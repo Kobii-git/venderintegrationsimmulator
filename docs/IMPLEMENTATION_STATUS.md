@@ -1,6 +1,6 @@
 # Implementation and verification, 4 October 2026
 
-## Raw log generator, 6 October 2026 (0.4.3)
+## Raw log generator, 6 October 2026 (0.4.4)
 
 - Added **Generate raw log** without requiring a destination or saved simulation.
   Product/scenario selection, optional sample values and diagnostic mode produce
@@ -8,8 +8,9 @@
   output and pending responses. Default formats share the existing source renderer;
   source logs omit transport and event-hook envelopes.
 - Local verification: 303 backend tests, 16 frontend tests, lint/format/type
-  checks, production frontend build, 10 migration checks and the Chromium raw-log
-  workflow passed. Generation exercised 149 scenarios across 35 products. Locked
+  checks, production frontend build, 10 migration checks and all 11 Chromium
+  workflows passed together against the production image. Generation exercised
+  149 scenarios across 35 products. Locked
   Python and npm dependency audits found no known vulnerabilities.
 - The local ARM64 production image passed default startup, SPA/API generation,
   and database/encryption-key persistence after container recreation. A full Docker
@@ -17,7 +18,11 @@
   frontend build caches restored space, and the complete check then passed.
 - Existing preview/send contracts are preserved. No migration or dependency change.
   Real UpGuard type/schema fidelity and Logic App/Sentinel acceptance remain separate
-  environment checks. See [upgrade and operator notes](UPGRADE_0.4.3.md).
+  environment checks. See [upgrade and operator notes](UPGRADE_0.4.4.md).
+- The 0.4.3 publication gate caught a browser assertion that compared mutable
+  statistics from other active simulations. Version 0.4.4 checks the raw page's
+  own write requests instead; backend tests independently verify that raw
+  generation creates no simulation or delivery. No 0.4.3 image was published.
 
 Release 0.4.0 implements the four planned stages in source. The deployment and external compatibility gates below remain open; this is not a claim of certified vendor-parser or live Sentinel compatibility.
 
@@ -64,7 +69,7 @@ on the local ARM64 Docker host. Published multi-platform digest:
 ## Recovery baseline
 
 The authoritative application repository is now https://github.com/Kobii-git/venderintegrationsimmulator.
-Version 0.4.3 source, deployment configuration and verification scripts are maintained on `main`.
+Version 0.4.4 source, deployment configuration and verification scripts are maintained on `main`.
 Future updates increment the application version and publish versioned and commit-tagged images.
 
 ## HTTP LAN browser fix, 6 October 2026 (0.4.2)

@@ -14,7 +14,7 @@ def test_version_endpoint(client: ASGITestClient) -> None:
     assert response.status_code == 200
     data = response.json()
     assert data["app_name"] == "Integration Simulator"
-    assert data["version"] == "0.4.3"
+    assert data["version"] == "0.4.4"
     assert data["environment"] == "development"
 
 

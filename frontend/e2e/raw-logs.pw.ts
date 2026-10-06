@@ -3,9 +3,12 @@ import { expect, test } from "@playwright/test";
 
 test("generate four UpGuard raw JSON examples, download, and inspect native logs", async ({
   page,
-  request,
 }) => {
-  const before = await (await request.get("/api/v1/simulations")).json();
+  const writes: string[] = [];
+  page.on("request", (request) => {
+    if (request.method() !== "GET")
+      writes.push(new URL(request.url()).pathname);
+  });
   await page.goto("/");
   await page.getByRole("link", { name: "Generate raw log" }).click();
   await expect(page.getByLabel("Product", { exact: true })).toHaveValue(
@@ -51,7 +54,10 @@ test("generate four UpGuard raw JSON examples, download, and inspect native logs
     .click();
   await expect(output).toHaveValue(/srcip=/);
   expect(await output.inputValue()).not.toContain("_syslog_message");
-  expect(await (await request.get("/api/v1/simulations")).json()).toEqual(
-    before,
-  );
+  expect(writes).toHaveLength(6);
+  expect(
+    writes.every((path) =>
+      /^\/api\/v1\/products\/[^/]+\/scenarios\/[^/]+\/raw$/.test(path),
+    ),
+  ).toBe(true);
 });

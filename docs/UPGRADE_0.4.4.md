@@ -1,9 +1,13 @@
-# Upgrade to 0.4.3
+# Upgrade to 0.4.4
 
-Version 0.4.3 adds **Generate raw log** in the navigation. Select a product and
+Version 0.4.4 adds **Generate raw log** in the navigation. Select a product and
 scenario, optionally customize sample values, then generate, copy or download one
 raw sample. No destination, credentials or saved simulation are required, and
 generation does not send anything or create delivery history.
+
+Version 0.4.3 was withheld by CI because its browser test compared background
+simulation statistics. Version 0.4.4 corrects that verification and reruns all
+browser workflows together before publication.
 
 The generator uses the product's default format: JSON, native text, CEF, CSV or
 XML according to the source. JSON is formatted for readability. Downloaded files
@@ -25,6 +29,6 @@ endpoint accepts `fidelity_mode`, `scenario_overrides` and an optional
 the selected fidelity mode. Existing preview and delivery endpoints retain their
 contracts. There are no database migrations or new dependencies.
 
-Pull `ghcr.io/kobii-git/venderintegrationsimmulator:0.4.3` after publication and
+Pull `ghcr.io/kobii-git/venderintegrationsimmulator:0.4.4` after publication and
 recreate the container using the existing data volume. Follow the
 [installation guide](INSTALLATION.md) for updates and retain an operator backup.
