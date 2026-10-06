@@ -64,10 +64,54 @@ jobs:
       - run: docker build -f docker/Dockerfile -t integration-simulator:0.4.0 .
       - run: scripts/verify-standalone-image.sh
 
-  publish-image:
+  native-images:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: [backend, frontend, migrations, browser-workflows, production-image]
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-24.04
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - id: metadata
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/kobii-git/venderintegrationsimmulator
+          tags: type=raw,value=sha-${{ github.sha }}-${{ matrix.arch }}
+          flavor: latest=false
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile
+          platforms: linux/${{ matrix.arch }}
+          push: true
+          tags: ${{ steps.metadata.outputs.tags }}
+          labels: ${{ steps.metadata.outputs.labels }}
+          cache-from: type=gha,scope=${{ matrix.arch }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.arch }}
+      - run: |
+          image=ghcr.io/kobii-git/venderintegrationsimmulator:sha-${{ github.sha }}-${{ matrix.arch }}
+          docker pull "$image"
+          scripts/verify-standalone-image.sh "$image"
+
+  publish-image:
+    needs: native-images
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       packages: write
@@ -83,32 +127,19 @@ jobs:
           with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
               output.write(f'version={version}\n')
           PY
-      - uses: docker/setup-qemu-action@v3
       - uses: docker/setup-buildx-action@v3
       - uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - id: metadata
-        uses: docker/metadata-action@v5
-        with:
-          images: ghcr.io/kobii-git/venderintegrationsimmulator
-          tags: |
-            type=raw,value=latest
-            type=raw,value=${{ steps.version.outputs.version }}
-            type=sha,format=long
-      - uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: docker/Dockerfile
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: ${{ steps.metadata.outputs.tags }}
-          labels: ${{ steps.metadata.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-      - run: |
-          docker pull ghcr.io/kobii-git/venderintegrationsimmulator:sha-${{ github.sha }}
-          scripts/verify-standalone-image.sh ghcr.io/kobii-git/venderintegrationsimmulator:sha-${{ github.sha }}
-          DOCKER_DEFAULT_PLATFORM=linux/arm64 scripts/verify-standalone-image.sh ghcr.io/kobii-git/venderintegrationsimmulator:sha-${{ github.sha }}
+      - name: Publish tested multi-platform manifest
+        run: |
+          image=ghcr.io/kobii-git/venderintegrationsimmulator
+          docker buildx imagetools create \
+            -t "$image:${{ steps.version.outputs.version }}" \
+            -t "$image:latest" -t "$image:sha-${{ github.sha }}" \
+            "$image:sha-${{ github.sha }}-amd64" "$image:sha-${{ github.sha }}-arm64"
+          docker buildx imagetools inspect --raw "$image:sha-${{ github.sha }}" | python3 -c 'import json,sys; platforms={m.get("platform",{}).get("architecture") for m in json.load(sys.stdin)["manifests"]}; assert {"amd64","arm64"} <= platforms, platforms'
+          docker pull "$image:sha-${{ github.sha }}"
+          scripts/verify-standalone-image.sh "$image:sha-${{ github.sha }}"
