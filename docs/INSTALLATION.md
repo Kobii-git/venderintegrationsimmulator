@@ -7,6 +7,17 @@
 
 ## Pull and run the published image
 
+If the registry package is private, authenticate Docker once using an account with access.
+For the repository owner, the GitHub CLI flow is:
+
+```bash
+gh auth refresh --hostname github.com --scopes read:packages
+gh auth token --hostname github.com | docker login ghcr.io --username Kobii-git --password-stdin
+```
+
+This uses the token through standard input. For another authorized account, replace the
+username. Public packages need no registry login.
+
 ```bash
 docker pull ghcr.io/kobii-git/venderintegrationsimmulator:0.4.0
 docker run -d --name integration-simulator --restart unless-stopped \

@@ -30,6 +30,16 @@ Each build has a version tag, a full `sha-<commit>` tag and `latest`.
 
 Run the complete frontend and backend directly, without cloning the source:
 
+For a private registry package, authorize GitHub package access and authenticate Docker
+once before running it (use your GitHub username):
+
+```bash
+gh auth refresh --hostname github.com --scopes read:packages
+gh auth token --hostname github.com | docker login ghcr.io --username Kobii-git --password-stdin
+```
+
+Public packages can be pulled without this login step.
+
 ```bash
 docker run -d --name integration-simulator --restart unless-stopped \
   -p 127.0.0.1:8080:8080 \
