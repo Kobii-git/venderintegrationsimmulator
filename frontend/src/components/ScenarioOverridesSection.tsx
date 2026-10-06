@@ -41,8 +41,10 @@ function JsonField({ id, value, fallback, onChange }: JsonFieldProps) {
           try {
             onChange(JSON.parse(next) as unknown);
             setError(null);
+            event.target.setCustomValidity("");
           } catch {
             setError("Enter valid JSON before saving.");
+            event.target.setCustomValidity("Enter valid JSON.");
           }
         }}
       />

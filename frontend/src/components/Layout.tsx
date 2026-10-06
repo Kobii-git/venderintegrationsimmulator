@@ -34,6 +34,9 @@ export function Layout() {
           <Link to="/uploads" className={isActive("/uploads") ? "active" : ""}>
             Upload logs
           </Link>
+          <Link to="/raw-logs" className={isActive("/raw-logs") ? "active" : ""}>
+            Generate raw log
+          </Link>
           <Link to="/lab" className={isActive("/lab") ? "active" : ""}>
             Log Lab
           </Link>

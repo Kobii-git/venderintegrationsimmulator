@@ -3,6 +3,8 @@ from app.core.exceptions import NotFoundError
 from app.schemas.event import (
     ScenarioPreviewRequest,
     ScenarioPreviewResponse,
+    ScenarioRawPreviewRequest,
+    ScenarioRawPreviewResponse,
     ScenarioSendRequest,
     ScenarioSendResponse,
 )
@@ -76,6 +78,23 @@ def preview_scenario(
 ) -> ScenarioPreviewResponse:
     """Generate a scenario payload without sending it."""
     preview = service.preview(product_id, scenario_id, request)
+    if preview is None:
+        raise NotFoundError(f"Scenario not found: {product_id}/{scenario_id}")
+    return preview
+
+
+@router.post(
+    "/{product_id}/scenarios/{scenario_id}/raw",
+    response_model=ScenarioRawPreviewResponse,
+)
+def raw_preview_scenario(
+    product_id: str,
+    scenario_id: str,
+    request: ScenarioRawPreviewRequest,
+    service: EventDeliveryService = Depends(get_event_delivery_service),
+) -> ScenarioRawPreviewResponse:
+    """Generate a readable raw log in the source's default format without delivery."""
+    preview = service.raw_preview(product_id, scenario_id, request)
     if preview is None:
         raise NotFoundError(f"Scenario not found: {product_id}/{scenario_id}")
     return preview

@@ -1,6 +1,6 @@
 # Architecture
 
-Integration Simulator `0.4.2` is a vendor-neutral, single-operator engineering tool. One container runs the FastAPI application, the APScheduler runtime, and the compiled React UI. SQLite and the generated encryption key live in the persistent `/data` volume.
+Integration Simulator `0.4.3` is a vendor-neutral, single-operator engineering tool. One container runs the FastAPI application, the APScheduler runtime, and the compiled React UI. SQLite and the generated encryption key live in the persistent `/data` volume.
 
 ## Implemented system
 
@@ -77,7 +77,7 @@ This programme deliberately retains the trusted-user model: no application login
 
 ## Deliberately deferred
 
-PostgreSQL, multiple application replicas, distributed scheduling, built-in login/RBAC, UpGuard HMAC, mTLS client authentication, destination allowlists, Tenable asynchronous exports are outside `0.4.2`.
+PostgreSQL, multiple application replicas, distributed scheduling, built-in login/RBAC, UpGuard HMAC, mTLS client authentication, destination allowlists, Tenable asynchronous exports are outside `0.4.3`.
 
 ## Log lab delivery
 

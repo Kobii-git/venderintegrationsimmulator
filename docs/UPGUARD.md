@@ -7,10 +7,10 @@ The Integration Simulator ships with a full **UpGuard** product module for webho
 | Scenario ID | Event type |
 |-------------|------------|
 | `data-leak` | DataLeakPublished |
-| `vulnerability` | VulnerabilityPublished |
+| `vulnerability` | NewVulnerabilityDetected |
 | `identity-breach` | IdentityBreachPublished |
 | `vendor-score-change` | VendorScoreChanged |
-| `score-threshold` | ScoreThresholdCrossed |
+| `score-threshold` | CustomerCSTARUnderThreshold |
 
 ## Fidelity modes
 
@@ -18,6 +18,13 @@ The Integration Simulator ships with a full **UpGuard** product module for webho
 - **vendor_accurate** — payload matches vendor structure without simulator metadata
 
 ## Typical workflow
+
+For a sample without configuring a simulation, open **Generate raw log**, select
+**UpGuard** and a scenario, and click **Generate raw log**. Customize values if
+needed, then copy or download the raw JSON. **Vendor payload** omits `_simulator`;
+**Include simulator diagnostics** adds it. This does not send an event. The data
+leak, identity breach and vulnerability schemas remain inferred; validate them
+against real UpGuard samples before relying on production routing.
 
 1. Create a simulation with product `upguard` and one or more scenarios.
 2. Set destination URL to your collector (Logic App, Azure Function, Sentinel DCR, etc.).

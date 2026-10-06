@@ -13,6 +13,8 @@ from app.products.scenario import ScenarioDefinition
 from app.schemas.event import (
     ScenarioPreviewRequest,
     ScenarioPreviewResponse,
+    ScenarioRawPreviewRequest,
+    ScenarioRawPreviewResponse,
     ScenarioSendEventResponse,
     ScenarioSendRequest,
     ScenarioSendResponse,
@@ -32,6 +34,42 @@ class EventDeliveryService:
     ) -> None:
         self._registry = registry
         self._transport_service = transport_service
+
+    def raw_preview(
+        self,
+        product_id: str,
+        scenario_id: str,
+        request: ScenarioRawPreviewRequest,
+    ) -> ScenarioRawPreviewResponse | None:
+        scenario = self._registry.get_scenario(product_id, scenario_id)
+        manifest = self._registry.get_manifest(product_id)
+        if scenario is None or manifest is None:
+            return None
+        self._validate_scenario_overrides(scenario, request.scenario_overrides)
+        payload = self._generate_payload(
+            scenario,
+            fidelity_mode=request.fidelity_mode,
+            correlation_id=request.correlation_id or str(uuid.uuid4()),
+            overrides=request.scenario_overrides,
+            diagnostic_merge=manifest.diagnostic_merge,
+            prepare_outbound=False,
+        )
+        body, content_type = render_source(
+            payload if isinstance(payload, dict) else {"_syslog_message": payload}, "default"
+        )
+        if isinstance(body, dict) and "_syslog_message" in body:
+            raw_log = str(body["_syslog_message"])
+        elif isinstance(body, str):
+            raw_log = body
+        else:
+            raw_log = json.dumps(body, indent=2, ensure_ascii=False)
+        return ScenarioRawPreviewResponse(
+            product_id=product_id,
+            scenario_id=scenario_id,
+            fidelity_mode=request.fidelity_mode,
+            content_type=content_type,
+            raw_log=raw_log,
+        )
 
     def preview(
         self,
@@ -146,6 +184,7 @@ class EventDeliveryService:
         correlation_id: str,
         overrides: dict[str, Any],
         diagnostic_merge: str | None,
+        prepare_outbound: bool = True,
     ) -> dict[str, Any] | str:
         plugin = self._registry.get_plugin(scenario.product_id)
         payload = self._registry.renderer.render_scenario(
@@ -157,7 +196,7 @@ class EventDeliveryService:
             diagnostic_merge=diagnostic_merge,
         )
         workflow = self._registry.get_workflow_plugin(scenario.product_id)
-        if workflow is not None and isinstance(payload, dict):
+        if prepare_outbound and workflow is not None and isinstance(payload, dict):
             payload = workflow.prepare_outbound_payload(
                 scenario.id,
                 payload,

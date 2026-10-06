@@ -29,8 +29,12 @@ while True:
         time.sleep(1)
 assert b'<div id="root">' in request("/")
 assert request("/log-lab") == request("/")
+assert request("/raw-logs") == request("/")
 assert json.loads(request("/api/v1/products"))
 assert json.loads(request("/api/v1/version"))["environment"] == "production"
+raw = json.loads(request("/api/v1/products/upguard/scenarios/score-threshold/raw", {}))
+assert raw["content_type"] == "application/json"
+assert json.loads(raw["raw_log"])["notification"]["type"] == "CustomerCSTARUnderThreshold"
 key_hash = hashlib.sha256(Path("/data/.secret_key").read_bytes()).hexdigest()
 state_file = Path("/data/standalone-verification.json")
 mode = sys.argv[1] if len(sys.argv) > 1 else "fresh"

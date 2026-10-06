@@ -594,6 +594,14 @@ export interface ScenarioPreviewResponse {
   payload: Record<string, unknown>;
 }
 
+export interface ScenarioRawPreviewResponse {
+  product_id: string;
+  scenario_id: string;
+  fidelity_mode: FidelityMode;
+  content_type: string;
+  raw_log: string;
+}
+
 export interface ScenarioSendRequest extends ScenarioEventRequest {
   destination: DestinationConfig;
   auth_config?: AuthConfigInput;

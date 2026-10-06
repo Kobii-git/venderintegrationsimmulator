@@ -20,6 +20,20 @@ class ScenarioPreviewRequest(ScenarioEventRequest):
     """Generate a scenario payload without sending."""
 
 
+class ScenarioRawPreviewRequest(ScenarioPreviewRequest):
+    fidelity_mode: FidelityMode = FidelityMode.VENDOR_ACCURATE
+
+
+class ScenarioRawPreviewResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    product_id: str
+    scenario_id: str
+    fidelity_mode: FidelityMode
+    content_type: str
+    raw_log: str
+
+
 class ScenarioPreviewResponse(BaseModel):
     model_config = ConfigDict(extra="forbid")
 

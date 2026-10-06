@@ -5,6 +5,7 @@ import type {
   ScenarioDetail,
   ScenarioEventRequest,
   ScenarioPreviewResponse,
+  ScenarioRawPreviewResponse,
   ScenarioSendRequest,
   ScenarioSendResponse,
   ScenarioSummary,
@@ -43,4 +44,15 @@ export function sendScenario(
   body: ScenarioSendRequest,
 ): Promise<ScenarioSendResponse> {
   return post<ScenarioSendResponse>(`/products/${productId}/scenarios/${scenarioId}/send`, body);
+}
+
+export function generateRawLog(
+  productId: string,
+  scenarioId: string,
+  body: ScenarioEventRequest,
+): Promise<ScenarioRawPreviewResponse> {
+  return post<ScenarioRawPreviewResponse>(
+    `/products/${productId}/scenarios/${scenarioId}/raw`,
+    body,
+  );
 }
