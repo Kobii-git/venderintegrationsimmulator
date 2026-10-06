@@ -1,6 +1,6 @@
 from typing import Any, Literal, Self
 
-from app.core.http_url import reject_embedded_url_credentials
+from app.core.http_url import reject_embedded_url_credentials, split_url_query
 from app.schemas.simulation import AuthConfigInput, DestinationConfig
 from app.transports.delivery_result import DeliveryResult
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -32,6 +32,13 @@ class HttpTransportRequest(BaseModel):
     @model_validator(mode="after")
     def reject_url_user_info(self) -> Self:
         reject_embedded_url_credentials(self.url)
+        self.url, inline_query = split_url_query(self.url)
+        for name, value in inline_query:
+            if name in self.query_params:
+                raise ValueError("Duplicate query parameter names are not allowed")
+            self.query_params[name] = value
+            if name not in self.sensitive_query_names:
+                self.sensitive_query_names.append(name)
         return self
 
 

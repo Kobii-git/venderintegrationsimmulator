@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from urllib.parse import unquote, urlsplit, urlunsplit
+from urllib.parse import parse_qsl, unquote, urlsplit, urlunsplit
 
 EMBEDDED_CREDENTIALS_ERROR = (
     "URL must not include embedded credentials; configure authentication separately."
@@ -38,6 +38,19 @@ def reject_embedded_url_credentials(url: str) -> None:
     """Reject URLs that would store or expose credentials in user-info."""
     if get_embedded_url_credentials(url) is not None:
         raise ValueError(EMBEDDED_CREDENTIALS_ERROR)
+
+
+def split_url_query(url: str) -> tuple[str, list[tuple[str, str]]]:
+    """Move inline query values out of a URL for secure structured handling."""
+    parsed = urlsplit(url)
+    pairs = parse_qsl(parsed.query, keep_blank_values=True, max_num_fields=1000)
+    names = [name.strip() for name, _value in pairs]
+    if any(not name for name in names):
+        raise ValueError("URL query parameter names cannot be blank")
+    if len(names) != len(set(names)):
+        raise ValueError("Duplicate query parameter names are not allowed")
+    base = urlunsplit((parsed.scheme, parsed.netloc, parsed.path, "", parsed.fragment))
+    return base, [(name, value) for name, (_original, value) in zip(names, pairs, strict=True)]
 
 
 def strip_embedded_url_credentials(url: str) -> str:

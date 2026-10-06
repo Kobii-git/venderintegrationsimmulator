@@ -25,6 +25,13 @@ Before delivery, the HTTP engine collects exact secret values from outbound auth
 
 Request URLs retain scheme, host, non-default port, path, and redacted query values. Logs, destination summaries, history, API reads, default exports, generated cURL, and validation errors use redacted representations; validation responses do not echo rejected input values.
 
+Full HTTP webhook URLs may be pasted with query parameters. Input validation splits
+those values into sensitive structured entries before connection testing, one-shot
+delivery or encrypted persistence; stored URLs never retain inline query strings.
+`sig` and signature-like names cannot be marked public. Duplicate inline names or
+collisions with separately configured parameters are rejected without echoing the
+URL or its values.
+
 The automated secret-canary suites place canaries in auth passwords/tokens, OAuth secrets, Authorization/custom headers, URL/query data, inbound auth, and bodies. Backend tests and the production-image workflow fail if those canaries appear in database configuration/history, container logs, read APIs, default exports, or cURL. These checks are the release guarantee; they do not make a confirmed-secret export safe to disclose.
 
 Production and development dependency sets are audited independently. Any development-only exception must be documented with scope, owner, and expiry in [SECURITY_WAIVERS.md](SECURITY_WAIVERS.md); production audits have no ignored advisories.

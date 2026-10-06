@@ -8,8 +8,8 @@ interface Props {
 }
 
 const forcedSensitive = (name: string) =>
-  /^(authorization|proxy-authorization|cookie|set-cookie)$/i.test(name) ||
-  /(password|passwd|secret|token|api[-_]?key|code)/i.test(name);
+  /^(authorization|proxy-authorization|cookie|set-cookie|sig)$/i.test(name) ||
+  /(password|passwd|secret|token|api[-_]?key|code|signature)/i.test(name);
 
 export function StructuredValueEditor({
   label,

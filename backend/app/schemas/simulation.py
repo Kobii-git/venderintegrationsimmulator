@@ -6,7 +6,7 @@ from ipaddress import ip_address
 from typing import Any, Literal, Self
 from urllib.parse import urlsplit
 
-from app.core.http_url import reject_embedded_url_credentials
+from app.core.http_url import reject_embedded_url_credentials, split_url_query
 from app.domain.enums import FidelityMode, ScheduleType, SimulationMode
 from app.domain.fault_config import FaultConfig
 from app.domain.inbound import InboundConfig
@@ -16,8 +16,12 @@ SyslogProtocol = Literal["udp", "tcp", "tls"]
 SyslogFormat = Literal["rfc3164", "rfc5424", "raw"]
 TcpFraming = Literal["newline", "octet_counting"]
 
-FORCED_SENSITIVE_NAMES = frozenset({"authorization", "proxy-authorization", "cookie", "set-cookie"})
-SECRET_NAME_PATTERN = re.compile(r"(?:password|passwd|secret|token|api[-_]?key|code)", re.I)
+FORCED_SENSITIVE_NAMES = frozenset(
+    {"authorization", "proxy-authorization", "cookie", "set-cookie", "sig"}
+)
+SECRET_NAME_PATTERN = re.compile(
+    r"(?:password|passwd|secret|token|api[-_]?key|code|signature)", re.I
+)
 
 
 class ConfiguredValueInput(BaseModel):
@@ -149,10 +153,13 @@ class DestinationConfig(BaseModel):
         if self.url:
             reject_embedded_url_credentials(self.url)
             parsed = urlsplit(self.url)
-            if parsed.query:
-                raise ValueError("URL query parameters must be configured in query_params")
             if parsed.fragment:
                 raise ValueError("URL fragments are not supported")
+            self.url, inline_query = split_url_query(self.url)
+            self.query_params.extend(
+                ConfiguredValueInput(name=name, value=value, sensitive=True)
+                for name, value in inline_query
+            )
         self._validate_unique(self.headers, case_sensitive=False, label="header")
         self._validate_unique(self.query_params, case_sensitive=True, label="query parameter")
         return self

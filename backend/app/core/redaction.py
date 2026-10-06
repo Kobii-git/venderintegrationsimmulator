@@ -6,7 +6,7 @@ import re
 from typing import Any
 
 SENSITIVE_KEY_PATTERN = re.compile(
-    r"(password|token|secret|api[_-]?key|authorization|credential)",
+    r"(password|token|secret|api[_-]?key|authorization|credential|^sig$)",
     re.IGNORECASE,
 )
 REDACTED = "***REDACTED***"
@@ -34,7 +34,7 @@ def is_sensitive_header(name: str, extra: set[str] | frozenset[str] | None = Non
         return True
     if extra and normalized in {item.lower() for item in extra}:
         return True
-    return is_sensitive_key(name)
+    return is_sensitive_key(name) or "signature" in normalized
 
 
 def redact_headers(
@@ -108,7 +108,11 @@ def collect_http_secret_values(
             secrets.add(str(value))
     explicit_query_names = set(sensitive_query_names or set())
     for name, value in query_params.items():
-        if value is None or (name not in explicit_query_names and not is_sensitive_key(name)):
+        if value is None or (
+            name not in explicit_query_names
+            and not is_sensitive_key(name)
+            and "signature" not in name.casefold()
+        ):
             continue
         if isinstance(value, list | tuple | set):
             secrets.update(str(item) for item in value if item is not None and str(item))

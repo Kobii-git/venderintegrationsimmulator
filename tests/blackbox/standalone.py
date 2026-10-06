@@ -43,14 +43,23 @@ if mode == "create":
         "name": "Standalone persistence check", "product_id": "upguard",
         "scenario_id": "data-leak", "scenario_ids": ["data-leak"],
         "simulation_mode": "push_webhook", "fidelity_mode": "vendor_accurate",
-        "destination": {"transport_id": "http_webhook", "url": "http://127.0.0.1:9000/echo"},
+        "destination": {"transport_id": "http_webhook", "url": "http://127.0.0.1:9000/echo?sig=standalone-signature-canary"},
         "auth_config": {"auth_method_id": "none"}, "scenario_overrides": {},
         "schedule": {"type": "manual"},
     }))
+    assert simulation["destination"]["url"] == "http://127.0.0.1:9000/echo"
+    assert simulation["destination"]["query_params"] == [
+        {"name": "sig", "sensitive": True, "has_value": True}
+    ]
+    assert "standalone-signature-canary" not in json.dumps(simulation)
+    assert b"standalone-signature-canary" not in Path("/data/integration_simulator.db").read_bytes()
     state_file.write_text(json.dumps({"id": simulation["id"], "key_hash": key_hash}))
 elif mode == "retained":
     state = json.loads(state_file.read_text())
     assert key_hash == state["key_hash"], "encryption key changed after recreation"
     simulation = json.loads(request("/api/v1/simulations/" + state["id"]))
     assert simulation["name"] == "Standalone persistence check"
+    assert simulation["destination"]["query_params"] == [
+        {"name": "sig", "sensitive": True, "has_value": True}
+    ]
 print("Verified", mode, "image", ready["version"])

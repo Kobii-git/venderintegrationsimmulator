@@ -35,6 +35,13 @@ against real UpGuard samples before relying on production routing.
 
 ## Destination configuration
 
+You can paste a complete Logic App callback URL into **Webhook URL**, including
+its `api-version`, `sp`, `sv` and `sig` query parameters. Version 0.4.5 splits them
+into encrypted query entries when saved. The same parsing applies to **Test
+connection**. Saved signatures remain masked on edit and excluded from delivery
+history and normal exports. Avoid configuring the same parameter both in the URL
+and in **URL query parameters**.
+
 ```json
 {
   "url": "https://your-collector.example/webhook",

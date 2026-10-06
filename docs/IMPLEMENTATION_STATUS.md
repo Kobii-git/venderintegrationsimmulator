@@ -69,8 +69,23 @@ on the local ARM64 Docker host. Published multi-platform digest:
 ## Recovery baseline
 
 The authoritative application repository is now https://github.com/Kobii-git/venderintegrationsimmulator.
-Version 0.4.4 source, deployment configuration and verification scripts are maintained on `main`.
+Version 0.4.5 source, deployment configuration and verification scripts are maintained on `main`.
 Future updates increment the application version and publish versioned and commit-tagged images.
+
+## Signed webhook URLs, 7 October 2026 (0.4.5)
+
+- Fixed the mismatch where testing a complete Logic App callback URL succeeded,
+  but saving it rejected its inline query parameters. Testing and saving now
+  extract the parameters consistently; saved inline values are encrypted and
+  write-only, and signatures always remain sensitive.
+- Regression coverage verifies encoded and blank values, duplicate rejection,
+  editing with hidden values, delivery and redaction in history, exports and curl
+  previews. Container recreation retains the encrypted signature entry.
+- Local checks passed: 316 backend tests, 17 frontend tests, 10 migration tests,
+  all 12 Chromium workflows, lint/type/build checks and dependency audits.
+  Production-image startup, UI/API and persistence checks also passed.
+- No database migration or dependency change. Deployed Logic App and Sentinel
+  acceptance remain separate checks. See [upgrade notes](UPGRADE_0.4.5.md).
 
 ## HTTP LAN browser fix, 6 October 2026 (0.4.2)
 

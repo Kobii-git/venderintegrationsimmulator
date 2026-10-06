@@ -78,16 +78,9 @@ def test_lifecycle_status_is_write_protected(client: ASGITestClient) -> None:
     assert update.status_code == 422
 
 
-def test_destination_url_query_and_bad_nested_overrides_are_rejected(
+def test_destination_url_credentials_and_bad_nested_overrides_are_rejected(
     client: ASGITestClient,
 ) -> None:
-    bad_url = _http_payload()
-    bad_url["destination"] = {
-        "transport_id": "http_webhook",
-        "url": "https://example.com/hook?access_token=plaintext",
-    }
-    assert client.post("/api/v1/simulations", json=bad_url).status_code == 422
-
     credential_url = _http_payload()
     credential_url["destination"] = {
         "transport_id": "http_webhook",

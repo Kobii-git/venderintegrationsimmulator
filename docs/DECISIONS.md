@@ -84,7 +84,7 @@ Accepted decisions for Integration Simulator. ADR numbers are unique; records 01
 
 ## ADR-021: Structured secure destination values
 
-**Decision:** Custom headers and query parameters are ordered `{name, value, sensitive}` entries, sensitive by default. Authorization, cookie, password, token, key, and secret-like names are always sensitive. Hidden values survive an edit only while their entry remains; omission from a full destination update deletes the value. Destination URLs cannot contain query strings or fragments.
+**Decision:** Custom headers and query parameters are ordered `{name, value, sensitive}` entries, sensitive by default. Authorization, cookie, password, token, key, signature and secret-like names are always sensitive. Hidden values survive an edit only while their entry remains; omission from a full destination update deletes the value. Starting in 0.4.5, full HTTP webhook URLs are accepted as input: inline query strings are extracted into sensitive entries before testing or encrypted persistence. Stored destination URLs contain no query strings. URL fragments remain unsupported for saved destinations.
 
 ## ADR-022: Per-scenario override maps
 

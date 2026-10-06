@@ -226,6 +226,10 @@ export function DestinationSection({
               value={destination.url ?? ""}
               onChange={(event) => updateDestination({ url: event.target.value })}
             />
+            <span className="form-hint">
+              Paste the full webhook URL, including its query parameters. Parameters
+              pasted in the URL become encrypted query entries when saved.
+            </span>
           </div>
           <div className="grid-2">
             <div className="form-row">
