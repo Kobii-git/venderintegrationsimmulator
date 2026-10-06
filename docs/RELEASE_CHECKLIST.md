@@ -2,14 +2,20 @@
 
 See [implementation evidence](IMPLEMENTATION_STATUS.md). Source checks, 271 backend tests, 12 frontend tests and seven local Chromium workflows passed. Production/development lock audits report no known vulnerabilities.
 
-- [ ] Build and run the production image and Linux amd64/arm64 variants.
+- [x] Build and run the production image and Linux amd64/arm64 variants.
 - [ ] Run the 15-minute Linux 100-EPS/four-collector benchmark and retain its report.
 - [ ] Run the configured Sentinel smoke test and inspect parsed fields.
 - [ ] Validate advertised fixtures against installed vendor/Sentinel parser versions.
 - [x] Initialize the owner-designated authoritative checkout for `Kobii-git/venderintegrationsimmulator` on `main`.
 - [x] Build the local Linux ARM64 image and verify standalone startup, UI/API and persistence.
-- [ ] Confirm the `main` publication workflow and pulled AMD64/ARM64 image checks.
-- [ ] Publish only after applicable deployment gates pass.
+- [x] Confirm the `main` publication workflow and pulled AMD64/ARM64 image checks.
+- [x] Publish the owner-requested source and Docker release after the applicable container gates pass.
+
+On 6 October 2026, [the release workflow](https://github.com/Kobii-git/venderintegrationsimmulator/actions/runs/37515547469)
+passed all source, migration, browser, production-image and native AMD64/ARM64 checks.
+The public `ghcr.io/kobii-git/venderintegrationsimmulator:0.4.0` image also passed an
+anonymous pull and standalone startup/UI/API/persistence checks on the local ARM64 Docker host.
+The benchmark and external parser/Sentinel acceptance items above remain separate operator gates.
 
 The older checklist below records prior release work; its checked entries are historical and do not prove 0.4.0 image acceptance.
 

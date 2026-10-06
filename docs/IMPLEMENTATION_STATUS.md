@@ -27,10 +27,20 @@ The application retains UpGuard and demonstration products, existing vendor plug
 
 ## Open verification gates
 
-1. Multiarch publication and pulled-image verification are performed by the `Verify simulator` workflow on `main`. On 6 October 2026, the local Linux ARM64 production image built successfully and passed standalone default startup, UI/API readiness and database/key persistence after container recreation. Both architecture results must be confirmed in the publication workflow.
-2. Run the 900-second benchmark on a documented Linux host with at least 2 vCPUs and 4 GiB RAM. The manual CI workflow runs a container constrained to those resources and saves receiver/memory/latency evidence.
-3. Run the [Sentinel smoke test](SENTINEL_SMOKE_TEST.md) against a configured workspace, DCR and credentials. Validate table arrival and parsed fields. API acceptance is distinct from this gate.
-4. Validate all advertised fixtures against the actual installed vendor/Sentinel parsers. Firmware-specific optional/trailing fields, cloud native connector schemas and configurable NSS layouts require environment-specific acceptance.
+1. Run the 900-second benchmark on a documented Linux host with at least 2 vCPUs and 4 GiB RAM. The manual CI workflow runs a container constrained to those resources and saves receiver/memory/latency evidence.
+2. Run the [Sentinel smoke test](SENTINEL_SMOKE_TEST.md) against a configured workspace, DCR and credentials. Validate table arrival and parsed fields. API acceptance is distinct from this gate.
+3. Validate all advertised fixtures against the actual installed vendor/Sentinel parsers. Firmware-specific optional/trailing fields, cloud native connector schemas and configurable NSS layouts require environment-specific acceptance.
+
+## Docker publication verified, 6 October 2026
+
+[The publication workflow](https://github.com/Kobii-git/venderintegrationsimmulator/actions/runs/37515547469)
+passed backend/frontend, migrations, seven Chromium workflows and production-image integration checks.
+Native Linux AMD64 and ARM64 runners built, pushed, pulled and tested their images before
+publishing the combined `0.4.0`, `latest` and commit-tagged manifest. Both variants passed
+default startup, UI/API readiness and database/key persistence after container recreation.
+An anonymous pull of the public `0.4.0` image and the same standalone checks also passed
+on the local ARM64 Docker host. Published multi-platform digest:
+`sha256:613e5471e856ac1ebbca09fcf794daba949bd6b6d7654a26ca04dbc1ccb2a358`.
 
 ## Recovery baseline
 
