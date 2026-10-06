@@ -54,3 +54,60 @@ test("build and edit a multi-collector lab with devices and uploaded replay", as
   await request.delete(`/api/v1/simulations/${id}`);
   await request.delete(`/api/v1/datasets/${simulation.replay_config.dataset_id}`);
 });
+
+test("Log Lab opens and saves on HTTP origins without randomUUID", async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(crypto, "randomUUID", { value: undefined, configurable: true });
+  });
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.goto("/lab");
+  await expect(page.getByRole("heading", { name: "Build a log lab" })).toBeVisible();
+  await page.getByLabel("Source", { exact: true }).selectOption("uploaded-logs");
+  await page.getByRole("checkbox", { name: "Uploaded record", exact: true }).check();
+  await page.getByLabel("Name", { exact: true }).fill("HTTP LAN regression");
+  await page.getByRole("button", { name: "Add device" }).click();
+  await expect(page.getByLabel("Device 1 hostname")).toBeVisible();
+  await page.getByRole("button", { name: "Add collector" }).click();
+  await expect(page.getByLabel("Collector 2 name")).toBeVisible();
+  await page.getByRole("button", { name: "Remove collector" }).last().click();
+  await page.getByLabel("Collector 1 transport").selectOption("http_webhook");
+  await page.getByLabel("Collector 1 payload format").selectOption("json");
+  await page.locator('input[type="url"]').fill("https://example.test/webhook");
+  await page.getByRole("button", { name: "Create lab" }).click();
+  await expect(page).toHaveURL(/\/simulations\/[^/]+$/);
+  expect(errors).toEqual([]);
+  const id = page.url().split("/").pop();
+  await page.request.delete(`/api/v1/simulations/${id}`);
+});
+
+test("Upload logs creates a target without randomUUID", async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(crypto, "randomUUID", { value: undefined, configurable: true });
+  });
+  await page.route("**/api/v1/simulations", async (route) => {
+    if (route.request().method() !== "POST") return route.continue();
+    const body = route.request().postDataJSON();
+    expect(body.targets[0].id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
+    await route.fulfill({ status: 422, json: { error: { code: "validation_error", message: "Target creation verified" } } });
+  });
+  await page.goto("/uploads");
+  await page.getByRole("combobox", { name: "File format", exact: true }).selectOption("json");
+  await page.getByLabel("Log file", { exact: true }).setInputFiles({
+    name: "http-lan.json",
+    mimeType: "application/json",
+    buffer: Buffer.from('[{"Time":"2026-10-06T20:00:00Z","Application":"IntegrationSimulator","RawData":"HTTP LAN test"}]'),
+  });
+  await expect(page.getByLabel("Dataset")).not.toHaveValue("");
+  await page.getByRole("combobox", { name: "Payload mode", exact: true }).selectOption("json");
+  await page.getByLabel("DCE endpoint").fill("https://example.ingest.monitor.azure.com");
+  await page.getByLabel("Tenant ID", { exact: true }).fill("tenant");
+  await page.getByLabel("DCR immutable ID").fill("dcr-test");
+  await page.getByLabel("Stream name").fill("Custom-Test");
+  await page.getByLabel("Client ID", { exact: true }).fill("client");
+  await page.getByLabel("Client secret", { exact: true }).fill("local-test-secret");
+  await page.getByRole("button", { name: "Upload to Azure" }).click();
+  await expect(page.getByText("Target creation verified")).toBeVisible();
+  const datasetId = await page.getByLabel("Dataset").inputValue();
+  await page.request.delete(`/api/v1/datasets/${datasetId}`);
+});

@@ -25,9 +25,10 @@ import type {
   TransportId,
 } from "../types/api";
 import { formatApiError } from "../utils/format";
+import { createUuid } from "../utils/uuid";
 
 const newTarget = (): TargetInput => ({
-  id: crypto.randomUUID(),
+  id: createUuid(),
   name: "Collector",
   enabled: true,
   payload_format: "default",
@@ -91,7 +92,7 @@ export function LogLabPage() {
   const [overrides, setOverrides] = useState<
     Record<string, Record<string, unknown>>
   >({});
-  const [targets, setTargets] = useState<TargetInput[]>([newTarget()]);
+  const [targets, setTargets] = useState<TargetInput[]>(() => [newTarget()]);
   const [devices, setDevices] = useState<SimulatedDevice[]>([]);
   const [schedule, setSchedule] = useState<ScheduleConfig>({ type: "manual" });
   const [rateMode, setRateMode] = useState(true);
@@ -426,7 +427,7 @@ export function LogLabPage() {
                 setDevices((ds) => [
                   ...ds,
                   {
-                    id: crypto.randomUUID(),
+                    id: createUuid(),
                     hostname: `lab-device-${ds.length + 1}`,
                     ip_address: `192.0.2.${ds.length + 10}`,
                     vendor: productId,

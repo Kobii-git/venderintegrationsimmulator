@@ -16,6 +16,7 @@ import type {
   SimulationResponse,
 } from "../types/api";
 import { formatApiError } from "../utils/format";
+import { createUuid } from "../utils/uuid";
 
 type Validation = {
   record_count: number;
@@ -120,7 +121,7 @@ export function UploadLogsPage() {
         fidelity_mode: "vendor_accurate",
         targets: [
           {
-            id: crypto.randomUUID(),
+            id: createUuid(),
             name:
               destination.transport_id === "azure_function_app"
                 ? "Function App → DCE"

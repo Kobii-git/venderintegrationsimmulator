@@ -45,8 +45,23 @@ on the local ARM64 Docker host. Published multi-platform digest:
 ## Recovery baseline
 
 The authoritative application repository is now https://github.com/Kobii-git/venderintegrationsimmulator.
-Version 0.4.1 source, deployment configuration and verification scripts are maintained on `main`.
+Version 0.4.2 source, deployment configuration and verification scripts are maintained on `main`.
 Future updates increment the application version and publish versioned and commit-tagged images.
+
+## HTTP LAN browser fix, 6 October 2026 (0.4.2)
+
+- Fixed the blank Log Lab page on HTTP LAN addresses where browsers omit
+  `crypto.randomUUID()`. Collector, device and Upload logs target identifiers now
+  use native UUID generation when available, with a cryptographically random UUID
+  v4 fallback through `crypto.getRandomValues()`.
+- Reproduced the original render exception before applying the fix. All 13
+  frontend tests, lint, type checking and the production build passed afterward.
+  Three Chromium workflows passed against the production image, including Log Lab
+  creation without `randomUUID` and Upload logs target creation without Azure calls.
+  All 13 version/health and migration tests passed.
+- No database migrations, authentication changes or log-payload changes. Azure
+  and Sentinel acceptance remain separate environment checks. See the
+  [0.4.2 upgrade notes](UPGRADE_0.4.2.md).
 
 A private source archive was captured before implementation at `/private/tmp/vendor-simulator-before-implementation-20261004.tgz`. No application database was present in the initial workspace. Keep an operator-owned copy before upgrading a deployed instance: `/private/tmp` is temporary. Startup captures a preflight SQLite backup before schema/configuration upgrades; restore the database together with its encryption key for rollback. See [upgrade notes](UPGRADE_0.4.0.md).
 
