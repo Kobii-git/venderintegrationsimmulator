@@ -1,0 +1,34 @@
+{
+  "content_type": "application/json",
+  "body": {
+    "_source_event": {
+      "vendor": "Sophos",
+      "product": "XG Firewall",
+      "version": "SFOS 19.5",
+      "family": "web-filter",
+      "name": "Web Filter",
+      "signature": "1002",
+      "severity": 5,
+      "default_format": "native",
+      "time": "{{ generated_at_iso }}",
+      "hostname": "{{ hostname }}",
+      "device_ip": "{{ device_ip }}",
+      "src": "{{ src }}",
+      "dst": "{{ dst }}",
+      "user": "{{ user }}",
+      "spt": "{{ spt }}",
+      "dpt": "{{ dpt }}",
+      "action": "allowed"
+    },
+    "record": {
+      "TimeGenerated": "{{ generated_at_iso }}",
+      "Computer": "{{ hostname }}",
+      "SourceIP": "{{ src }}",
+      "DestinationIP": "{{ dst }}",
+      "UserName": "{{ user }}",
+      "EventFamily": "web-filter",
+      "CorrelationId": "{{ correlation_id }}"
+    },
+    "native": "device_name=\"{{ hostname }}\" device_id=\"C01001LAB\" log_id=\"010101600001\" log_type=\"Content Filtering\" log_component=\"HTTP\" log_subtype=\"Allowed\" priority=\"Information\" src_ip={{ src }} dst_ip={{ dst }} src_port={{ spt }} dst_port={{ dpt }} protocol=\"TCP\" user_name=\"{{ user }}\" status=\"Allow\" url=\"http://example.test/lab\""
+  }
+}

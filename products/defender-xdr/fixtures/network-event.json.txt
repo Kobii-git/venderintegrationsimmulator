@@ -1,0 +1,13 @@
+{
+  "Timestamp": "2026-10-04T12:00:00+00:00",
+  "DeviceId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "DeviceName": "sim-device-01",
+  "ReportId": 1,
+  "ActionType": "ConnectionSuccess",
+  "RemoteIP": "203.0.113.10",
+  "RemotePort": 443,
+  "LocalIP": "198.51.100.20",
+  "LocalPort": 49152,
+  "Protocol": "Tcp",
+  "InitiatingProcessFileName": "curl.exe"
+}

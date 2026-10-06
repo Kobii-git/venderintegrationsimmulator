@@ -1,0 +1,10 @@
+{
+  "content_type": "text/plain",
+  "method": "POST",
+  "body": "integration-simulator demo-syslog ping message={{ message }} event_id={{ correlation_id }}",
+  "diagnostic_fields": {
+    "simulator_product": "{{ product_id }}",
+    "simulator_scenario": "{{ scenario_id }}"
+  },
+  "diagnostic_merge": "nested"
+}

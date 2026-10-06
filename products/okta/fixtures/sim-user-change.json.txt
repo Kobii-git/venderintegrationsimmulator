@@ -1,0 +1,30 @@
+{
+  "uuid": "11111111-2222-4333-8444-555555555555",
+  "published": "2026-10-04T12:00:00+00:00",
+  "eventType": "user.lifecycle.create",
+  "version": "0",
+  "severity": "INFO",
+  "displayMessage": "user-change",
+  "actor": {
+    "id": "00uLab",
+    "type": "User",
+    "alternateId": "labuser@example.test",
+    "displayName": "labuser"
+  },
+  "client": {
+    "ipAddress": "198.51.100.20",
+    "userAgent": {
+      "rawUserAgent": "Lab Simulator"
+    }
+  },
+  "outcome": {
+    "result": "SUCCESS"
+  },
+  "target": [
+    {
+      "id": "0oaLab",
+      "type": "AppInstance",
+      "displayName": "Lab Application"
+    }
+  ]
+}

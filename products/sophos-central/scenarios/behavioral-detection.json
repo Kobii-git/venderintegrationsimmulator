@@ -1,0 +1,22 @@
+{
+  "content_type": "application/json",
+  "method": "GET",
+  "body": {
+    "id": "{{ correlation_id }}",
+    "customer_id": "{{ customer_id }}",
+    "endpoint_id": "{{ endpoint_id }}",
+    "endpoint_type": "computer",
+    "severity": "CRITICAL",
+    "source": "{{ username }}",
+    "source_info": {"process": "powershell.exe"},
+    "location": "{{ hostname }}",
+    "when": "{{ generated_at_iso }}",
+    "created_at": "{{ generated_at_iso }}",
+    "name": "Suspicious behavior blocked",
+    "type": "Event::Endpoint::CoreBehavioralDetection",
+    "group": "RUNTIME_DETECTIONS",
+    "threat": "CryptoGuard",
+    "user_id": "{{ username }}",
+    "origin": "endpoint"
+  }
+}

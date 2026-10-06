@@ -1,0 +1,71 @@
+id: infoblox
+display_name: Infoblox NIOS / BloxOne
+version: 1.0.0
+supported_modes:
+- push_webhook
+supported_auth_methods:
+- none
+- basic
+- bearer
+- api_key_header
+scenarios:
+- id: dns-query
+  display_name: Dns Query
+  description: Synthetic NIOS 9 dns-query event. See source field reference.
+  default_transport: syslog
+  template: scenarios/dns-query.json
+  config_schema: &id001
+    type: object
+    additionalProperties: false
+    properties:
+      hostname:
+        type: string
+        default: sim-device-01
+      device_ip:
+        type: string
+        default: 192.0.2.10
+      src:
+        type: string
+        default: 198.51.100.20
+      dst:
+        type: string
+        default: 203.0.113.10
+      user:
+        type: string
+        default: labuser
+      spt:
+        type: integer
+        default: 49152
+      dpt:
+        type: integer
+        default: 443
+  supported_modes:
+  - push_webhook
+- id: dhcp-lease
+  display_name: Dhcp Lease
+  description: Synthetic NIOS 9 dhcp-lease event. See source field reference.
+  default_transport: syslog
+  template: scenarios/dhcp-lease.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+- id: dns-threat
+  display_name: Dns Threat
+  description: Synthetic NIOS 9 dns-threat event. See source field reference.
+  default_transport: syslog
+  template: scenarios/dns-threat.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+supported_transports:
+- syslog
+- http_webhook
+- azure_logs_ingestion
+formats:
+- native
+- cef
+field_references:
+- https://docs.infoblox.com/space/nios90/220318668/Using+Syslog
+schema_version: NIOS 9
+compatibility: Representative synthetic wire format; live vendor parser validation
+  required

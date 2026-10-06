@@ -1,0 +1,72 @@
+id: azure-activity
+display_name: Azure Activity
+version: 1.0.0
+supported_modes:
+- push_webhook
+supported_auth_methods:
+- none
+- basic
+- bearer
+- api_key_header
+scenarios:
+- id: resource-operation
+  display_name: Resource Operation
+  description: Synthetic Activity Log 2015-04-01 schema resource-operation event.
+    See source field reference.
+  default_transport: http_webhook
+  template: scenarios/resource-operation.json
+  config_schema: &id001
+    type: object
+    additionalProperties: false
+    properties:
+      hostname:
+        type: string
+        default: sim-device-01
+      device_ip:
+        type: string
+        default: 192.0.2.10
+      src:
+        type: string
+        default: 198.51.100.20
+      dst:
+        type: string
+        default: 203.0.113.10
+      user:
+        type: string
+        default: labuser
+      spt:
+        type: integer
+        default: 49152
+      dpt:
+        type: integer
+        default: 443
+  supported_modes:
+  - push_webhook
+- id: role-change
+  display_name: Role Change
+  description: Synthetic Activity Log 2015-04-01 schema role-change event. See source
+    field reference.
+  default_transport: http_webhook
+  template: scenarios/role-change.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+- id: policy-event
+  display_name: Policy Event
+  description: Synthetic Activity Log 2015-04-01 schema policy-event event. See source
+    field reference.
+  default_transport: http_webhook
+  template: scenarios/policy-event.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+supported_transports:
+- syslog
+- http_webhook
+- azure_logs_ingestion
+formats:
+- json
+field_references:
+- https://learn.microsoft.com/en-us/azure/azure-monitor/platform/activity-log-schema
+schema_version: Activity Log 2015-04-01 schema
+compatibility: Synthetic ingestion; native service connector not reproduced

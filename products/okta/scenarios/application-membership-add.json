@@ -1,0 +1,17 @@
+{
+  "content_type": "application/json",
+  "method": "POST",
+  "body": {
+    "uuid": "{{ correlation_id }}",
+    "published": "{{ generated_at_iso }}",
+    "eventType": "application.user_membership.add",
+    "version": "0",
+    "displayMessage": "Add user to application membership",
+    "severity": "INFO",
+    "client": {"ipAddress": "{{ source_ip }}"},
+    "actor": {"id": "{{ actor_id }}", "type": "User", "alternateId": "admin@example.com", "displayName": "Okta Administrator"},
+    "outcome": {"result": "SUCCESS", "reason": null},
+    "target": [{"id": "{{ target_id }}", "type": "User", "alternateId": "{{ user_email }}", "displayName": "{{ user_name }}"}, {"id": "{{ application_id }}", "type": "AppInstance", "alternateId": "example-app", "displayName": "Example Application"}],
+    "transaction": {"type": "WEB", "id": "{{ transaction_id }}", "detail": {}}
+  }
+}

@@ -1,0 +1,1 @@
+mcpd[1234]: 01070417:5: AUDIT - user labuser - transaction #123 - object /Common/Lab - modify

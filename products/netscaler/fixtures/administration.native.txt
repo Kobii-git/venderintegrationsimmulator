@@ -1,0 +1,1 @@
+sim-device-01 0-PPE-0 : default CLI CMD_EXECUTED 1234 0 : User labuser - Remote_ip 198.51.100.20 - Command "show ns version"

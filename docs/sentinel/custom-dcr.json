@@ -1,0 +1,28 @@
+{
+  "location": "<workspace-region>",
+  "kind": "Direct",
+  "properties": {
+    "streamDeclarations": {
+      "Custom-SimulatorEvents": {
+        "columns": [
+          {"name": "TimeGenerated", "type": "datetime"},
+          {"name": "SourceProfile", "type": "string"},
+          {"name": "Computer", "type": "string"},
+          {"name": "RawData", "type": "string"}
+        ]
+      }
+    },
+    "destinations": {
+      "logAnalytics": [{
+        "workspaceResourceId": "/subscriptions/<subscription>/resourceGroups/<group>/providers/Microsoft.OperationalInsights/workspaces/<workspace>",
+        "name": "sentinelWorkspace"
+      }]
+    },
+    "dataFlows": [{
+      "streams": ["Custom-SimulatorEvents"],
+      "destinations": ["sentinelWorkspace"],
+      "transformKql": "source",
+      "outputStream": "Custom-SimulatorEvents_CL"
+    }]
+  }
+}

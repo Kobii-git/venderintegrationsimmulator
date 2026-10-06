@@ -1,0 +1,24 @@
+{
+  "content_type": "application/json",
+  "method": "POST",
+  "body": {
+    "notification": {
+      "id": "{{ notification_id }}",
+      "type": "CustomerCSTARUnderThreshold",
+      "description": "The score for '{{ organisation_name }}' dropped below {{ threshold }} with a score of {{ latest_score }}",
+      "occurredAt": "{{ generated_at_iso }}",
+      "context": {
+        "LatestScore": "{{ latest_score }}",
+        "PrevScore": "{{ prev_score }}",
+        "Threshold": "{{ threshold }}"
+      }
+    }
+  },
+  "diagnostic_fields": {
+    "simulator_event_id": "{{ correlation_id }}",
+    "simulator_timestamp": "{{ generated_at_iso }}",
+    "simulator_product": "{{ product_id }}",
+    "simulator_scenario": "{{ scenario_id }}"
+  },
+  "diagnostic_merge": "nested"
+}

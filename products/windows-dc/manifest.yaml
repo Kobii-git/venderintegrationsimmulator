@@ -1,0 +1,110 @@
+id: windows-dc
+display_name: Windows Server / AD Domain Controller
+version: 1.0.0
+supported_modes:
+- push_webhook
+supported_auth_methods:
+- none
+- basic
+- bearer
+- api_key_header
+scenarios:
+- id: logon-success
+  display_name: Logon Success
+  description: Synthetic Windows Server 2022 event schema logon-success event. See
+    source field reference.
+  default_transport: http_webhook
+  template: scenarios/logon-success.json
+  config_schema: &id001
+    type: object
+    additionalProperties: false
+    properties:
+      hostname:
+        type: string
+        default: sim-device-01
+      device_ip:
+        type: string
+        default: 192.0.2.10
+      src:
+        type: string
+        default: 198.51.100.20
+      dst:
+        type: string
+        default: 203.0.113.10
+      user:
+        type: string
+        default: labuser
+      spt:
+        type: integer
+        default: 49152
+      dpt:
+        type: integer
+        default: 443
+  supported_modes:
+  - push_webhook
+- id: logon-failure
+  display_name: Logon Failure
+  description: Synthetic Windows Server 2022 event schema logon-failure event. See
+    source field reference.
+  default_transport: http_webhook
+  template: scenarios/logon-failure.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+- id: kerberos-ticket
+  display_name: Kerberos Ticket
+  description: Synthetic Windows Server 2022 event schema kerberos-ticket event. See
+    source field reference.
+  default_transport: http_webhook
+  template: scenarios/kerberos-ticket.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+- id: ntlm-auth
+  display_name: Ntlm Auth
+  description: Synthetic Windows Server 2022 event schema ntlm-auth event. See source
+    field reference.
+  default_transport: http_webhook
+  template: scenarios/ntlm-auth.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+- id: account-lockout
+  display_name: Account Lockout
+  description: Synthetic Windows Server 2022 event schema account-lockout event. See
+    source field reference.
+  default_transport: http_webhook
+  template: scenarios/account-lockout.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+- id: account-created
+  display_name: Account Created
+  description: Synthetic Windows Server 2022 event schema account-created event. See
+    source field reference.
+  default_transport: http_webhook
+  template: scenarios/account-created.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+- id: group-member-added
+  display_name: Group Member Added
+  description: Synthetic Windows Server 2022 event schema group-member-added event.
+    See source field reference.
+  default_transport: http_webhook
+  template: scenarios/group-member-added.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+supported_transports:
+- syslog
+- http_webhook
+- azure_logs_ingestion
+formats:
+- xml
+- json
+field_references:
+- https://learn.microsoft.com/en-us/windows/security/threat-protection/auditing/advanced-security-audit-policy-settings
+schema_version: Windows Server 2022 event schema
+compatibility: Representative synthetic wire format; live vendor parser validation
+  required

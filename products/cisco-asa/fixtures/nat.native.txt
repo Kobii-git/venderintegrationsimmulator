@@ -1,0 +1,1 @@
+%ASA-6-305011: Built dynamic TCP translation from inside:198.51.100.20/49152 to outside:192.0.2.10/60000

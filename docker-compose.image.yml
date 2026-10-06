@@ -1,0 +1,12 @@
+# Run a published image without building the source.
+services:
+  integration-simulator:
+    image: ghcr.io/kobii-git/venderintegrationsimmulator:${SIMULATOR_VERSION:-latest}
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - integration-simulator-data:/data
+    stop_grace_period: 30s
+    restart: unless-stopped
+volumes:
+  integration-simulator-data:

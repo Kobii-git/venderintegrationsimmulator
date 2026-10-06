@@ -1,0 +1,14 @@
+{
+  "CreationTime": "2026-10-04T12:00:00+00:00",
+  "Id": "11111111-2222-4333-8444-555555555555",
+  "Operation": "MailItemsAccessed",
+  "RecordType": 50,
+  "Workload": "Exchange",
+  "UserId": "labuser@example.test",
+  "UserType": 0,
+  "OrganizationId": "11111111-2222-4333-8444-555555555555",
+  "ClientIP": "198.51.100.20",
+  "ResultStatus": "Succeeded",
+  "ObjectId": "https://example.test/lab/sample.txt",
+  "Version": 1
+}

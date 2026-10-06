@@ -1,0 +1,22 @@
+{
+  "content_type": "application/json",
+  "method": "GET",
+  "body": {
+    "id": "{{ correlation_id }}",
+    "customer_id": "{{ customer_id }}",
+    "endpoint_id": "{{ endpoint_id }}",
+    "endpoint_type": "computer",
+    "severity": "MEDIUM",
+    "source": "{{ username }}",
+    "source_info": {"path": "C:\\Temp\\installer.exe"},
+    "location": "{{ hostname }}",
+    "when": "{{ generated_at_iso }}",
+    "created_at": "{{ generated_at_iso }}",
+    "name": "Potentially unwanted application detected",
+    "type": "Event::Endpoint::CorePuaDetection",
+    "group": "PUA",
+    "threat": "Generic PUA",
+    "user_id": "{{ username }}",
+    "origin": "endpoint"
+  }
+}

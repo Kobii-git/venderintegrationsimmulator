@@ -1,0 +1,21 @@
+{
+  "metadata": {
+    "customerIDString": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "offset": 1,
+    "eventType": "DetectionSummaryEvent",
+    "eventCreationTime": "1785822412",
+    "version": "1.0"
+  },
+  "event": {
+    "DetectId": "11111111-2222-4333-8444-555555555555",
+    "ComputerName": "sim-device-01",
+    "UserName": "labuser",
+    "LocalIP": "192.0.2.10",
+    "FileName": "eicar.com",
+    "Severity": 4,
+    "SeverityName": "High",
+    "Tactic": "Execution",
+    "Technique": "User Execution",
+    "PatternDispositionDescription": "prevention"
+  }
+}

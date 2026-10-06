@@ -1,0 +1,24 @@
+{
+  "content_type": "application/json",
+  "method": "POST",
+  "body": {
+    "notification": {
+      "id": "{{ notification_id }}",
+      "type": "DataLeakPublished",
+      "description": "A new data leak was published affecting {{ affected_domain }}: {{ leak_title }}",
+      "occurredAt": "{{ generated_at_iso }}",
+      "context": {
+        "Title": "{{ leak_title }}",
+        "Domain": "{{ affected_domain }}",
+        "FindingUrl": "{{ finding_url }}"
+      }
+    }
+  },
+  "diagnostic_fields": {
+    "simulator_event_id": "{{ correlation_id }}",
+    "simulator_timestamp": "{{ generated_at_iso }}",
+    "simulator_product": "{{ product_id }}",
+    "simulator_scenario": "{{ scenario_id }}"
+  },
+  "diagnostic_merge": "nested"
+}

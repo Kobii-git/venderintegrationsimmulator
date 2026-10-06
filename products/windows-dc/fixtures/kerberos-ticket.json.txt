@@ -1,0 +1,20 @@
+{
+  "TimeGenerated": "2026-10-04T12:00:00+00:00",
+  "Computer": "sim-device-01",
+  "EventID": 4769,
+  "EventRecordId": "1",
+  "Channel": "Security",
+  "Provider": "Microsoft-Windows-Security-Auditing",
+  "EventData": {
+    "TargetUserName": "labuser",
+    "TargetDomainName": "LAB.LOCAL",
+    "ServiceName": "cifs/server01",
+    "ServiceSid": "S-1-5-21-1000-1000-1000-1102",
+    "TicketOptions": "0x40810000",
+    "TicketEncryptionType": "0x12",
+    "IpAddress": "198.51.100.20",
+    "IpPort": "49152",
+    "Status": "0x0",
+    "LogonGuid": "11111111-2222-4333-8444-555555555555"
+  }
+}

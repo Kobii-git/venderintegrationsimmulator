@@ -1,0 +1,1 @@
+CEF:0|F5|ASM|BIG-IP 17 CEF|ASM|Blocked Request|5|src=198.51.100.20 dst=203.0.113.10 spt=49152 dpt=443 proto=TCP act=blocked suser=labuser dvchost=sim-device-01 dvc=192.0.2.10 msg=Blocked Request request=http://example.test/lab requestMethod=GET cs1=/Common/Lab cs1Label=policy_name cs2=Illegal URL cs2Label=violations

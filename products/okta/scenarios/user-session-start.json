@@ -1,0 +1,20 @@
+{
+  "content_type": "application/json",
+  "method": "POST",
+  "body": {
+    "uuid": "{{ correlation_id }}",
+    "published": "{{ generated_at_iso }}",
+    "eventType": "user.session.start",
+    "version": "0",
+    "displayMessage": "User login to Okta",
+    "severity": "INFO",
+    "client": {"ipAddress": "{{ source_ip }}", "userAgent": {"rawUserAgent": "Mozilla/5.0", "os": "Other", "browser": "OTHER"}},
+    "actor": {"id": "{{ actor_id }}", "type": "User", "alternateId": "{{ user_email }}", "displayName": "{{ user_name }}"},
+    "outcome": {"result": "SUCCESS", "reason": null},
+    "target": [{"id": "{{ target_id }}", "type": "User", "alternateId": "{{ user_email }}", "displayName": "{{ user_name }}"}],
+    "transaction": {"type": "WEB", "id": "{{ transaction_id }}", "detail": {}},
+    "debugContext": {"debugData": {"requestId": "{{ transaction_id }}"}},
+    "authenticationContext": {"authenticationStep": 0, "externalSessionId": "{{ transaction_id }}"},
+    "securityContext": {"isProxy": false}
+  }
+}

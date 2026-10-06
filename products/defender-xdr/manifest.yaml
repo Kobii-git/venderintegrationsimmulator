@@ -1,0 +1,80 @@
+id: defender-xdr
+display_name: Microsoft Defender XDR
+version: 1.0.0
+supported_modes:
+- push_webhook
+supported_auth_methods:
+- none
+- basic
+- bearer
+- api_key_header
+scenarios:
+- id: alert
+  display_name: Alert
+  description: Synthetic Advanced Hunting schema alert event. See source field reference.
+  default_transport: http_webhook
+  template: scenarios/alert.json
+  config_schema: &id001
+    type: object
+    additionalProperties: false
+    properties:
+      hostname:
+        type: string
+        default: sim-device-01
+      device_ip:
+        type: string
+        default: 192.0.2.10
+      src:
+        type: string
+        default: 198.51.100.20
+      dst:
+        type: string
+        default: 203.0.113.10
+      user:
+        type: string
+        default: labuser
+      spt:
+        type: integer
+        default: 49152
+      dpt:
+        type: integer
+        default: 443
+  supported_modes:
+  - push_webhook
+- id: process-event
+  display_name: Process Event
+  description: Synthetic Advanced Hunting schema process-event event. See source field
+    reference.
+  default_transport: http_webhook
+  template: scenarios/process-event.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+- id: network-event
+  display_name: Network Event
+  description: Synthetic Advanced Hunting schema network-event event. See source field
+    reference.
+  default_transport: http_webhook
+  template: scenarios/network-event.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+- id: identity-event
+  display_name: Identity Event
+  description: Synthetic Advanced Hunting schema identity-event event. See source
+    field reference.
+  default_transport: http_webhook
+  template: scenarios/identity-event.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+supported_transports:
+- syslog
+- http_webhook
+- azure_logs_ingestion
+formats:
+- json
+field_references:
+- https://learn.microsoft.com/en-us/defender-xdr/advanced-hunting-schema-tables
+schema_version: Advanced Hunting schema
+compatibility: Synthetic ingestion; native service connector not reproduced

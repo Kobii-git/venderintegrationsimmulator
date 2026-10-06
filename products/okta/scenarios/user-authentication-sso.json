@@ -1,0 +1,18 @@
+{
+  "content_type": "application/json",
+  "method": "POST",
+  "body": {
+    "uuid": "{{ correlation_id }}",
+    "published": "{{ generated_at_iso }}",
+    "eventType": "user.authentication.sso",
+    "version": "0",
+    "displayMessage": "User single sign on to app",
+    "severity": "INFO",
+    "client": {"ipAddress": "{{ source_ip }}"},
+    "actor": {"id": "{{ actor_id }}", "type": "User", "alternateId": "{{ user_email }}", "displayName": "{{ user_name }}"},
+    "outcome": {"result": "SUCCESS", "reason": null},
+    "target": [{"id": "{{ application_id }}", "type": "AppInstance", "alternateId": "example-app", "displayName": "Example Application"}],
+    "transaction": {"type": "WEB", "id": "{{ transaction_id }}", "detail": {}},
+    "authenticationContext": {"authenticationStep": 1, "externalSessionId": "{{ transaction_id }}"}
+  }
+}

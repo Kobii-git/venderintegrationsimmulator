@@ -1,0 +1,137 @@
+id: upguard
+display_name: UpGuard
+version: "1.0.0"
+description: >
+  UpGuard Cyber Risk webhook integration simulation.
+  Payloads model the documented notification envelope; see docs/vendor/upguard/ for fidelity notes.
+
+supported_modes:
+  - push_webhook
+
+supported_transports:
+  - http_webhook
+
+supported_auth_methods:
+  - none
+  - basic
+
+plugin: true
+diagnostic_merge: nested
+
+scenarios:
+  - id: score-threshold
+    display_name: Security Score Threshold
+    description: >
+      Simulates CustomerCSTARUnderThreshold — organisation security score dropped below threshold.
+      Type string is documented by UpGuard.
+    default_transport: http_webhook
+    template: scenarios/score-threshold.json
+    config_schema:
+      type: object
+      properties:
+        organisation_name:
+          type: string
+          description: Organisation name in the notification description
+          default: Example Company
+        threshold:
+          type: integer
+          description: Score threshold that was breached
+          default: 600
+        latest_score:
+          type: integer
+          description: Current security score
+          default: 599
+        prev_score:
+          type: integer
+          description: Previous security score
+          default: 732
+      additionalProperties: false
+
+  - id: vendor-score-change
+    display_name: Vendor Security Score Change
+    description: >
+      Simulates a watched vendor score dropping below a threshold.
+      Notification type is inferred — see docs/vendor/upguard/ASSUMPTIONS.md.
+    default_transport: http_webhook
+    template: scenarios/vendor-score-change.json
+    config_schema:
+      type: object
+      properties:
+        vendor_name:
+          type: string
+          description: Vendor organisation name
+          default: Acme Supplies Ltd
+        threshold:
+          type: integer
+          default: 500
+        latest_score:
+          type: integer
+          default: 487
+        prev_score:
+          type: integer
+          default: 612
+      additionalProperties: false
+
+  - id: data-leak
+    display_name: Data Leak Detected
+    description: >
+      Simulates a new data leak publication notification.
+      Context fields are inferred from integration documentation.
+    default_transport: http_webhook
+    template: scenarios/data-leak.json
+    config_schema:
+      type: object
+      properties:
+        leak_title:
+          type: string
+          default: Credentials found in public paste site
+        affected_domain:
+          type: string
+          default: example.com
+        finding_url:
+          type: string
+          default: https://www.upguard.com/breach/example
+      additionalProperties: false
+
+  - id: identity-breach
+    display_name: Identity Breach Detected
+    description: >
+      Simulates an identity breach notification from UpGuard Breach Risk.
+    default_transport: http_webhook
+    template: scenarios/identity-breach.json
+    config_schema:
+      type: object
+      properties:
+        breach_title:
+          type: string
+          default: Employee credentials exposed in third-party breach
+        affected_email_count:
+          type: integer
+          default: 3
+        finding_url:
+          type: string
+          default: https://www.upguard.com/breach/identity/example
+      additionalProperties: false
+
+  - id: vulnerability
+    display_name: Vulnerability Detected
+    description: >
+      Simulates a new vulnerability detection notification.
+    default_transport: http_webhook
+    template: scenarios/vulnerability.json
+    config_schema:
+      type: object
+      properties:
+        cve_id:
+          type: string
+          default: CVE-2024-12345
+        severity:
+          type: string
+          default: High
+        asset_name:
+          type: string
+          default: api.example.com
+        finding_url:
+          type: string
+          default: https://www.upguard.com/vulnerabilities/example
+      additionalProperties: false

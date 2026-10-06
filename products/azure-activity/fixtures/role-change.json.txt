@@ -1,0 +1,16 @@
+{
+  "time": "2026-10-04T12:00:00+00:00",
+  "resourceId": "/subscriptions/11111111-2222-4333-8444-555555555555/resourceGroups/lab/providers/Microsoft.Compute/virtualMachines/vm01",
+  "operationName": "Microsoft.Authorization/roleAssignments/write",
+  "category": "Administrative",
+  "resultType": "Success",
+  "caller": "labuser@example.test",
+  "correlationId": "11111111-2222-4333-8444-555555555555",
+  "level": "Informational",
+  "properties": {
+    "statusCode": "OK"
+  },
+  "claims": {
+    "ipaddr": "198.51.100.20"
+  }
+}

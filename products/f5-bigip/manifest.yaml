@@ -1,0 +1,71 @@
+id: f5-bigip
+display_name: F5 BIG-IP / Advanced WAF
+version: 1.0.0
+supported_modes:
+- push_webhook
+supported_auth_methods:
+- none
+- basic
+- bearer
+- api_key_header
+scenarios:
+- id: waf-violation
+  display_name: Waf Violation
+  description: Synthetic BIG-IP 17 CEF waf-violation event. See source field reference.
+  default_transport: syslog
+  template: scenarios/waf-violation.json
+  config_schema: &id001
+    type: object
+    additionalProperties: false
+    properties:
+      hostname:
+        type: string
+        default: sim-device-01
+      device_ip:
+        type: string
+        default: 192.0.2.10
+      src:
+        type: string
+        default: 198.51.100.20
+      dst:
+        type: string
+        default: 203.0.113.10
+      user:
+        type: string
+        default: labuser
+      spt:
+        type: integer
+        default: 49152
+      dpt:
+        type: integer
+        default: 443
+  supported_modes:
+  - push_webhook
+- id: blocked-request
+  display_name: Blocked Request
+  description: Synthetic BIG-IP 17 CEF blocked-request event. See source field reference.
+  default_transport: syslog
+  template: scenarios/blocked-request.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+- id: administration
+  display_name: Administration
+  description: Synthetic BIG-IP 17 CEF administration event. See source field reference.
+  default_transport: syslog
+  template: scenarios/administration.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+supported_transports:
+- syslog
+- http_webhook
+- azure_logs_ingestion
+formats:
+- cef
+- native
+field_references:
+- https://techdocs.f5.com/en-us/bigip-17-1-0/big-ip-asm-implementations/logging-application-security-events.html
+schema_version: BIG-IP 17 CEF
+compatibility: Representative synthetic wire format; live vendor parser validation
+  required

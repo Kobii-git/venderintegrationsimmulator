@@ -1,0 +1,1 @@
+sudo: labuser : TTY=pts/0 ; PWD=/home/labuser ; USER=root ; COMMAND=/usr/bin/id

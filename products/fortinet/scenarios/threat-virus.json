@@ -1,0 +1,9 @@
+{
+  "content_type": "text/plain",
+  "method": "POST",
+  "body": "date={{ fortigate_date }} time={{ fortigate_time }} devname=\"{{ devname }}\" devid=\"{{ devid }}\" logid=\"0211008192\" type=\"utm\" subtype=\"virus\" eventtype=\"infected\" level=\"{{ level }}\" vd=\"{{ vd }}\" eventtime={{ eventtime }} msg=\"File is infected.\" action=\"{{ action }}\" service=\"{{ service }}\" sessionid={{ sessionid }} srcip={{ srcip }} dstip={{ dstip }} srcport={{ srcport }} dstport={{ dstport }} srcintf=\"{{ srcintf }}\" srcintfrole=\"undefined\" dstintf=\"{{ dstintf }}\" dstintfrole=\"undefined\" policyid={{ policyid }} proto={{ proto }} direction=\"incoming\" filename=\"{{ filename }}\" quarskip=\"File-was-not-quarantined.\" virus=\"{{ virus }}\" dtype=\"Virus\" ref=\"http://www.fortinet.com/ve?vn={{ virus }}\" virusid=2172 url=\"http://{{ dstip }}/virus/{{ filename }}\" profile=\"g-default\" agent=\"curl/7.47.0\" crscore=50 craction=2 crlevel=\"critical\"",
+  "diagnostic_fields": {
+    "simulator_product": "{{ product_id }}",
+    "simulator_scenario": "{{ scenario_id }}"
+  }
+}

@@ -1,0 +1,97 @@
+id: linux
+display_name: Linux authentication and system
+version: 1.0.0
+supported_modes:
+- push_webhook
+supported_auth_methods:
+- none
+- basic
+- bearer
+- api_key_header
+scenarios:
+- id: ssh-success
+  display_name: Ssh Success
+  description: Synthetic OpenSSH 9 / sudo 1.9 ssh-success event. See source field
+    reference.
+  default_transport: syslog
+  template: scenarios/ssh-success.json
+  config_schema: &id001
+    type: object
+    additionalProperties: false
+    properties:
+      hostname:
+        type: string
+        default: sim-device-01
+      device_ip:
+        type: string
+        default: 192.0.2.10
+      src:
+        type: string
+        default: 198.51.100.20
+      dst:
+        type: string
+        default: 203.0.113.10
+      user:
+        type: string
+        default: labuser
+      spt:
+        type: integer
+        default: 49152
+      dpt:
+        type: integer
+        default: 443
+  supported_modes:
+  - push_webhook
+- id: ssh-failure
+  display_name: Ssh Failure
+  description: Synthetic OpenSSH 9 / sudo 1.9 ssh-failure event. See source field
+    reference.
+  default_transport: syslog
+  template: scenarios/ssh-failure.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+- id: sudo
+  display_name: Sudo
+  description: Synthetic OpenSSH 9 / sudo 1.9 sudo event. See source field reference.
+  default_transport: syslog
+  template: scenarios/sudo.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+- id: authentication
+  display_name: Authentication
+  description: Synthetic OpenSSH 9 / sudo 1.9 authentication event. See source field
+    reference.
+  default_transport: syslog
+  template: scenarios/authentication.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+- id: kernel
+  display_name: Kernel
+  description: Synthetic OpenSSH 9 / sudo 1.9 kernel event. See source field reference.
+  default_transport: syslog
+  template: scenarios/kernel.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+- id: system
+  display_name: System
+  description: Synthetic OpenSSH 9 / sudo 1.9 system event. See source field reference.
+  default_transport: syslog
+  template: scenarios/system.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+supported_transports:
+- syslog
+- http_webhook
+- azure_logs_ingestion
+formats:
+- native
+field_references:
+- https://man.openbsd.org/sshd.8
+schema_version: OpenSSH 9 / sudo 1.9
+compatibility: Representative synthetic wire format; live vendor parser validation
+  required

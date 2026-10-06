@@ -1,0 +1,1 @@
+CEF:0|Trend Micro|Deep Security Agent|Deep Security 20 CEF|1001111|Ips|5|src=198.51.100.20 dst=203.0.113.10 spt=49152 dpt=443 proto=TCP act=IDS:Reset suser=labuser dvchost=sim-device-01 dvc=192.0.2.10 msg=Ips cn1=1 cn1Label=Host ID filePath=/etc/passwd

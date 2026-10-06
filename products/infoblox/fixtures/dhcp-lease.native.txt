@@ -1,0 +1,1 @@
+dhcpd[1234]: DHCPACK on 198.51.100.20 to 00:11:22:33:44:55 (sim-device-01) via eth0

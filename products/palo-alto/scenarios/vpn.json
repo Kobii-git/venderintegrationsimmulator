@@ -1,0 +1,67 @@
+{
+  "content_type": "application/json",
+  "body": {
+    "_source_event": {
+      "vendor": "Palo Alto Networks",
+      "product": "PAN-OS",
+      "version": "PAN-OS 11.1",
+      "family": "vpn",
+      "name": "Vpn",
+      "signature": "SYSTEM",
+      "severity": 5,
+      "default_format": "csv",
+      "time": "{{ generated_at_iso }}",
+      "hostname": "{{ hostname }}",
+      "device_ip": "{{ device_ip }}",
+      "src": "{{ src }}",
+      "dst": "{{ dst }}",
+      "user": "{{ user }}",
+      "spt": "{{ spt }}",
+      "dpt": "{{ dpt }}",
+      "action": "allowed",
+      "cef_extensions": {
+        "cs1": "LabPolicy",
+        "cs1Label": "Rule",
+        "cs2": "vsys1",
+        "cs2Label": "Virtual System",
+        "cs3": "ssl",
+        "cs3Label": "Application",
+        "cn1": "1234",
+        "cn1Label": "Session ID"
+      }
+    },
+    "record": {
+      "TimeGenerated": "{{ generated_at_iso }}",
+      "Computer": "{{ hostname }}",
+      "SourceIP": "{{ src }}",
+      "DestinationIP": "{{ dst }}",
+      "UserName": "{{ user }}",
+      "EventFamily": "vpn",
+      "CorrelationId": "{{ correlation_id }}"
+    },
+    "csv": [
+      "1",
+      "{{ generated_at_iso }}",
+      "012345678901",
+      "SYSTEM",
+      "globalprotect",
+      "1",
+      "{{ generated_at_iso }}",
+      "vsys1",
+      "globalprotect-gateway-auth-succ",
+      "LabVPN",
+      "0",
+      "0",
+      "globalprotect",
+      "informational",
+      "GlobalProtect gateway authentication succeeded for {{ user }}",
+      "1",
+      "0x0",
+      "0",
+      "0",
+      "0",
+      "0",
+      "{{ hostname }}"
+    ]
+  }
+}

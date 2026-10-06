@@ -1,0 +1,9 @@
+{
+  "content_type": "text/plain",
+  "method": "POST",
+  "body": "date={{ fortigate_date }} time={{ fortigate_time }} devname=\"{{ devname }}\" devid=\"{{ devid }}\" logid=\"0001000014\" type=\"traffic\" subtype=\"local\" level=\"{{ level }}\" vd=\"{{ vd }}\" eventtime={{ eventtime }} srcip={{ srcip }} srcport={{ srcport }} srcintf=\"{{ srcintf }}\" srcintfrole=\"undefined\" dstip={{ dstip }} dstport={{ dstport }} dstintf=\"{{ dstintf }}\" dstintfrole=\"undefined\" sessionid={{ sessionid }} proto={{ proto }} action=\"{{ action }}\" policyid={{ policyid }} policytype=\"local-in-policy\" service=\"{{ service }}\" dstcountry=\"Reserved\" srccountry=\"Reserved\" trandisp=\"noop\" app=\"Web Management(HTTPS)\" duration=5 sentbyte=1247 rcvdbyte=1719 sentpkt=5 rcvdpkt=6 appcat=\"unscanned\"",
+  "diagnostic_fields": {
+    "simulator_product": "{{ product_id }}",
+    "simulator_scenario": "{{ scenario_id }}"
+  }
+}

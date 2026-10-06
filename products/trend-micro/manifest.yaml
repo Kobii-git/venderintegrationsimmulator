@@ -1,0 +1,71 @@
+id: trend-micro
+display_name: Trend Micro Deep Security
+version: 1.0.0
+supported_modes:
+- push_webhook
+supported_auth_methods:
+- none
+- basic
+- bearer
+- api_key_header
+scenarios:
+- id: malware
+  display_name: Malware
+  description: Synthetic Deep Security 20 CEF malware event. See source field reference.
+  default_transport: syslog
+  template: scenarios/malware.json
+  config_schema: &id001
+    type: object
+    additionalProperties: false
+    properties:
+      hostname:
+        type: string
+        default: sim-device-01
+      device_ip:
+        type: string
+        default: 192.0.2.10
+      src:
+        type: string
+        default: 198.51.100.20
+      dst:
+        type: string
+        default: 203.0.113.10
+      user:
+        type: string
+        default: labuser
+      spt:
+        type: integer
+        default: 49152
+      dpt:
+        type: integer
+        default: 443
+  supported_modes:
+  - push_webhook
+- id: ips
+  display_name: Ips
+  description: Synthetic Deep Security 20 CEF ips event. See source field reference.
+  default_transport: syslog
+  template: scenarios/ips.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+- id: integrity-monitoring
+  display_name: Integrity Monitoring
+  description: Synthetic Deep Security 20 CEF integrity-monitoring event. See source
+    field reference.
+  default_transport: syslog
+  template: scenarios/integrity-monitoring.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+supported_transports:
+- syslog
+- http_webhook
+- azure_logs_ingestion
+formats:
+- cef
+field_references:
+- https://help.deepsecurity.trendmicro.com/20_0/on-premise/Events-Alerts/syslog-parsing.html
+schema_version: Deep Security 20 CEF
+compatibility: Representative synthetic wire format; live vendor parser validation
+  required

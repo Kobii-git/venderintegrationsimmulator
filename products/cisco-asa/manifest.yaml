@@ -1,0 +1,86 @@
+id: cisco-asa
+display_name: Cisco ASA
+version: 1.0.0
+supported_modes:
+- push_webhook
+supported_auth_methods:
+- none
+- basic
+- bearer
+- api_key_header
+scenarios:
+- id: connection
+  display_name: Connection
+  description: Synthetic ASA 9.20 connection event. See source field reference.
+  default_transport: syslog
+  template: scenarios/connection.json
+  config_schema: &id001
+    type: object
+    additionalProperties: false
+    properties:
+      hostname:
+        type: string
+        default: sim-device-01
+      device_ip:
+        type: string
+        default: 192.0.2.10
+      src:
+        type: string
+        default: 198.51.100.20
+      dst:
+        type: string
+        default: 203.0.113.10
+      user:
+        type: string
+        default: labuser
+      spt:
+        type: integer
+        default: 49152
+      dpt:
+        type: integer
+        default: 443
+  supported_modes:
+  - push_webhook
+- id: deny
+  display_name: Deny
+  description: Synthetic ASA 9.20 deny event. See source field reference.
+  default_transport: syslog
+  template: scenarios/deny.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+- id: nat
+  display_name: Nat
+  description: Synthetic ASA 9.20 nat event. See source field reference.
+  default_transport: syslog
+  template: scenarios/nat.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+- id: vpn
+  display_name: Vpn
+  description: Synthetic ASA 9.20 vpn event. See source field reference.
+  default_transport: syslog
+  template: scenarios/vpn.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+- id: authentication
+  display_name: Authentication
+  description: Synthetic ASA 9.20 authentication event. See source field reference.
+  default_transport: syslog
+  template: scenarios/authentication.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+supported_transports:
+- syslog
+- http_webhook
+- azure_logs_ingestion
+formats:
+- native
+field_references:
+- https://www.cisco.com/c/en/us/td/docs/security/asa/syslog/b_syslog.html
+schema_version: ASA 9.20
+compatibility: Representative synthetic wire format; live vendor parser validation
+  required

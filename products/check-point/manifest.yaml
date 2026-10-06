@@ -1,0 +1,80 @@
+id: check-point
+display_name: Check Point Log Exporter
+version: 1.0.0
+supported_modes:
+- push_webhook
+supported_auth_methods:
+- none
+- basic
+- bearer
+- api_key_header
+scenarios:
+- id: firewall
+  display_name: Firewall
+  description: Synthetic Log Exporter R81 CEF firewall event. See source field reference.
+  default_transport: syslog
+  template: scenarios/firewall.json
+  config_schema: &id001
+    type: object
+    additionalProperties: false
+    properties:
+      hostname:
+        type: string
+        default: sim-device-01
+      device_ip:
+        type: string
+        default: 192.0.2.10
+      src:
+        type: string
+        default: 198.51.100.20
+      dst:
+        type: string
+        default: 203.0.113.10
+      user:
+        type: string
+        default: labuser
+      spt:
+        type: integer
+        default: 49152
+      dpt:
+        type: integer
+        default: 443
+  supported_modes:
+  - push_webhook
+- id: threat-prevention
+  display_name: Threat Prevention
+  description: Synthetic Log Exporter R81 CEF threat-prevention event. See source
+    field reference.
+  default_transport: syslog
+  template: scenarios/threat-prevention.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+- id: vpn
+  display_name: Vpn
+  description: Synthetic Log Exporter R81 CEF vpn event. See source field reference.
+  default_transport: syslog
+  template: scenarios/vpn.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+- id: administration
+  display_name: Administration
+  description: Synthetic Log Exporter R81 CEF administration event. See source field
+    reference.
+  default_transport: syslog
+  template: scenarios/administration.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+supported_transports:
+- syslog
+- http_webhook
+- azure_logs_ingestion
+formats:
+- cef
+field_references:
+- https://sc1.checkpoint.com/documents/R81/WebAdminGuides/EN/CP_R81_LoggingAndMonitoring_AdminGuide/Topics-LMG/Log-Exporter-CEF-Field-Mappings.htm
+schema_version: Log Exporter R81 CEF
+compatibility: Representative synthetic wire format; live vendor parser validation
+  required

@@ -1,0 +1,244 @@
+id: okta
+display_name: Okta
+version: 1.0.0
+description: Okta System Log polling and event-hook workflow simulation
+supported_modes:
+- pull_api
+- push_webhook
+supported_transports:
+- http_webhook
+- syslog
+- azure_logs_ingestion
+supported_auth_methods:
+- none
+- basic
+- bearer
+- api_key_header
+supported_inbound_auth_methods:
+- api_key
+- oauth2_client_credentials
+plugin: true
+inbound_options_schema:
+  type: object
+  properties:
+    org_url:
+      type: string
+      title: Okta org URL
+      description: Logical Okta org URL used in event source fields
+      pattern: ^https://[^/]+$
+      default: https://example.okta.com
+  required:
+  - org_url
+  additionalProperties: false
+scenarios:
+- id: user-session-start
+  display_name: User Session Started
+  description: Successful user login and Okta session creation
+  template: scenarios/user-session-start.json
+  supported_modes:
+  - pull_api
+  - push_webhook
+  delivery_policy: &id001
+    timeout_seconds: 3
+    follow_redirects: false
+    max_attempts: 2
+    retry_on:
+    - timeout
+    - http_5xx
+  config_schema: &id002
+    type: object
+    properties:
+      user_email:
+        type: string
+        default: analyst@example.com
+      user_name:
+        type: string
+        default: Example Analyst
+      source_ip:
+        type: string
+        default: 192.0.2.25
+    additionalProperties: false
+- id: user-lifecycle-create
+  display_name: User Created
+  description: Okta user lifecycle create event
+  template: scenarios/user-lifecycle-create.json
+  supported_modes:
+  - pull_api
+  - push_webhook
+  delivery_policy: *id001
+  config_schema: *id002
+- id: user-lifecycle-deactivate
+  display_name: User Deactivated
+  description: Okta user lifecycle deactivate event
+  template: scenarios/user-lifecycle-deactivate.json
+  supported_modes:
+  - pull_api
+  - push_webhook
+  delivery_policy: *id001
+  config_schema: *id002
+- id: application-membership-add
+  display_name: Application Membership Added
+  description: User assigned to an Okta application
+  template: scenarios/application-membership-add.json
+  supported_modes:
+  - pull_api
+  - push_webhook
+  delivery_policy: *id001
+  config_schema: *id002
+- id: user-authentication-sso
+  display_name: User SSO Authentication
+  description: User single sign-on attempt to an application
+  template: scenarios/user-authentication-sso.json
+  supported_modes:
+  - pull_api
+  - push_webhook
+  delivery_policy: *id001
+  config_schema: *id002
+- id: application-sign-on-denied
+  display_name: Application Sign-On Denied
+  description: Application sign-on policy denied access
+  template: scenarios/application-sign-on-denied.json
+  supported_modes:
+  - pull_api
+  - push_webhook
+  delivery_policy: *id001
+  config_schema: *id002
+- id: sim-sign-in
+  display_name: Sign In
+  description: Synthetic System Log API v1 sign-in event. See source field reference.
+  default_transport: http_webhook
+  template: scenarios/sim-sign-in.json
+  config_schema: &id003
+    type: object
+    additionalProperties: false
+    properties:
+      hostname:
+        type: string
+        default: sim-device-01
+      device_ip:
+        type: string
+        default: 192.0.2.10
+      src:
+        type: string
+        default: 198.51.100.20
+      dst:
+        type: string
+        default: 203.0.113.10
+      user:
+        type: string
+        default: labuser
+      spt:
+        type: integer
+        default: 49152
+      dpt:
+        type: integer
+        default: 443
+  supported_modes:
+  - push_webhook
+- id: sim-denied-authentication
+  display_name: Denied Authentication
+  description: Synthetic System Log API v1 denied-authentication event. See source
+    field reference.
+  default_transport: http_webhook
+  template: scenarios/sim-denied-authentication.json
+  config_schema: *id003
+  supported_modes:
+  - push_webhook
+- id: sim-user-change
+  display_name: User Change
+  description: Synthetic System Log API v1 user-change event. See source field reference.
+  default_transport: http_webhook
+  template: scenarios/sim-user-change.json
+  config_schema: *id003
+  supported_modes:
+  - push_webhook
+- id: sim-group-change
+  display_name: Group Change
+  description: Synthetic System Log API v1 group-change event. See source field reference.
+  default_transport: http_webhook
+  template: scenarios/sim-group-change.json
+  config_schema: *id003
+  supported_modes:
+  - push_webhook
+- id: sim-application-change
+  display_name: Application Change
+  description: Synthetic System Log API v1 application-change event. See source field
+    reference.
+  default_transport: http_webhook
+  template: scenarios/sim-application-change.json
+  config_schema: *id003
+  supported_modes:
+  - push_webhook
+mock_routes:
+- id: oauth-token
+  path: oauth2/v1/token
+  methods:
+  - POST
+  scenario_id: user-session-start
+  handler: oauth_token
+  required_oauth_scopes:
+  - okta.logs.read
+  response_type: single
+  supports_pagination: false
+  supports_time_filter: false
+  response_profile:
+    body_style: static
+    pagination_location: none
+- id: system-log
+  path: api/v1/logs
+  methods:
+  - GET
+  scenario_id: user-session-start
+  scenario_ids:
+  - user-session-start
+  - user-lifecycle-create
+  - user-lifecycle-deactivate
+  - application-membership-add
+  - user-authentication-sso
+  - application-sign-on-denied
+  handler: dataset_list
+  required_oauth_scopes:
+  - okta.logs.read
+  response_type: list
+  supports_pagination: true
+  supports_time_filter: true
+  response_profile:
+    body_style: array
+    cursor_request_param: after
+    limit_request_param: limit
+    since_request_param: since
+    until_request_param: until
+    minimum_limit: 1
+    default_limit: 100
+    maximum_limit: 1000
+    pagination_location: link_header
+    include_self_link: true
+    always_include_next_link: true
+actions:
+- id: verify-event-hook
+  display_name: Verify event-hook endpoint
+  description: Send Okta's one-time verification challenge and validate the echoed
+    response
+  supported_modes:
+  - push_webhook
+  method: GET
+  headers:
+    Accept: application/json
+    x-okta-verification-challenge: '{{ challenge }}'
+  content_type: null
+  accepted_statuses:
+  - 200
+  delivery_policy:
+    timeout_seconds: 3
+    follow_redirects: false
+    max_attempts: 1
+  assertion:
+    type: json_field_equals_context
+    field: verification
+    context_key: challenge
+formats:
+- json
+field_references:
+- https://developer.okta.com/docs/reference/api/system-log/
+schema_version: System Log API v1
+compatibility: Synthetic ingestion; native service connector not reproduced

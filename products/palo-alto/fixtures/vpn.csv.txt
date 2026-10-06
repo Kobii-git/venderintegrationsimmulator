@@ -1,0 +1,1 @@
+1,2026-10-04T12:00:00+00:00,012345678901,SYSTEM,globalprotect,1,2026-10-04T12:00:00+00:00,vsys1,globalprotect-gateway-auth-succ,LabVPN,0,0,globalprotect,informational,GlobalProtect gateway authentication succeeded for labuser,1,0x0,0,0,0,0,sim-device-01

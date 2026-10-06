@@ -1,0 +1,14 @@
+{
+  "TimeGenerated": "2026-10-04T12:00:00+00:00",
+  "Computer": "sim-device-01",
+  "EventID": 4776,
+  "EventRecordId": "1",
+  "Channel": "Security",
+  "Provider": "Microsoft-Windows-Security-Auditing",
+  "EventData": {
+    "PackageName": "MICROSOFT_AUTHENTICATION_PACKAGE_V1_0",
+    "TargetUserName": "labuser",
+    "Workstation": "sim-device-01",
+    "Status": "0x0"
+  }
+}

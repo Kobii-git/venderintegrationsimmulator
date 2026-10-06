@@ -1,0 +1,23 @@
+{
+  "content_type": "application/json",
+  "method": "GET",
+  "body": {
+    "id": "{{ correlation_id }}",
+    "customer_id": "{{ customer_id }}",
+    "endpoint_id": "{{ endpoint_id }}",
+    "endpoint_type": "computer",
+    "severity": "HIGH",
+    "source": "198.51.100.20",
+    "source_info": {"direction": "inbound"},
+    "location": "{{ hostname }}",
+    "when": "{{ generated_at_iso }}",
+    "created_at": "{{ generated_at_iso }}",
+    "name": "Inbound network exploit blocked",
+    "type": "Event::Endpoint::Threat::IpsInboundDetection",
+    "group": "SECURITY",
+    "threat": "CVE-2021-44228",
+    "user_id": "{{ username }}",
+    "origin": "endpoint",
+    "ips_threat_data": {"remoteIp": "198.51.100.20", "remotePort": "443", "localPort": "8443"}
+  }
+}

@@ -1,0 +1,46 @@
+id: demo-syslog
+display_name: Demo Syslog Product
+version: "1.0.0"
+description: >
+  Internal demonstration product for vendor-neutral syslog transport verification.
+  Not intended for production use.
+
+supported_modes:
+  - push_webhook
+
+supported_transports:
+  - syslog
+
+supported_auth_methods:
+  - none
+
+plugin: false
+
+scenarios:
+  - id: ping
+    display_name: Syslog Ping
+    description: Raw syslog message for transport verification
+    default_transport: syslog
+    template: scenarios/ping.json
+    config_schema:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Message embedded in the syslog payload
+          default: syslog ping
+      additionalProperties: false
+
+  - id: json-event
+    display_name: JSON Syslog Event
+    description: Structured payload formatted as RFC5424 syslog
+    default_transport: syslog
+    template: scenarios/json-event.json
+    config_schema:
+      type: object
+      properties:
+        event_type:
+          type: string
+          description: Event type label
+          default: demo_event
+      additionalProperties: false

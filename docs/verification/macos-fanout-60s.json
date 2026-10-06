@@ -1,0 +1,33 @@
+{
+  "host_platform": "macOS-26.6.2-arm64-arm-64bit",
+  "duration_seconds": 60,
+  "generation_elapsed_seconds": 60.568,
+  "required_linux_acceptance": false,
+  "generated": 6040,
+  "measured_events_per_second": 99.72,
+  "capture_count": {
+    "udp": 6040,
+    "tcp": 6040,
+    "tls": 6040,
+    "http": 6040
+  },
+  "unique_capture_count": {
+    "udp": 6040,
+    "tcp": 6040,
+    "tls": 6040,
+    "http": 6040
+  },
+  "missing_events": {
+    "udp": 0,
+    "tcp": 0,
+    "tls": 0,
+    "http": 0
+  },
+  "parse_errors": [],
+  "management_latency_p95_ms": 198.57,
+  "peak_rss_mib": 131.17,
+  "rss_start_mib": 126.75,
+  "rss_end_mib": 131.17,
+  "simulation_id": "b7b788f1-d147-454a-a791-e187815dd224",
+  "passed": true
+}

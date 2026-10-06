@@ -1,0 +1,1 @@
+sshd[1234]: pam_unix(sshd:session): session opened for user labuser by (uid=0)

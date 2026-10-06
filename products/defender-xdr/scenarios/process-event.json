@@ -1,0 +1,36 @@
+{
+  "content_type": "application/json",
+  "body": {
+    "_source_event": {
+      "vendor": "Microsoft",
+      "product": "Defender XDR",
+      "version": "Advanced Hunting schema",
+      "family": "process-event",
+      "name": "Process Event",
+      "signature": "1001",
+      "severity": 5,
+      "default_format": "json",
+      "time": "{{ generated_at_iso }}",
+      "hostname": "{{ hostname }}",
+      "device_ip": "{{ device_ip }}",
+      "src": "{{ src }}",
+      "dst": "{{ dst }}",
+      "user": "{{ user }}",
+      "spt": "{{ spt }}",
+      "dpt": "{{ dpt }}",
+      "action": "allowed"
+    },
+    "record": {
+      "Timestamp": "{{ generated_at_iso }}",
+      "DeviceId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "DeviceName": "{{ hostname }}",
+      "ReportId": 1,
+      "ActionType": "ProcessCreated",
+      "FileName": "cmd.exe",
+      "FolderPath": "C:\\Windows\\System32",
+      "ProcessCommandLine": "cmd.exe /c whoami",
+      "AccountName": "{{ user }}",
+      "ProcessId": 1234
+    }
+  }
+}

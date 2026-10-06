@@ -1,0 +1,35 @@
+// Custom table: send a finite 100-event DC simulation with hostname dc01.lab.test.
+SimulatorEvents_CL
+| where ingestion_time() > ago(30m)
+| where SourceProfile == "windows-dc" and Computer == "dc01.lab.test"
+| extend EventXml = parse_xml(RawData)
+| extend EventID = toint(EventXml.Event.System.EventID),
+         RecordID = tostring(EventXml.Event.System.EventRecordID),
+         EventComputer = tostring(EventXml.Event.System.Computer)
+| summarize Received=count(), UniqueRecords=dcount(RecordID),
+            EventIDs=make_set(EventID), Computers=make_set(EventComputer)
+
+// Syslog and CEF paths: configure AMA/DCR facility and severity first.
+Syslog
+| where ingestion_time() > ago(30m)
+| where SyslogMessage contains "sim-device" or Computer == "dc01.lab.test"
+| project TimeGenerated, Computer, Facility, SeverityLevel, ProcessName, SyslogMessage
+| take 100
+
+CommonSecurityLog
+| where ingestion_time() > ago(30m)
+| where DeviceAddress == "192.0.2.10"
+| project TimeGenerated, DeviceVendor, DeviceProduct, DeviceEventClassID,
+          DeviceAction, SourceIP, DestinationIP, SourcePort, DestinationPort
+| take 100
+
+// Explicit direct table mappings; use a matching input stream declaration/DCR.
+SecurityEvent
+| where ingestion_time() > ago(30m) and Computer == "dc01.lab.test"
+| project TimeGenerated, Computer, EventID, Account, IpAddress, EventData
+| take 100
+
+WindowsEvent
+| where ingestion_time() > ago(30m) and Computer == "dc01.lab.test"
+| project TimeGenerated, Computer, Provider, Channel, EventID, EventData
+| take 100

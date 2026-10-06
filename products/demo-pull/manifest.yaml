@@ -1,0 +1,71 @@
+id: demo-pull
+display_name: Demo Pull API Product
+version: "1.0.0"
+description: >
+  Internal demonstration product for pull-based (inbound mock API) simulations.
+  External collectors poll these endpoints as if they were a vendor REST API.
+
+supported_modes:
+  - pull_api
+
+supported_transports: []
+
+supported_auth_methods:
+  - none
+
+supported_inbound_auth_methods:
+  - none
+  - api_key
+  - basic
+  - bearer
+  - oauth2_client_credentials
+
+plugin: true
+
+scenarios:
+  - id: security-event
+    display_name: Security Event
+    description: Generic security event for the events list endpoint
+    template: scenarios/security-event.json
+    config_schema:
+      type: object
+      properties:
+        severity:
+          type: string
+          default: medium
+      additionalProperties: false
+  - id: alert
+    display_name: Alert
+    description: Generic alert for the alerts list endpoint
+    template: scenarios/alert.json
+    config_schema:
+      type: object
+      properties:
+        alert_type:
+          type: string
+          default: suspicious_activity
+      additionalProperties: false
+
+mock_routes:
+  - id: events
+    path: events
+    methods: [GET]
+    scenario_id: security-event
+    description: List security events (paginated)
+    response_type: list
+    items_field: events
+    next_token_field: nextPageToken
+    supports_pagination: true
+    supports_time_filter: true
+  - id: alerts
+    path: alerts
+    methods: [GET]
+    scenario_id: alert
+    description: List alerts (paginated)
+    response_type: list
+    items_field: alerts
+    next_token_field: nextPageToken
+    supports_pagination: true
+    supports_time_filter: true
+    response_profile:
+      required_headers: [X-Collector-ID]

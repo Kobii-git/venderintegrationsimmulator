@@ -1,0 +1,49 @@
+{
+  "content_type": "application/json",
+  "body": {
+    "_source_event": {
+      "vendor": "Amazon",
+      "product": "CloudTrail",
+      "version": "CloudTrail eventVersion 1.09",
+      "family": "console-sign-in",
+      "name": "Console Sign In",
+      "signature": "1000",
+      "severity": 5,
+      "default_format": "json",
+      "time": "{{ generated_at_iso }}",
+      "hostname": "{{ hostname }}",
+      "device_ip": "{{ device_ip }}",
+      "src": "{{ src }}",
+      "dst": "{{ dst }}",
+      "user": "{{ user }}",
+      "spt": "{{ spt }}",
+      "dpt": "{{ dpt }}",
+      "action": "allowed"
+    },
+    "record": {
+      "eventVersion": "1.09",
+      "userIdentity": {
+        "type": "IAMUser",
+        "principalId": "AIDALAB",
+        "arn": "arn:aws:iam::123456789012:user/{{ user }}",
+        "accountId": "123456789012",
+        "userName": "{{ user }}"
+      },
+      "eventTime": "{{ generated_at_iso }}",
+      "eventSource": "signin.amazonaws.com",
+      "eventName": "ConsoleLogin",
+      "awsRegion": "us-east-1",
+      "sourceIPAddress": "{{ src }}",
+      "userAgent": "Lab Simulator",
+      "requestParameters": null,
+      "responseElements": {
+        "ConsoleLogin": "Success"
+      },
+      "eventID": "{{ correlation_id }}",
+      "eventType": "AwsConsoleSignIn",
+      "managementEvent": true,
+      "recipientAccountId": "123456789012",
+      "eventCategory": "Management"
+    }
+  }
+}

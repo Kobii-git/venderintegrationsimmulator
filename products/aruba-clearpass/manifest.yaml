@@ -1,0 +1,71 @@
+id: aruba-clearpass
+display_name: Aruba ClearPass
+version: 1.0.0
+supported_modes:
+- push_webhook
+supported_auth_methods:
+- none
+- basic
+- bearer
+- api_key_header
+scenarios:
+- id: radius-auth
+  display_name: Radius Auth
+  description: Synthetic ClearPass 6.11 radius-auth event. See source field reference.
+  default_transport: syslog
+  template: scenarios/radius-auth.json
+  config_schema: &id001
+    type: object
+    additionalProperties: false
+    properties:
+      hostname:
+        type: string
+        default: sim-device-01
+      device_ip:
+        type: string
+        default: 192.0.2.10
+      src:
+        type: string
+        default: 198.51.100.20
+      dst:
+        type: string
+        default: 203.0.113.10
+      user:
+        type: string
+        default: labuser
+      spt:
+        type: integer
+        default: 49152
+      dpt:
+        type: integer
+        default: 443
+  supported_modes:
+  - push_webhook
+- id: tacacs-auth
+  display_name: Tacacs Auth
+  description: Synthetic ClearPass 6.11 tacacs-auth event. See source field reference.
+  default_transport: syslog
+  template: scenarios/tacacs-auth.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+- id: policy-decision
+  display_name: Policy Decision
+  description: Synthetic ClearPass 6.11 policy-decision event. See source field reference.
+  default_transport: syslog
+  template: scenarios/policy-decision.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+supported_transports:
+- syslog
+- http_webhook
+- azure_logs_ingestion
+formats:
+- native
+- cef
+field_references:
+- https://arubanetworking.hpe.com/techdocs/ClearPass/6.11/PolicyManager/Content/CPPM_UserGuide/Admin/SyslogExportFilters_main.htm
+schema_version: ClearPass 6.11
+compatibility: Representative synthetic wire format; live vendor parser validation
+  required

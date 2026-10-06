@@ -1,0 +1,1 @@
+kmd[1234]: KMD_VPN_UP_ALARM_USER: VPN LabVPN from 198.51.100.20 is up

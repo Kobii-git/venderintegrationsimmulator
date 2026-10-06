@@ -1,0 +1,10 @@
+{
+  "Timestamp": "2026-10-04T12:00:00+00:00",
+  "ReportId": 1,
+  "ActionType": "LogonSuccess",
+  "AccountName": "labuser",
+  "AccountDomain": "LAB",
+  "IPAddress": "198.51.100.20",
+  "Application": "Active Directory",
+  "Protocol": "Kerberos"
+}

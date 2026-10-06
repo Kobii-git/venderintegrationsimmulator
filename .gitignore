@@ -1,0 +1,55 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+ENV/
+.env
+.env.*
+!.env.example
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+frontend/test-results/
+frontend/playwright-report/
+playwright-report/
+
+# Node
+node_modules/
+frontend/dist/
+*.local
+
+# Data & secrets
+/data/
+backend/data/
+*.db
+.secret_key
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Build
+dist/
+build/
+*.egg-info/
+
+# Docker
+.docker/
+
+# Logs
+*.log
+
+*.oci.tar
+
+**/.venv*

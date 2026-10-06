@@ -1,0 +1,41 @@
+{
+  "content_type": "application/json",
+  "body": {
+    "_source_event": {
+      "vendor": "Microsoft",
+      "product": "Windows Security",
+      "version": "Windows Server 2022 event schema",
+      "family": "account-lockout",
+      "name": "Account Lockout",
+      "signature": "4740",
+      "severity": 5,
+      "default_format": "xml",
+      "time": "{{ generated_at_iso }}",
+      "hostname": "{{ hostname }}",
+      "device_ip": "{{ device_ip }}",
+      "src": "{{ src }}",
+      "dst": "{{ dst }}",
+      "user": "{{ user }}",
+      "spt": "{{ spt }}",
+      "dpt": "{{ dpt }}",
+      "action": "allowed"
+    },
+    "record": {
+      "TimeGenerated": "{{ generated_at_iso }}",
+      "Computer": "{{ hostname }}",
+      "EventID": 4740,
+      "EventRecordId": "{{ event_sequence + 1 }}",
+      "Channel": "Security",
+      "Provider": "Microsoft-Windows-Security-Auditing",
+      "EventData": {
+        "TargetUserName": "{{ user }}",
+        "TargetDomainName": "LAB",
+        "TargetSid": "S-1-5-21-1000-1000-1000-1101",
+        "SubjectUserName": "DC01$",
+        "SubjectDomainName": "LAB",
+        "SubjectLogonId": "0x3e7",
+        "CallerComputerName": "{{ hostname }}"
+      }
+    }
+  }
+}

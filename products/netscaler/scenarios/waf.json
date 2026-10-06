@@ -1,0 +1,34 @@
+{
+  "content_type": "application/json",
+  "body": {
+    "_source_event": {
+      "vendor": "Citrix",
+      "product": "NetScaler",
+      "version": "NetScaler 14.1",
+      "family": "waf",
+      "name": "Waf",
+      "signature": "1002",
+      "severity": 5,
+      "default_format": "native",
+      "time": "{{ generated_at_iso }}",
+      "hostname": "{{ hostname }}",
+      "device_ip": "{{ device_ip }}",
+      "src": "{{ src }}",
+      "dst": "{{ dst }}",
+      "user": "{{ user }}",
+      "spt": "{{ spt }}",
+      "dpt": "{{ dpt }}",
+      "action": "allowed"
+    },
+    "record": {
+      "TimeGenerated": "{{ generated_at_iso }}",
+      "Computer": "{{ hostname }}",
+      "SourceIP": "{{ src }}",
+      "DestinationIP": "{{ dst }}",
+      "UserName": "{{ user }}",
+      "EventFamily": "waf",
+      "CorrelationId": "{{ correlation_id }}"
+    },
+    "native": "{{ hostname }} 0-PPE-0 : default APPFW APPFW_POLICY_ACTION 1234 0 : {{ src }} 1234-PPE0 - lab_policy http://example.test/lab BLOCK"
+  }
+}

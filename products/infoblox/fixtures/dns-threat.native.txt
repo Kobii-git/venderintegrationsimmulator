@@ -1,0 +1,1 @@
+named[1234]: client 198.51.100.20#49152 (malware.test): rpz QNAME NXDOMAIN rewrite malware.test via malware.test.rpz.lab

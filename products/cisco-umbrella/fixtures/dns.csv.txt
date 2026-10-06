@@ -1,0 +1,1 @@
+2026-10-04T12:00:00+00:00,labuser,labuser,198.51.100.20,192.0.2.10,Blocked,A,NOERROR,example.test,Malware,DNS,Identity,,

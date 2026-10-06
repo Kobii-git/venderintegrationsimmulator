@@ -1,0 +1,1 @@
+device_name="sim-device-01" device_id="C01001LAB" log_id="010101600001" log_type="Firewall" log_component="Firewall Rule" log_subtype="Allowed" priority="Information" src_ip=198.51.100.20 dst_ip=203.0.113.10 src_port=49152 dst_port=443 protocol="TCP" user_name="labuser" status="Allow"

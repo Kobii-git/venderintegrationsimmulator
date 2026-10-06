@@ -1,0 +1,86 @@
+id: sophos-firewall
+display_name: Sophos Firewall
+version: 1.0.0
+supported_modes:
+- push_webhook
+supported_auth_methods:
+- none
+- basic
+- bearer
+- api_key_header
+scenarios:
+- id: firewall
+  display_name: Firewall
+  description: Synthetic SFOS 19.5 firewall event. See source field reference.
+  default_transport: syslog
+  template: scenarios/firewall.json
+  config_schema: &id001
+    type: object
+    additionalProperties: false
+    properties:
+      hostname:
+        type: string
+        default: sim-device-01
+      device_ip:
+        type: string
+        default: 192.0.2.10
+      src:
+        type: string
+        default: 198.51.100.20
+      dst:
+        type: string
+        default: 203.0.113.10
+      user:
+        type: string
+        default: labuser
+      spt:
+        type: integer
+        default: 49152
+      dpt:
+        type: integer
+        default: 443
+  supported_modes:
+  - push_webhook
+- id: ips
+  display_name: Ips
+  description: Synthetic SFOS 19.5 ips event. See source field reference.
+  default_transport: syslog
+  template: scenarios/ips.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+- id: web-filter
+  display_name: Web Filter
+  description: Synthetic SFOS 19.5 web-filter event. See source field reference.
+  default_transport: syslog
+  template: scenarios/web-filter.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+- id: vpn
+  display_name: Vpn
+  description: Synthetic SFOS 19.5 vpn event. See source field reference.
+  default_transport: syslog
+  template: scenarios/vpn.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+- id: authentication
+  display_name: Authentication
+  description: Synthetic SFOS 19.5 authentication event. See source field reference.
+  default_transport: syslog
+  template: scenarios/authentication.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+supported_transports:
+- syslog
+- http_webhook
+- azure_logs_ingestion
+formats:
+- native
+field_references:
+- https://docs.sophos.com/nsg/sophos-firewall/19.5/PDF/SF-syslog-guide-19.5.pdf
+schema_version: SFOS 19.5
+compatibility: Representative synthetic wire format; live vendor parser validation
+  required

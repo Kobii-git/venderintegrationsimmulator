@@ -1,0 +1,72 @@
+id: microsoft-365
+display_name: Microsoft 365
+version: 1.0.0
+supported_modes:
+- push_webhook
+supported_auth_methods:
+- none
+- basic
+- bearer
+- api_key_header
+scenarios:
+- id: exchange-audit
+  display_name: Exchange Audit
+  description: Synthetic Management Activity API common schema exchange-audit event.
+    See source field reference.
+  default_transport: http_webhook
+  template: scenarios/exchange-audit.json
+  config_schema: &id001
+    type: object
+    additionalProperties: false
+    properties:
+      hostname:
+        type: string
+        default: sim-device-01
+      device_ip:
+        type: string
+        default: 192.0.2.10
+      src:
+        type: string
+        default: 198.51.100.20
+      dst:
+        type: string
+        default: 203.0.113.10
+      user:
+        type: string
+        default: labuser
+      spt:
+        type: integer
+        default: 49152
+      dpt:
+        type: integer
+        default: 443
+  supported_modes:
+  - push_webhook
+- id: sharepoint-audit
+  display_name: Sharepoint Audit
+  description: Synthetic Management Activity API common schema sharepoint-audit event.
+    See source field reference.
+  default_transport: http_webhook
+  template: scenarios/sharepoint-audit.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+- id: teams-audit
+  display_name: Teams Audit
+  description: Synthetic Management Activity API common schema teams-audit event.
+    See source field reference.
+  default_transport: http_webhook
+  template: scenarios/teams-audit.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+supported_transports:
+- syslog
+- http_webhook
+- azure_logs_ingestion
+formats:
+- json
+field_references:
+- https://learn.microsoft.com/en-us/office/office-365-management-api/office-365-management-activity-api-schema
+schema_version: Management Activity API common schema
+compatibility: Synthetic ingestion; native service connector not reproduced

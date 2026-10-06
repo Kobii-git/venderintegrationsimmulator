@@ -1,0 +1,32 @@
+id: demo-http
+display_name: Demo HTTP Product
+version: "1.0.0"
+description: >
+  Internal demonstration product used to verify the product module framework.
+  Not intended for production use.
+
+supported_modes:
+  - push_webhook
+
+supported_transports:
+  - http_webhook
+
+supported_auth_methods:
+  - none
+
+plugin: true
+
+scenarios:
+  - id: ping
+    display_name: Ping Event
+    description: A trivial JSON ping payload for framework verification
+    default_transport: http_webhook
+    template: scenarios/ping.json
+    config_schema:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Message included in the ping payload
+          default: hello
+      additionalProperties: false

@@ -1,0 +1,1 @@
+device_name="sim-device-01" log_type="Event" log_component="Authentication" user_name="labuser" src_ip=198.51.100.20 status="Success"

@@ -1,0 +1,1 @@
+%SYS-5-CONFIG_I: Configured from console by labuser on vty0 (198.51.100.20)

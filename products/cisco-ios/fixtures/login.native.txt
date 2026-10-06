@@ -1,0 +1,1 @@
+%SEC_LOGIN-5-LOGIN_SUCCESS: Login Success [user: labuser] [Source: 198.51.100.20] [localport: 22]

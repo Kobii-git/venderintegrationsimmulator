@@ -1,0 +1,14 @@
+{
+  "Timestamp": "2026-10-04T12:00:00+00:00",
+  "Identity": "labuser",
+  "InternalIp": "198.51.100.20",
+  "ExternalIp": "192.0.2.10",
+  "Action": "Blocked",
+  "QueryType": "A",
+  "ResponseCode": "NOERROR",
+  "Domain": "example.test",
+  "Categories": [
+    "Malware"
+  ],
+  "LogType": "firewall"
+}

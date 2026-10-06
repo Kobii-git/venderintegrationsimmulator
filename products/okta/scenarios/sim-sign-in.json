@@ -1,0 +1,54 @@
+{
+  "content_type": "application/json",
+  "body": {
+    "_source_event": {
+      "vendor": "Okta",
+      "product": "System Log",
+      "version": "System Log API v1",
+      "family": "sign-in",
+      "name": "Sign In",
+      "signature": "1000",
+      "severity": 5,
+      "default_format": "json",
+      "time": "{{ generated_at_iso }}",
+      "hostname": "{{ hostname }}",
+      "device_ip": "{{ device_ip }}",
+      "src": "{{ src }}",
+      "dst": "{{ dst }}",
+      "user": "{{ user }}",
+      "spt": "{{ spt }}",
+      "dpt": "{{ dpt }}",
+      "action": "allowed"
+    },
+    "record": {
+      "uuid": "{{ correlation_id }}",
+      "published": "{{ generated_at_iso }}",
+      "eventType": "user.session.start",
+      "version": "0",
+      "severity": "INFO",
+      "displayMessage": "sign-in",
+      "actor": {
+        "id": "00uLab",
+        "type": "User",
+        "alternateId": "{{ user }}@example.test",
+        "displayName": "{{ user }}"
+      },
+      "client": {
+        "ipAddress": "{{ src }}",
+        "userAgent": {
+          "rawUserAgent": "Lab Simulator"
+        }
+      },
+      "outcome": {
+        "result": "SUCCESS"
+      },
+      "target": [
+        {
+          "id": "0oaLab",
+          "type": "AppInstance",
+          "displayName": "Lab Application"
+        }
+      ]
+    }
+  }
+}

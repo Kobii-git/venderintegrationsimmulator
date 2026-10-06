@@ -1,0 +1,9 @@
+{
+  "content_type": "text/plain",
+  "method": "POST",
+  "body": "date={{ fortigate_date }} time={{ fortigate_time }} devname=\"{{ devname }}\" devid=\"{{ devid }}\" logid=\"0101037127\" type=\"event\" subtype=\"vpn\" level=\"{{ level }}\" vd=\"{{ vd }}\" eventtime={{ eventtime }} logdesc=\"Progress IPsec phase 1\" msg=\"progress IPsec phase 1\" action=\"{{ action }}\" remip={{ remip }} locip={{ locip }} remport=500 locport=500 outintf=\"{{ outintf }}\" user=\"N/A\" group=\"N/A\" xauthuser=\"N/A\" xauthgroup=\"N/A\" assignip=N/A vpntunnel=\"{{ vpntunnel }}\" status=\"{{ status }}\" init=\"local\" mode=\"main\" dir=\"outbound\" stage=1 role=\"initiator\" result=\"OK\"",
+  "diagnostic_fields": {
+    "simulator_product": "{{ product_id }}",
+    "simulator_scenario": "{{ scenario_id }}"
+  }
+}

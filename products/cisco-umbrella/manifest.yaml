@@ -1,0 +1,70 @@
+id: cisco-umbrella
+display_name: Cisco Umbrella
+version: 1.0.0
+supported_modes:
+- push_webhook
+supported_auth_methods:
+- none
+- basic
+- bearer
+- api_key_header
+scenarios:
+- id: dns
+  display_name: Dns
+  description: Synthetic Umbrella S3 log schema dns event. See source field reference.
+  default_transport: syslog
+  template: scenarios/dns.json
+  config_schema: &id001
+    type: object
+    additionalProperties: false
+    properties:
+      hostname:
+        type: string
+        default: sim-device-01
+      device_ip:
+        type: string
+        default: 192.0.2.10
+      src:
+        type: string
+        default: 198.51.100.20
+      dst:
+        type: string
+        default: 203.0.113.10
+      user:
+        type: string
+        default: labuser
+      spt:
+        type: integer
+        default: 49152
+      dpt:
+        type: integer
+        default: 443
+  supported_modes:
+  - push_webhook
+- id: proxy
+  display_name: Proxy
+  description: Synthetic Umbrella S3 log schema proxy event. See source field reference.
+  default_transport: syslog
+  template: scenarios/proxy.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+- id: firewall
+  display_name: Firewall
+  description: Synthetic Umbrella S3 log schema firewall event. See source field reference.
+  default_transport: syslog
+  template: scenarios/firewall.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+supported_transports:
+- syslog
+- http_webhook
+- azure_logs_ingestion
+formats:
+- csv
+- json
+field_references:
+- https://docs.umbrella.com/deployment-umbrella/docs/log-formats-and-versioning
+schema_version: Umbrella S3 log schema
+compatibility: Synthetic ingestion; native service connector not reproduced

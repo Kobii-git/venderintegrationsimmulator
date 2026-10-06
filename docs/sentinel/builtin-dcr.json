@@ -1,0 +1,172 @@
+{
+  "location": "<workspace-region>",
+  "kind": "Direct",
+  "properties": {
+    "streamDeclarations": {
+      "Custom-SimulatorSecurityEvent": {
+        "columns": [
+          {
+            "name": "TimeGenerated",
+            "type": "datetime"
+          },
+          {
+            "name": "Computer",
+            "type": "string"
+          },
+          {
+            "name": "EventID",
+            "type": "int"
+          },
+          {
+            "name": "Activity",
+            "type": "string"
+          },
+          {
+            "name": "EventData",
+            "type": "string"
+          },
+          {
+            "name": "Account",
+            "type": "string"
+          },
+          {
+            "name": "IpAddress",
+            "type": "string"
+          },
+          {
+            "name": "LogonType",
+            "type": "int"
+          }
+        ]
+      },
+      "Custom-SimulatorWindowsEvent": {
+        "columns": [
+          {
+            "name": "TimeGenerated",
+            "type": "datetime"
+          },
+          {
+            "name": "Computer",
+            "type": "string"
+          },
+          {
+            "name": "EventID",
+            "type": "int"
+          },
+          {
+            "name": "EventData",
+            "type": "dynamic"
+          },
+          {
+            "name": "Channel",
+            "type": "string"
+          },
+          {
+            "name": "Provider",
+            "type": "string"
+          }
+        ]
+      },
+      "Custom-SimulatorCommonSecurityLog": {
+        "columns": [
+          {
+            "name": "TimeGenerated",
+            "type": "datetime"
+          },
+          {
+            "name": "DeviceVendor",
+            "type": "string"
+          },
+          {
+            "name": "DeviceProduct",
+            "type": "string"
+          },
+          {
+            "name": "DeviceVersion",
+            "type": "string"
+          },
+          {
+            "name": "DeviceEventClassID",
+            "type": "string"
+          },
+          {
+            "name": "Activity",
+            "type": "string"
+          },
+          {
+            "name": "LogSeverity",
+            "type": "string"
+          },
+          {
+            "name": "SourceIP",
+            "type": "string"
+          },
+          {
+            "name": "DestinationIP",
+            "type": "string"
+          },
+          {
+            "name": "SourcePort",
+            "type": "int"
+          },
+          {
+            "name": "DestinationPort",
+            "type": "int"
+          },
+          {
+            "name": "DeviceAction",
+            "type": "string"
+          },
+          {
+            "name": "DeviceAddress",
+            "type": "string"
+          },
+          {
+            "name": "SourceUserName",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    "destinations": {
+      "logAnalytics": [
+        {
+          "workspaceResourceId": "/subscriptions/<subscription>/resourceGroups/<group>/providers/Microsoft.OperationalInsights/workspaces/<workspace>",
+          "name": "sentinelWorkspace"
+        }
+      ]
+    },
+    "dataFlows": [
+      {
+        "streams": [
+          "Custom-SimulatorSecurityEvent"
+        ],
+        "destinations": [
+          "sentinelWorkspace"
+        ],
+        "transformKql": "source",
+        "outputStream": "Microsoft-SecurityEvent"
+      },
+      {
+        "streams": [
+          "Custom-SimulatorWindowsEvent"
+        ],
+        "destinations": [
+          "sentinelWorkspace"
+        ],
+        "transformKql": "source",
+        "outputStream": "Microsoft-WindowsEvent"
+      },
+      {
+        "streams": [
+          "Custom-SimulatorCommonSecurityLog"
+        ],
+        "destinations": [
+          "sentinelWorkspace"
+        ],
+        "transformKql": "source",
+        "outputStream": "Microsoft-CommonSecurityLog"
+      }
+    ]
+  }
+}

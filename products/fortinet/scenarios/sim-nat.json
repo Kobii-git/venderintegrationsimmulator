@@ -1,0 +1,34 @@
+{
+  "content_type": "application/json",
+  "body": {
+    "_source_event": {
+      "vendor": "Fortinet",
+      "product": "FortiGate",
+      "version": "FortiOS 7.4",
+      "family": "nat",
+      "name": "Nat",
+      "signature": "1000",
+      "severity": 5,
+      "default_format": "native",
+      "time": "{{ generated_at_iso }}",
+      "hostname": "{{ hostname }}",
+      "device_ip": "{{ device_ip }}",
+      "src": "{{ src }}",
+      "dst": "{{ dst }}",
+      "user": "{{ user }}",
+      "spt": "{{ spt }}",
+      "dpt": "{{ dpt }}",
+      "action": "allowed"
+    },
+    "record": {
+      "TimeGenerated": "{{ generated_at_iso }}",
+      "Computer": "{{ hostname }}",
+      "SourceIP": "{{ src }}",
+      "DestinationIP": "{{ dst }}",
+      "UserName": "{{ user }}",
+      "EventFamily": "nat",
+      "CorrelationId": "{{ correlation_id }}"
+    },
+    "native": "date={{ generated_at_iso[:10] }} time=12:00:00 devname=\"{{ hostname }}\" devid=\"FGTSIM00000001\" logid=\"0000000013\" type=\"traffic\" subtype=\"forward\" level=\"notice\" srcip={{ src }} dstip={{ dst }} srcport={{ spt }} dstport={{ dpt }} action=\"accept\" trandisp=\"snat\" transip={{ device_ip }} transport=60000"
+  }
+}

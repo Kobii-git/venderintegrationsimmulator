@@ -1,0 +1,453 @@
+id: fortinet
+display_name: Fortinet FortiGate
+version: 1.0.0
+description: 'FortiGate syslog simulation using documented key-value log formats.
+  Delivers realistic traffic, event, and UTM messages via the generic syslog transport.
+
+  '
+supported_modes:
+- push_webhook
+supported_transports:
+- syslog
+- http_webhook
+- azure_logs_ingestion
+supported_auth_methods:
+- none
+- basic
+- bearer
+- api_key_header
+plugin: true
+diagnostic_merge: nested
+scenarios:
+- id: forward-traffic-allow
+  display_name: Forward Traffic Allow
+  description: 'Forwarded session traffic with action close/accept semantics. Based
+    on FortiOS sample logid 0000000013 (forward traffic).
+
+    '
+  default_transport: syslog
+  template: scenarios/forward-traffic-allow.json
+  config_schema:
+    type: object
+    properties:
+      devname:
+        type: string
+        default: FGT-SIM-01
+      devid:
+        type: string
+        default: FGT60FTK21000000
+      vd:
+        type: string
+        default: root
+      level:
+        type: string
+        default: notice
+      srcip:
+        type: string
+        default: 10.1.100.11
+      dstip:
+        type: string
+        default: 23.59.154.35
+      srcport:
+        type: integer
+        default: 58012
+      dstport:
+        type: integer
+        default: 443
+      srcintf:
+        type: string
+        default: port12
+      dstintf:
+        type: string
+        default: port11
+      proto:
+        type: integer
+        default: 6
+      service:
+        type: string
+        default: HTTPS
+      action:
+        type: string
+        default: close
+      policyid:
+        type: integer
+        default: 1
+    additionalProperties: false
+- id: forward-traffic-deny
+  display_name: Forward Traffic Deny
+  description: 'Forwarded traffic denied by firewall policy. Uses documented traffic
+    fields with action=deny (see vendor field reference).
+
+    '
+  default_transport: syslog
+  template: scenarios/forward-traffic-deny.json
+  config_schema:
+    type: object
+    properties:
+      devname:
+        type: string
+        default: FGT-SIM-01
+      devid:
+        type: string
+        default: FGT60FTK21000000
+      vd:
+        type: string
+        default: root
+      level:
+        type: string
+        default: warning
+      srcip:
+        type: string
+        default: 10.1.100.50
+      dstip:
+        type: string
+        default: 198.51.100.10
+      srcport:
+        type: integer
+        default: 49152
+      dstport:
+        type: integer
+        default: 22
+      srcintf:
+        type: string
+        default: port12
+      dstintf:
+        type: string
+        default: port11
+      proto:
+        type: integer
+        default: 6
+      service:
+        type: string
+        default: SSH
+      action:
+        type: string
+        default: deny
+      policyid:
+        type: integer
+        default: 2
+    additionalProperties: false
+- id: local-traffic
+  display_name: Local Traffic
+  description: 'Traffic to or from the FortiGate itself (subtype=local). Based on
+    FortiOS sample logid 0001000014.
+
+    '
+  default_transport: syslog
+  template: scenarios/local-traffic.json
+  config_schema:
+    type: object
+    properties:
+      devname:
+        type: string
+        default: FGT-SIM-01
+      devid:
+        type: string
+        default: FGT60FTK21000000
+      vd:
+        type: string
+        default: root
+      level:
+        type: string
+        default: notice
+      srcip:
+        type: string
+        default: 172.16.200.254
+      dstip:
+        type: string
+        default: 172.16.200.2
+      srcport:
+        type: integer
+        default: 62024
+      dstport:
+        type: integer
+        default: 443
+      srcintf:
+        type: string
+        default: port11
+      dstintf:
+        type: string
+        default: vdom1
+      proto:
+        type: integer
+        default: 6
+      service:
+        type: string
+        default: HTTPS
+      action:
+        type: string
+        default: server-rst
+      policyid:
+        type: integer
+        default: 0
+    additionalProperties: false
+- id: vpn-event
+  display_name: VPN Event
+  description: 'IPsec VPN negotiation event (type=event, subtype=vpn). Based on FortiOS
+    sample logid 0101037127.
+
+    '
+  default_transport: syslog
+  template: scenarios/vpn-event.json
+  config_schema:
+    type: object
+    properties:
+      devname:
+        type: string
+        default: FGT-SIM-01
+      devid:
+        type: string
+        default: FGT60FTK21000000
+      vd:
+        type: string
+        default: root
+      level:
+        type: string
+        default: notice
+      remip:
+        type: string
+        default: 50.1.1.101
+      locip:
+        type: string
+        default: 50.1.1.100
+      outintf:
+        type: string
+        default: port14
+      vpntunnel:
+        type: string
+        default: site-to-site-vpn
+      action:
+        type: string
+        default: negotiate
+      status:
+        type: string
+        default: success
+    additionalProperties: false
+- id: user-auth-event
+  display_name: User Authentication Event
+  description: 'User authentication success/failure (type=event, subtype=user). Based
+    on FortiOS sample logid 0102043008.
+
+    '
+  default_transport: syslog
+  template: scenarios/user-auth-event.json
+  config_schema:
+    type: object
+    properties:
+      devname:
+        type: string
+        default: FGT-SIM-01
+      devid:
+        type: string
+        default: FGT60FTK21000000
+      vd:
+        type: string
+        default: root
+      level:
+        type: string
+        default: notice
+      srcip:
+        type: string
+        default: 10.1.100.11
+      dstip:
+        type: string
+        default: 172.16.200.55
+      interface:
+        type: string
+        default: port10
+      user:
+        type: string
+        default: bob
+      group:
+        type: string
+        default: local-group1
+      authproto:
+        type: string
+        default: TELNET(10.1.100.11)
+      action:
+        type: string
+        default: authentication
+      status:
+        type: string
+        default: success
+      policyid:
+        type: integer
+        default: 1
+    additionalProperties: false
+- id: system-event
+  display_name: System Event
+  description: 'Administrative or system event (type=event, subtype=system). Based
+    on FortiOS sample logid 0100032001.
+
+    '
+  default_transport: syslog
+  template: scenarios/system-event.json
+  config_schema:
+    type: object
+    properties:
+      devname:
+        type: string
+        default: FGT-SIM-01
+      devid:
+        type: string
+        default: FGT60FTK21000000
+      vd:
+        type: string
+        default: root
+      level:
+        type: string
+        default: information
+      user:
+        type: string
+        default: admin
+      srcip:
+        type: string
+        default: 172.16.200.254
+      dstip:
+        type: string
+        default: 172.16.200.2
+      method:
+        type: string
+        default: ssh
+      action:
+        type: string
+        default: login
+      status:
+        type: string
+        default: success
+      logdesc:
+        type: string
+        default: Admin login successful
+    additionalProperties: false
+- id: threat-virus
+  display_name: Threat / Virus Event
+  description: 'UTM antivirus detection (type=utm, subtype=virus). Based on FortiOS
+    sample logid 0211008192.
+
+    '
+  default_transport: syslog
+  template: scenarios/threat-virus.json
+  config_schema:
+    type: object
+    properties:
+      devname:
+        type: string
+        default: FGT-SIM-01
+      devid:
+        type: string
+        default: FGT60FTK21000000
+      vd:
+        type: string
+        default: root
+      level:
+        type: string
+        default: warning
+      srcip:
+        type: string
+        default: 10.1.100.11
+      dstip:
+        type: string
+        default: 172.16.200.55
+      srcport:
+        type: integer
+        default: 60446
+      dstport:
+        type: integer
+        default: 80
+      srcintf:
+        type: string
+        default: port12
+      dstintf:
+        type: string
+        default: port11
+      proto:
+        type: integer
+        default: 6
+      service:
+        type: string
+        default: HTTP
+      action:
+        type: string
+        default: blocked
+      policyid:
+        type: integer
+        default: 4
+      virus:
+        type: string
+        default: EICAR_TEST_FILE
+      filename:
+        type: string
+        default: eicar.com
+    additionalProperties: false
+- id: sim-nat
+  display_name: Nat
+  description: Synthetic FortiOS 7.4 nat event. See source field reference.
+  default_transport: syslog
+  template: scenarios/sim-nat.json
+  config_schema: &id001
+    type: object
+    additionalProperties: false
+    properties:
+      hostname:
+        type: string
+        default: sim-device-01
+      device_ip:
+        type: string
+        default: 192.0.2.10
+      src:
+        type: string
+        default: 198.51.100.20
+      dst:
+        type: string
+        default: 203.0.113.10
+      user:
+        type: string
+        default: labuser
+      spt:
+        type: integer
+        default: 49152
+      dpt:
+        type: integer
+        default: 443
+  supported_modes:
+  - push_webhook
+- id: sim-vpn
+  display_name: Vpn
+  description: Synthetic FortiOS 7.4 vpn event. See source field reference.
+  default_transport: syslog
+  template: scenarios/sim-vpn.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+- id: sim-authentication
+  display_name: Authentication
+  description: Synthetic FortiOS 7.4 authentication event. See source field reference.
+  default_transport: syslog
+  template: scenarios/sim-authentication.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+- id: sim-ips
+  display_name: Ips
+  description: Synthetic FortiOS 7.4 ips event. See source field reference.
+  default_transport: syslog
+  template: scenarios/sim-ips.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+- id: sim-malware
+  display_name: Malware
+  description: Synthetic FortiOS 7.4 malware event. See source field reference.
+  default_transport: syslog
+  template: scenarios/sim-malware.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+formats:
+- native
+- cef
+field_references:
+- https://docs.fortinet.com/document/fortigate/7.4.0/fortios-log-message-reference
+schema_version: FortiOS 7.4
+compatibility: Representative synthetic wire format; live vendor parser validation
+  required

@@ -1,0 +1,17 @@
+{
+  "TimeGenerated": "2026-10-04T12:00:00+00:00",
+  "Id": "11111111-2222-4333-8444-555555555555",
+  "Action": "Create",
+  "SourceSystem": {
+    "displayName": "Entra ID"
+  },
+  "TargetSystem": {
+    "displayName": "Lab SCIM application"
+  },
+  "StatusInfo": {
+    "status": "success"
+  },
+  "SourceIdentity": {
+    "displayName": "labuser"
+  }
+}

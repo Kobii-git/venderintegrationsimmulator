@@ -1,0 +1,34 @@
+{
+  "content_type": "application/json",
+  "body": {
+    "_source_event": {
+      "vendor": "Cisco",
+      "product": "IOS XE",
+      "version": "IOS XE 17",
+      "family": "acl-deny",
+      "name": "Acl Deny",
+      "signature": "1001",
+      "severity": 5,
+      "default_format": "native",
+      "time": "{{ generated_at_iso }}",
+      "hostname": "{{ hostname }}",
+      "device_ip": "{{ device_ip }}",
+      "src": "{{ src }}",
+      "dst": "{{ dst }}",
+      "user": "{{ user }}",
+      "spt": "{{ spt }}",
+      "dpt": "{{ dpt }}",
+      "action": "blocked"
+    },
+    "record": {
+      "TimeGenerated": "{{ generated_at_iso }}",
+      "Computer": "{{ hostname }}",
+      "SourceIP": "{{ src }}",
+      "DestinationIP": "{{ dst }}",
+      "UserName": "{{ user }}",
+      "EventFamily": "acl-deny",
+      "CorrelationId": "{{ correlation_id }}"
+    },
+    "native": "%SEC-6-IPACCESSLOGP: list LAB denied tcp {{ src }}({{ spt }}) -> {{ dst }}({{ dpt }}), 1 packet"
+  }
+}

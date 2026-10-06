@@ -1,0 +1,89 @@
+id: juniper-srx
+display_name: Juniper SRX
+version: 1.0.0
+supported_modes:
+- push_webhook
+supported_auth_methods:
+- none
+- basic
+- bearer
+- api_key_header
+scenarios:
+- id: session-create
+  display_name: Session Create
+  description: Synthetic Junos 23 structured syslog session-create event. See source
+    field reference.
+  default_transport: syslog
+  template: scenarios/session-create.json
+  config_schema: &id001
+    type: object
+    additionalProperties: false
+    properties:
+      hostname:
+        type: string
+        default: sim-device-01
+      device_ip:
+        type: string
+        default: 192.0.2.10
+      src:
+        type: string
+        default: 198.51.100.20
+      dst:
+        type: string
+        default: 203.0.113.10
+      user:
+        type: string
+        default: labuser
+      spt:
+        type: integer
+        default: 49152
+      dpt:
+        type: integer
+        default: 443
+  supported_modes:
+  - push_webhook
+- id: session-close
+  display_name: Session Close
+  description: Synthetic Junos 23 structured syslog session-close event. See source
+    field reference.
+  default_transport: syslog
+  template: scenarios/session-close.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+- id: deny
+  display_name: Deny
+  description: Synthetic Junos 23 structured syslog deny event. See source field reference.
+  default_transport: syslog
+  template: scenarios/deny.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+- id: vpn
+  display_name: Vpn
+  description: Synthetic Junos 23 structured syslog vpn event. See source field reference.
+  default_transport: syslog
+  template: scenarios/vpn.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+- id: system
+  display_name: System
+  description: Synthetic Junos 23 structured syslog system event. See source field
+    reference.
+  default_transport: syslog
+  template: scenarios/system.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+supported_transports:
+- syslog
+- http_webhook
+- azure_logs_ingestion
+formats:
+- native
+field_references:
+- https://www.juniper.net/documentation/us/en/software/junos/security-services/topics/topic-map/security-system-logging.html
+schema_version: Junos 23 structured syslog
+compatibility: Representative synthetic wire format; live vendor parser validation
+  required

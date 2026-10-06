@@ -1,0 +1,78 @@
+id: cisco-ftd
+display_name: Cisco FTD
+version: 1.0.0
+supported_modes:
+- push_webhook
+supported_auth_methods:
+- none
+- basic
+- bearer
+- api_key_header
+scenarios:
+- id: connection
+  display_name: Connection
+  description: Synthetic Secure Firewall 7.4 connection event. See source field reference.
+  default_transport: syslog
+  template: scenarios/connection.json
+  config_schema: &id001
+    type: object
+    additionalProperties: false
+    properties:
+      hostname:
+        type: string
+        default: sim-device-01
+      device_ip:
+        type: string
+        default: 192.0.2.10
+      src:
+        type: string
+        default: 198.51.100.20
+      dst:
+        type: string
+        default: 203.0.113.10
+      user:
+        type: string
+        default: labuser
+      spt:
+        type: integer
+        default: 49152
+      dpt:
+        type: integer
+        default: 443
+  supported_modes:
+  - push_webhook
+- id: intrusion
+  display_name: Intrusion
+  description: Synthetic Secure Firewall 7.4 intrusion event. See source field reference.
+  default_transport: syslog
+  template: scenarios/intrusion.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+- id: malware
+  display_name: Malware
+  description: Synthetic Secure Firewall 7.4 malware event. See source field reference.
+  default_transport: syslog
+  template: scenarios/malware.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+- id: vpn
+  display_name: Vpn
+  description: Synthetic Secure Firewall 7.4 vpn event. See source field reference.
+  default_transport: syslog
+  template: scenarios/vpn.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+supported_transports:
+- syslog
+- http_webhook
+- azure_logs_ingestion
+formats:
+- native
+field_references:
+- https://www.cisco.com/c/en/us/td/docs/security/firepower/Syslogs/fptd_syslog_guide/security-event-syslog-messages.html
+schema_version: Secure Firewall 7.4
+compatibility: Representative synthetic wire format; live vendor parser validation
+  required

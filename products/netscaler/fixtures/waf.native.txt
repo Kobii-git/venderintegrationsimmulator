@@ -1,0 +1,1 @@
+sim-device-01 0-PPE-0 : default APPFW APPFW_POLICY_ACTION 1234 0 : 198.51.100.20 1234-PPE0 - lab_policy http://example.test/lab BLOCK

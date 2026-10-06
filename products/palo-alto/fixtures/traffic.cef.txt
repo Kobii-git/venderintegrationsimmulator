@@ -1,0 +1,1 @@
+CEF:0|Palo Alto Networks|PAN-OS|PAN-OS 11.1|TRAFFIC|Traffic|5|src=198.51.100.20 dst=203.0.113.10 spt=49152 dpt=443 proto=TCP act=allowed suser=labuser dvchost=sim-device-01 dvc=192.0.2.10 msg=Traffic cs1=LabPolicy cs1Label=Rule cs2=vsys1 cs2Label=Virtual System cs3=ssl cs3Label=Application cn1=1234 cn1Label=Session ID

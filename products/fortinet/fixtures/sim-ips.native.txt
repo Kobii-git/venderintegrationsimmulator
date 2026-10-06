@@ -1,0 +1,1 @@
+devname="sim-device-01" logid="0419016384" type="utm" subtype="ips" eventtype="signature" srcip=198.51.100.20 dstip=203.0.113.10 attack="Lab signature" action="dropped"

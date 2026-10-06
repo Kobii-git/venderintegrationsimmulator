@@ -1,0 +1,80 @@
+id: zscaler
+display_name: Zscaler ZIA NSS
+version: 1.0.0
+supported_modes:
+- push_webhook
+supported_auth_methods:
+- none
+- basic
+- bearer
+- api_key_header
+scenarios:
+- id: web
+  display_name: Web
+  description: Synthetic NSS feed schema web event. See source field reference.
+  default_transport: syslog
+  template: scenarios/web.json
+  config_schema: &id001
+    type: object
+    additionalProperties: false
+    properties:
+      hostname:
+        type: string
+        default: sim-device-01
+      device_ip:
+        type: string
+        default: 192.0.2.10
+      src:
+        type: string
+        default: 198.51.100.20
+      dst:
+        type: string
+        default: 203.0.113.10
+      user:
+        type: string
+        default: labuser
+      spt:
+        type: integer
+        default: 49152
+      dpt:
+        type: integer
+        default: 443
+  supported_modes:
+  - push_webhook
+- id: firewall
+  display_name: Firewall
+  description: Synthetic NSS feed schema firewall event. See source field reference.
+  default_transport: syslog
+  template: scenarios/firewall.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+- id: dns
+  display_name: Dns
+  description: Synthetic NSS feed schema dns event. See source field reference.
+  default_transport: syslog
+  template: scenarios/dns.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+- id: administrator-audit
+  display_name: Administrator Audit
+  description: Synthetic NSS feed schema administrator-audit event. See source field
+    reference.
+  default_transport: syslog
+  template: scenarios/administrator-audit.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+supported_transports:
+- syslog
+- http_webhook
+- azure_logs_ingestion
+formats:
+- cef
+- csv
+field_references:
+- https://help.zscaler.com/zia/nss-feed-output-format
+schema_version: NSS feed schema
+compatibility: Representative synthetic wire format; live vendor parser validation
+  required

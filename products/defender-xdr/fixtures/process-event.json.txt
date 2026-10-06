@@ -1,0 +1,12 @@
+{
+  "Timestamp": "2026-10-04T12:00:00+00:00",
+  "DeviceId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "DeviceName": "sim-device-01",
+  "ReportId": 1,
+  "ActionType": "ProcessCreated",
+  "FileName": "cmd.exe",
+  "FolderPath": "C:\\Windows\\System32",
+  "ProcessCommandLine": "cmd.exe /c whoami",
+  "AccountName": "labuser",
+  "ProcessId": 1234
+}

@@ -1,0 +1,13 @@
+services:
+  integration-simulator:
+    depends_on:
+      receiver:
+        condition: service_started
+    environment:
+      SECRET_KEY: blackbox-stable-test-key
+      ENABLE_OPENAPI_DOCS: "true"
+  receiver:
+    build:
+      context: ./tests/blackbox
+    ports:
+      - "127.0.0.1:19000:9000"

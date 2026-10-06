@@ -1,0 +1,14 @@
+{
+  "id": "11111111-2222-4333-8444-555555555555",
+  "created_at": "2026-10-04T12:00:00+00:00",
+  "when": "2026-10-04T12:00:00+00:00",
+  "type": "Event::Endpoint::Network::Blocked",
+  "name": "ips",
+  "severity": "high",
+  "source": "198.51.100.20",
+  "location": "sim-device-01",
+  "endpoint_id": "11111111-2222-4333-8444-555555555555",
+  "endpoint_type": "computer",
+  "group": "Lab",
+  "user_id": "labuser"
+}

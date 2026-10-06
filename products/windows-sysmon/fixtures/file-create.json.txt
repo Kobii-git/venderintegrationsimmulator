@@ -1,0 +1,18 @@
+{
+  "TimeGenerated": "2026-10-04T12:00:00+00:00",
+  "Computer": "sim-device-01",
+  "EventID": 11,
+  "EventRecordId": "1",
+  "Channel": "Microsoft-Windows-Sysmon/Operational",
+  "Provider": "Microsoft-Windows-Sysmon",
+  "EventData": {
+    "RuleName": "-",
+    "UtcTime": "2026-10-04T12:00:00+00:00",
+    "ProcessGuid": "11111111-2222-4333-8444-555555555555",
+    "ProcessId": 1234,
+    "Image": "C:\\Windows\\System32\\cmd.exe",
+    "TargetFilename": "C:\\Lab\\sample.txt",
+    "CreationUtcTime": "2026-10-04T12:00:00+00:00",
+    "User": "labuser"
+  }
+}

@@ -1,0 +1,32 @@
+services:
+  integration-simulator:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    image: integration-simulator:0.4.0
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - integration-simulator-data:/data
+    environment:
+      APP_ENVIRONMENT: production
+      DATA_DIR: /data
+      DATABASE_URL: sqlite:////data/integration_simulator.db
+      PRODUCTS_DIR: /app/products
+      STATIC_DIR: /app/frontend/dist
+      LOG_LEVEL: INFO
+      ENABLE_OPENAPI_DOCS: "false"
+      SCHEDULER_RESUME_ON_RESTART: ${SCHEDULER_RESUME_ON_RESTART:-false}
+      # Set SECRET_KEY in .env. If blank, a stable key is generated in the data volume.
+      SECRET_KEY: ${SECRET_KEY:-}
+    stop_grace_period: 30s
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8080/api/v1/ready"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+volumes:
+  integration-simulator-data:

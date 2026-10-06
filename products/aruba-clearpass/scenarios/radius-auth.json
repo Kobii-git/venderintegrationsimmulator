@@ -1,0 +1,41 @@
+{
+  "content_type": "application/json",
+  "body": {
+    "_source_event": {
+      "vendor": "Aruba Networks",
+      "product": "ClearPass",
+      "version": "ClearPass 6.11",
+      "family": "radius-auth",
+      "name": "Radius Auth",
+      "signature": "radius-auth",
+      "severity": 5,
+      "default_format": "native",
+      "time": "{{ generated_at_iso }}",
+      "hostname": "{{ hostname }}",
+      "device_ip": "{{ device_ip }}",
+      "src": "{{ src }}",
+      "dst": "{{ dst }}",
+      "user": "{{ user }}",
+      "spt": "{{ spt }}",
+      "dpt": "{{ dpt }}",
+      "action": "allowed",
+      "cef_extensions": {
+        "cs1": "Lab-RADIUS",
+        "cs1Label": "Service",
+        "cs2": "Allow-Access",
+        "cs2Label": "Enforcement Profile",
+        "outcome": "Success"
+      }
+    },
+    "record": {
+      "TimeGenerated": "{{ generated_at_iso }}",
+      "Computer": "{{ hostname }}",
+      "SourceIP": "{{ src }}",
+      "DestinationIP": "{{ dst }}",
+      "UserName": "{{ user }}",
+      "EventFamily": "radius-auth",
+      "CorrelationId": "{{ correlation_id }}"
+    },
+    "native": "CPPM_Logs: {{ generated_at_iso }} {{ hostname }} RADIUS: Request ID=1234 User-Name={{ user }} NAS-IP-Address={{ src }} Service=Lab-RADIUS Authentication-Status=Success Enforcement-Profile=Allow-Access"
+  }
+}

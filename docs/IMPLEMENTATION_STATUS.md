@@ -1,0 +1,41 @@
+# Implementation and verification, 4 October 2026
+
+Release 0.4.0 implements the four planned stages in source. The deployment and external compatibility gates below remain open; this is not a claim of certified vendor-parser or live Sentinel compatibility.
+
+## Delivered
+
+| Stage | Source implementation |
+|---|---|
+| Baseline repairs | Final retry outcomes, persisted acceptance semantics, header/framing validation, bounded TCP operations and cancellation cleanup, collector-specific pacing, readiness, compatible vendor auth gateway paths, patched development locks. |
+| Collectors and formats | Stable independent targets, encrypted credentials, primary-target legacy compatibility, simulated devices, filters, logical event generation once with per-target rendering, partial outcomes, shared CEF/XML/JSON/CSV and Syslog framing, wire previews. |
+| API, rates and replay | Azure OAuth/refresh/byte batches/204/throttling, default custom-table envelope and explicit built-in mappings, rate schedules/weights/user pools/incident presets, durable bounded workers with batched writes, upload/preview/delete and fixed/original/looping replay. |
+| Catalog and deployment | 30 source profiles, 120 synthetic family scenarios plus retained legacy scenarios, 168 fixtures, cited versions/references/compatibility labels, Log Lab editor, per-collector live statistics, Alembic 010, export 3.0 with old imports, non-root persistent container configuration and multiarch build/acceptance workflow. |
+
+The application retains UpGuard and demonstration products, existing vendor plugins, fault injection and the Okta/Sophos polling workflows. Genuine Windows AMA/WEF and native cloud/S3 connectors require the external environments described in the operator guide.
+
+## Verified locally
+
+- Fresh hashed backend installation passes `pip check` and contains one pytest-asyncio distribution (the original installation had duplicate metadata). The original virtual environment is retained as `backend/.venv.before-log-lab`.
+- Full backend suite: **271 tests passed**, including migrations, legacy credential canaries, retry outcomes, per-target partial delivery, upload parsing/replay, original timing, queue overflow/outage isolation and restart, OAuth refresh/throttling/batching, real UDP/TCP/TLS/HTTP captures, certificate rejection, slow writes and cancellation.
+- Backend Ruff lint/format and mypy checks passed. The full suite was rerun after final-response filters, migration path handling and connection-test cleanup changes.
+- Clean frontend installation: type checking, lint, **12 unit tests**, production build and **7 Chromium browser workflows** passed. Browser workflows cover the new multi-collector lab/replay editor and retained UpGuard, Fortinet, OAuth, Sophos and Okta behavior.
+- Production and development Python dependency audits and the complete npm audit found **zero known vulnerabilities** in the locked dependencies at verification time.
+- Catalog/fixture regeneration is idempotent. Fixtures are tested for stable representative output and structural checks; external vendor-specific parser acceptance is not implied.
+- Docker Compose configuration and build script syntax validated without a daemon.
+
+[One-minute local diagnostic](verification/macos-fanout-60s.json): 6,040 logical events; all four independent UDP, TCP, TLS and HTTP receivers captured 6,040 unique records each. No missing events, duplicates or parse errors. Measured rate 99.72 EPS over 60.568 seconds; management P95 198.57 ms; peak process RSS 131.17 MiB. The host was macOS ARM64, so this does **not** satisfy the planned 15-minute Linux acceptance gate.
+
+## Open verification gates
+
+1. Multiarch publication and pulled-image verification are performed by the `Verify simulator` workflow on `main`. On 6 October 2026, the local Linux ARM64 production image built successfully and passed standalone default startup, UI/API readiness and database/key persistence after container recreation. Both architecture results must be confirmed in the publication workflow.
+2. Run the 900-second benchmark on a documented Linux host with at least 2 vCPUs and 4 GiB RAM. The manual CI workflow runs a container constrained to those resources and saves receiver/memory/latency evidence.
+3. Run the [Sentinel smoke test](SENTINEL_SMOKE_TEST.md) against a configured workspace, DCR and credentials. Validate table arrival and parsed fields. API acceptance is distinct from this gate.
+4. Validate all advertised fixtures against the actual installed vendor/Sentinel parsers. Firmware-specific optional/trailing fields, cloud native connector schemas and configurable NSS layouts require environment-specific acceptance.
+
+## Recovery baseline
+
+The authoritative application repository is now https://github.com/Kobii-git/venderintegrationsimmulator.
+Version 0.4.0 source, deployment configuration and verification scripts are maintained on `main`.
+Future updates increment the application version and publish versioned and commit-tagged images.
+
+A private source archive was captured before implementation at `/private/tmp/vendor-simulator-before-implementation-20261004.tgz`. No application database was present in the initial workspace. Keep an operator-owned copy before upgrading a deployed instance: `/private/tmp` is temporary. Startup captures a preflight SQLite backup before schema/configuration upgrades; restore the database together with its encryption key for rollback. See [upgrade notes](UPGRADE_0.4.0.md).

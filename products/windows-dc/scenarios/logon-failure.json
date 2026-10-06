@@ -1,0 +1,43 @@
+{
+  "content_type": "application/json",
+  "body": {
+    "_source_event": {
+      "vendor": "Microsoft",
+      "product": "Windows Security",
+      "version": "Windows Server 2022 event schema",
+      "family": "logon-failure",
+      "name": "Logon Failure",
+      "signature": "4625",
+      "severity": 5,
+      "default_format": "xml",
+      "time": "{{ generated_at_iso }}",
+      "hostname": "{{ hostname }}",
+      "device_ip": "{{ device_ip }}",
+      "src": "{{ src }}",
+      "dst": "{{ dst }}",
+      "user": "{{ user }}",
+      "spt": "{{ spt }}",
+      "dpt": "{{ dpt }}",
+      "action": "blocked"
+    },
+    "record": {
+      "TimeGenerated": "{{ generated_at_iso }}",
+      "Computer": "{{ hostname }}",
+      "EventID": 4625,
+      "EventRecordId": "{{ event_sequence + 1 }}",
+      "Channel": "Security",
+      "Provider": "Microsoft-Windows-Security-Auditing",
+      "EventData": {
+        "TargetUserName": "{{ user }}",
+        "TargetDomainName": "LAB",
+        "LogonType": "3",
+        "IpAddress": "{{ src }}",
+        "IpPort": "{{ spt }}",
+        "Status": "0xC000006D",
+        "SubStatus": "0xC000006A",
+        "FailureReason": "%%2313",
+        "AuthenticationPackageName": "NTLM"
+      }
+    }
+  }
+}

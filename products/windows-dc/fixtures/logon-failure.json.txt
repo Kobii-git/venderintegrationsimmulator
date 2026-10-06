@@ -1,0 +1,19 @@
+{
+  "TimeGenerated": "2026-10-04T12:00:00+00:00",
+  "Computer": "sim-device-01",
+  "EventID": 4625,
+  "EventRecordId": "1",
+  "Channel": "Security",
+  "Provider": "Microsoft-Windows-Security-Auditing",
+  "EventData": {
+    "TargetUserName": "labuser",
+    "TargetDomainName": "LAB",
+    "LogonType": "3",
+    "IpAddress": "198.51.100.20",
+    "IpPort": "49152",
+    "Status": "0xC000006D",
+    "SubStatus": "0xC000006A",
+    "FailureReason": "%%2313",
+    "AuthenticationPackageName": "NTLM"
+  }
+}

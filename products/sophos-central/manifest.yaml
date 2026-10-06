@@ -1,0 +1,196 @@
+id: sophos-central
+display_name: Sophos Central
+version: 1.0.0
+description: Sophos Central authentication, discovery, and SIEM event polling simulation
+supported_modes:
+- pull_api
+- push_webhook
+supported_transports:
+- syslog
+- http_webhook
+- azure_logs_ingestion
+supported_auth_methods:
+- none
+- basic
+- bearer
+- api_key_header
+supported_inbound_auth_methods:
+- oauth2_client_credentials
+plugin: true
+inbound_options_schema:
+  type: object
+  properties:
+    tenant_id:
+      type: string
+      title: Tenant ID
+      description: UUID returned by Who-am-I and required in X-Tenant-ID
+      pattern: ^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$
+      default: 57ca9a6b-885f-4e36-95ec-290548c26059
+  required:
+  - tenant_id
+  additionalProperties: false
+scenarios:
+- id: core-malware-detection
+  display_name: Core Malware Detection
+  description: Endpoint core malware detection event
+  template: scenarios/core-malware-detection.json
+  supported_modes:
+  - pull_api
+  config_schema: &id001
+    type: object
+    properties:
+      hostname:
+        type: string
+        default: SOPHOS-ENDPOINT-01
+      username:
+        type: string
+        default: EXAMPLE\\analyst
+    additionalProperties: false
+- id: behavioral-detection
+  display_name: Behavioral Detection
+  description: Endpoint behavioral protection detection event
+  template: scenarios/behavioral-detection.json
+  supported_modes:
+  - pull_api
+  config_schema: *id001
+- id: pua-detection
+  display_name: PUA Detection
+  description: Potentially unwanted application detection event
+  template: scenarios/pua-detection.json
+  supported_modes:
+  - pull_api
+  config_schema: *id001
+- id: ips-inbound-detection
+  display_name: IPS Inbound Detection
+  description: Endpoint inbound intrusion prevention detection
+  template: scenarios/ips-inbound-detection.json
+  supported_modes:
+  - pull_api
+  config_schema: *id001
+- id: ips-outbound-detection
+  display_name: IPS Outbound Detection
+  description: Endpoint outbound intrusion prevention detection
+  template: scenarios/ips-outbound-detection.json
+  supported_modes:
+  - pull_api
+  config_schema: *id001
+- id: sim-malware
+  display_name: Malware
+  description: Synthetic SIEM API v1 malware event. See source field reference.
+  default_transport: http_webhook
+  template: scenarios/sim-malware.json
+  config_schema: &id002
+    type: object
+    additionalProperties: false
+    properties:
+      hostname:
+        type: string
+        default: sim-device-01
+      device_ip:
+        type: string
+        default: 192.0.2.10
+      src:
+        type: string
+        default: 198.51.100.20
+      dst:
+        type: string
+        default: 203.0.113.10
+      user:
+        type: string
+        default: labuser
+      spt:
+        type: integer
+        default: 49152
+      dpt:
+        type: integer
+        default: 443
+  supported_modes:
+  - push_webhook
+- id: sim-behavioral
+  display_name: Behavioral
+  description: Synthetic SIEM API v1 behavioral event. See source field reference.
+  default_transport: http_webhook
+  template: scenarios/sim-behavioral.json
+  config_schema: *id002
+  supported_modes:
+  - push_webhook
+- id: sim-pua
+  display_name: Pua
+  description: Synthetic SIEM API v1 pua event. See source field reference.
+  default_transport: http_webhook
+  template: scenarios/sim-pua.json
+  config_schema: *id002
+  supported_modes:
+  - push_webhook
+- id: sim-ips
+  display_name: Ips
+  description: Synthetic SIEM API v1 ips event. See source field reference.
+  default_transport: http_webhook
+  template: scenarios/sim-ips.json
+  config_schema: *id002
+  supported_modes:
+  - push_webhook
+mock_routes:
+- id: oauth-token
+  path: api/v2/oauth2/token
+  methods:
+  - POST
+  scenario_id: core-malware-detection
+  handler: oauth_token
+  required_oauth_scopes:
+  - token
+  response_type: single
+  supports_pagination: false
+  supports_time_filter: false
+  response_profile:
+    body_style: static
+    pagination_location: none
+- id: whoami
+  path: whoami/v1
+  methods:
+  - GET
+  scenario_id: core-malware-detection
+  handler: static
+  required_oauth_scopes:
+  - token
+  response_type: single
+  supports_pagination: false
+  supports_time_filter: false
+  response_profile:
+    body_style: static
+    pagination_location: none
+- id: siem-events
+  path: siem/v1/events
+  methods:
+  - GET
+  scenario_id: core-malware-detection
+  scenario_ids:
+  - core-malware-detection
+  - behavioral-detection
+  - pua-detection
+  - ips-inbound-detection
+  - ips-outbound-detection
+  handler: dataset_list
+  required_oauth_scopes:
+  - token
+  response_type: list
+  items_field: items
+  next_token_field: next_cursor
+  supports_pagination: true
+  supports_time_filter: true
+  response_profile:
+    body_style: envelope
+    cursor_request_param: cursor
+    cursor_response_field: next_cursor
+    limit_request_param: limit
+    since_request_param: from_date
+    minimum_limit: 200
+    default_limit: 200
+    maximum_limit: 1000
+    pagination_location: body
+formats:
+- json
+field_references:
+- https://developer.sophos.com/siem-api-schemas/
+schema_version: SIEM API v1
+compatibility: Synthetic ingestion; native service connector not reproduced

@@ -1,0 +1,17 @@
+{
+  "content_type": "application/json",
+  "method": "POST",
+  "body": {
+    "event": "ping",
+    "message": "{{ message }}",
+    "sent_at": "{{ generated_at_iso }}",
+    "event_id": "{{ correlation_id }}",
+    "random_value": "{{ random_int(1, 1000) }}"
+  },
+  "diagnostic_fields": {
+    "simulator_product": "{{ product_id }}",
+    "simulator_scenario": "{{ scenario_id }}",
+    "simulator_event_id": "{{ correlation_id }}"
+  },
+  "diagnostic_merge": "nested"
+}

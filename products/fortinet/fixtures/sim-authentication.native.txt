@@ -1,0 +1,1 @@
+devname="sim-device-01" logid="0102043008" type="event" subtype="user" action="authentication" user="labuser" srcip=198.51.100.20 status="success"

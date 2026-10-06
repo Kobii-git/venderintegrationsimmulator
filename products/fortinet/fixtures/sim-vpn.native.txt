@@ -1,0 +1,1 @@
+devname="sim-device-01" logid="0101037127" type="event" subtype="vpn" action="tunnel-up" remip=198.51.100.20 locip=192.0.2.10 vpntunnel="Lab-IPSec" status="success"

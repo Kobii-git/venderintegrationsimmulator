@@ -1,0 +1,23 @@
+{
+  "id": "11111111-2222-4333-8444-555555555555",
+  "createdAt": "2026-10-04T12:00:00+00:00",
+  "activityType": 1,
+  "primaryDescription": "threat",
+  "agent": {
+    "computerName": "sim-device-01",
+    "networkInterfaces": [
+      {
+        "inet": [
+          "192.0.2.10"
+        ]
+      }
+    ]
+  },
+  "threatInfo": {
+    "threatName": "EICAR test file",
+    "classification": "Malware",
+    "confidenceLevel": "malicious",
+    "mitigationStatus": "mitigated"
+  },
+  "activityUuid": "11111111-2222-4333-8444-555555555555"
+}

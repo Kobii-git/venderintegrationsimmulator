@@ -1,0 +1,17 @@
+{
+  "content_type": "application/json",
+  "method": "GET",
+  "body": {
+    "id": "{{ correlation_id }}",
+    "alertType": "{{ alert_type }}",
+    "status": "new",
+    "createdAt": "{{ generated_at_iso }}",
+    "title": "Simulated alert #{{ event_sequence }}",
+    "source": "demo-pull-simulator"
+  },
+  "diagnostic_fields": {
+    "simulator_product": "{{ product_id }}",
+    "simulator_scenario": "{{ scenario_id }}"
+  },
+  "diagnostic_merge": "nested"
+}

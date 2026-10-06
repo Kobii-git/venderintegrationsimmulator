@@ -1,0 +1,1 @@
+ASM: unit_hostname="sim-device-01",management_ip_address="192.0.2.10",http_class_name="/Common/Lab",policy_name="/Common/Lab",violations="Illegal URL",support_id="123456789",request_status="blocked",ip_client="198.51.100.20",method="GET",uri="/lab"

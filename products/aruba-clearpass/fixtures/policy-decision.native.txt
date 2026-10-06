@@ -1,0 +1,1 @@
+CPPM_Logs: 2026-10-04T12:00:00+00:00 sim-device-01 RADIUS: Request ID=1234 User-Name=labuser NAS-IP-Address=198.51.100.20 Service=Lab-RADIUS Authentication-Status=Success Enforcement-Profile=Allow-Access Role=Lab-Employee Posture-Status=HEALTHY

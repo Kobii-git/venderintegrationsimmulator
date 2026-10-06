@@ -1,0 +1,19 @@
+{
+  "content_type": "application/json",
+  "method": "GET",
+  "body": {
+    "id": "{{ correlation_id }}",
+    "eventType": "SecurityEvent",
+    "severity": "{{ severity }}",
+    "timestamp": "{{ generated_at_iso }}",
+    "source": "demo-pull-simulator",
+    "description": "Simulated security event #{{ event_sequence }}",
+    "plugin_marker": "{{ plugin_marker }}"
+  },
+  "diagnostic_fields": {
+    "simulator_product": "{{ product_id }}",
+    "simulator_scenario": "{{ scenario_id }}",
+    "simulator_event_id": "{{ correlation_id }}"
+  },
+  "diagnostic_merge": "nested"
+}

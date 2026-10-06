@@ -1,0 +1,22 @@
+{
+  "TimeGenerated": "2026-10-04T12:00:00+00:00",
+  "Computer": "sim-device-01",
+  "EventID": 3,
+  "EventRecordId": "1",
+  "Channel": "Microsoft-Windows-Sysmon/Operational",
+  "Provider": "Microsoft-Windows-Sysmon",
+  "EventData": {
+    "RuleName": "-",
+    "UtcTime": "2026-10-04T12:00:00+00:00",
+    "ProcessGuid": "11111111-2222-4333-8444-555555555555",
+    "ProcessId": 1234,
+    "Image": "C:\\Windows\\System32\\curl.exe",
+    "User": "labuser",
+    "Protocol": "tcp",
+    "Initiated": "true",
+    "SourceIp": "198.51.100.20",
+    "SourcePort": "49152",
+    "DestinationIp": "203.0.113.10",
+    "DestinationPort": "443"
+  }
+}

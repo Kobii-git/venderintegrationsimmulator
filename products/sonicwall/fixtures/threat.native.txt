@@ -1,0 +1,1 @@
+id=firewall sn=LAB000001 time="2026-10-04T12:00:00+00:00" fw=192.0.2.10 pri=6 c=16 m=609 msg="Gateway Anti-Virus Alert: EICAR" src=198.51.100.20:49152:X0 dst=203.0.113.10:443:X1 proto=tcp/https user="labuser"

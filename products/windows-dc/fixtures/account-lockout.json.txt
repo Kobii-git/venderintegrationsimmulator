@@ -1,0 +1,17 @@
+{
+  "TimeGenerated": "2026-10-04T12:00:00+00:00",
+  "Computer": "sim-device-01",
+  "EventID": 4740,
+  "EventRecordId": "1",
+  "Channel": "Security",
+  "Provider": "Microsoft-Windows-Security-Auditing",
+  "EventData": {
+    "TargetUserName": "labuser",
+    "TargetDomainName": "LAB",
+    "TargetSid": "S-1-5-21-1000-1000-1000-1101",
+    "SubjectUserName": "DC01$",
+    "SubjectDomainName": "LAB",
+    "SubjectLogonId": "0x3e7",
+    "CallerComputerName": "sim-device-01"
+  }
+}

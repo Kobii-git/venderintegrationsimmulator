@@ -1,0 +1,1 @@
+CEF:0|Aruba Networks|ClearPass|ClearPass 6.11|tacacs-auth|Tacacs Auth|5|src=198.51.100.20 dst=203.0.113.10 spt=49152 dpt=443 proto=TCP act=allowed suser=labuser dvchost=sim-device-01 dvc=192.0.2.10 msg=Tacacs Auth cs1=Lab-RADIUS cs1Label=Service cs2=Allow-Access cs2Label=Enforcement Profile outcome=Success

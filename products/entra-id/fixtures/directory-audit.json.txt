@@ -1,0 +1,19 @@
+{
+  "TimeGenerated": "2026-10-04T12:00:00+00:00",
+  "Id": "11111111-2222-4333-8444-555555555555",
+  "OperationName": "Add user",
+  "Category": "UserManagement",
+  "Result": "success",
+  "InitiatedBy": {
+    "user": {
+      "userPrincipalName": "admin@example.test",
+      "ipAddress": "198.51.100.20"
+    }
+  },
+  "TargetResources": [
+    {
+      "displayName": "labuser",
+      "type": "User"
+    }
+  ]
+}

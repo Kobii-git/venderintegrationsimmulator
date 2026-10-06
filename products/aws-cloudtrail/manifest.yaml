@@ -1,0 +1,72 @@
+id: aws-cloudtrail
+display_name: AWS CloudTrail
+version: 1.0.0
+supported_modes:
+- push_webhook
+supported_auth_methods:
+- none
+- basic
+- bearer
+- api_key_header
+scenarios:
+- id: console-sign-in
+  display_name: Console Sign In
+  description: Synthetic CloudTrail eventVersion 1.09 console-sign-in event. See source
+    field reference.
+  default_transport: http_webhook
+  template: scenarios/console-sign-in.json
+  config_schema: &id001
+    type: object
+    additionalProperties: false
+    properties:
+      hostname:
+        type: string
+        default: sim-device-01
+      device_ip:
+        type: string
+        default: 192.0.2.10
+      src:
+        type: string
+        default: 198.51.100.20
+      dst:
+        type: string
+        default: 203.0.113.10
+      user:
+        type: string
+        default: labuser
+      spt:
+        type: integer
+        default: 49152
+      dpt:
+        type: integer
+        default: 443
+  supported_modes:
+  - push_webhook
+- id: iam-api
+  display_name: Iam Api
+  description: Synthetic CloudTrail eventVersion 1.09 iam-api event. See source field
+    reference.
+  default_transport: http_webhook
+  template: scenarios/iam-api.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+- id: resource-api
+  display_name: Resource Api
+  description: Synthetic CloudTrail eventVersion 1.09 resource-api event. See source
+    field reference.
+  default_transport: http_webhook
+  template: scenarios/resource-api.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+supported_transports:
+- syslog
+- http_webhook
+- azure_logs_ingestion
+formats:
+- json
+field_references:
+- https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-event-reference-record-contents.html
+schema_version: CloudTrail eventVersion 1.09
+compatibility: Synthetic ingestion; native service connector not reproduced

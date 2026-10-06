@@ -1,0 +1,43 @@
+{
+  "content_type": "application/json",
+  "body": {
+    "_source_event": {
+      "vendor": "F5",
+      "product": "ASM",
+      "version": "BIG-IP 17 CEF",
+      "family": "waf-violation",
+      "name": "Waf Violation",
+      "signature": "ASM",
+      "severity": 5,
+      "default_format": "native",
+      "time": "{{ generated_at_iso }}",
+      "hostname": "{{ hostname }}",
+      "device_ip": "{{ device_ip }}",
+      "src": "{{ src }}",
+      "dst": "{{ dst }}",
+      "user": "{{ user }}",
+      "spt": "{{ spt }}",
+      "dpt": "{{ dpt }}",
+      "action": "blocked",
+      "cef_extensions": {
+        "request": "http://example.test/lab",
+        "requestMethod": "GET",
+        "cs1": "/Common/Lab",
+        "cs1Label": "policy_name",
+        "cs2": "Illegal URL",
+        "cs2Label": "violations",
+        "act": "blocked"
+      }
+    },
+    "record": {
+      "TimeGenerated": "{{ generated_at_iso }}",
+      "Computer": "{{ hostname }}",
+      "SourceIP": "{{ src }}",
+      "DestinationIP": "{{ dst }}",
+      "UserName": "{{ user }}",
+      "EventFamily": "waf-violation",
+      "CorrelationId": "{{ correlation_id }}"
+    },
+    "native": "ASM: unit_hostname=\"{{ hostname }}\",management_ip_address=\"{{ device_ip }}\",http_class_name=\"/Common/Lab\",policy_name=\"/Common/Lab\",violations=\"Illegal URL\",support_id=\"123456789\",request_status=\"blocked\",ip_client=\"{{ src }}\",method=\"GET\",uri=\"/lab\""
+  }
+}

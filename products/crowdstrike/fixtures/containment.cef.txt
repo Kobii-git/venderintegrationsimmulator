@@ -1,0 +1,1 @@
+CEF:0|CrowdStrike|FalconHost|SIEM connector 2|UserActivityAuditEvent|Containment|5|src=198.51.100.20 dst=203.0.113.10 spt=49152 dpt=443 proto=TCP act=allowed suser=labuser dvchost=sim-device-01 dvc=192.0.2.10 msg=Containment fileName=eicar.com cs1=Execution cs1Label=Tactic cs2=User Execution cs2Label=Technique

@@ -1,0 +1,21 @@
+services:
+  protected-gateway:
+    image: caddy:2.10.2-alpine
+    profiles: ["protected-exposure"]
+    depends_on:
+      integration-simulator:
+        condition: service_healthy
+    ports:
+      - "0.0.0.0:8443:8443"
+    environment:
+      REMOTE_USERNAME: ${REMOTE_USERNAME:?Set REMOTE_USERNAME in .env}
+      REMOTE_PASSWORD_HASH: ${REMOTE_PASSWORD_HASH:?Set REMOTE_PASSWORD_HASH in .env}
+    volumes:
+      - ./docker/Caddyfile:/etc/caddy/Caddyfile:ro
+      - integration-simulator-caddy-data:/data
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  integration-simulator-caddy-data:

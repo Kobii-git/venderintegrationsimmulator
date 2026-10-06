@@ -1,0 +1,34 @@
+{
+  "content_type": "application/json",
+  "body": {
+    "_source_event": {
+      "vendor": "SonicWall",
+      "product": "SonicOS",
+      "version": "SonicOS 7",
+      "family": "vpn",
+      "name": "Vpn",
+      "signature": "1002",
+      "severity": 5,
+      "default_format": "native",
+      "time": "{{ generated_at_iso }}",
+      "hostname": "{{ hostname }}",
+      "device_ip": "{{ device_ip }}",
+      "src": "{{ src }}",
+      "dst": "{{ dst }}",
+      "user": "{{ user }}",
+      "spt": "{{ spt }}",
+      "dpt": "{{ dpt }}",
+      "action": "allowed"
+    },
+    "record": {
+      "TimeGenerated": "{{ generated_at_iso }}",
+      "Computer": "{{ hostname }}",
+      "SourceIP": "{{ src }}",
+      "DestinationIP": "{{ dst }}",
+      "UserName": "{{ user }}",
+      "EventFamily": "vpn",
+      "CorrelationId": "{{ correlation_id }}"
+    },
+    "native": "id=firewall sn=LAB000001 time=\"{{ generated_at_iso }}\" fw={{ device_ip }} pri=6 c=16 m=358 msg=\"IPSec tunnel established\" src={{ src }}:{{ spt }}:X0 dst={{ dst }}:{{ dpt }}:X1 proto=tcp/https user=\"{{ user }}\""
+  }
+}

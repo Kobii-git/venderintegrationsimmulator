@@ -1,0 +1,24 @@
+{
+  "content_type": "application/json",
+  "method": "POST",
+  "body": {
+    "notification": {
+      "id": "{{ notification_id }}",
+      "type": "IdentityBreachPublished",
+      "description": "An identity breach was detected: {{ breach_title }} ({{ affected_email_count }} affected email addresses)",
+      "occurredAt": "{{ generated_at_iso }}",
+      "context": {
+        "Title": "{{ breach_title }}",
+        "AffectedEmails": "{{ affected_email_count }}",
+        "FindingUrl": "{{ finding_url }}"
+      }
+    }
+  },
+  "diagnostic_fields": {
+    "simulator_event_id": "{{ correlation_id }}",
+    "simulator_timestamp": "{{ generated_at_iso }}",
+    "simulator_product": "{{ product_id }}",
+    "simulator_scenario": "{{ scenario_id }}"
+  },
+  "diagnostic_merge": "nested"
+}

@@ -1,0 +1,17 @@
+{
+  "content_type": "application/json",
+  "method": "POST",
+  "body": {
+    "uuid": "{{ correlation_id }}",
+    "published": "{{ generated_at_iso }}",
+    "eventType": "application.policy.sign_on.deny_access",
+    "version": "0",
+    "displayMessage": "Sign-on policy denied access",
+    "severity": "WARN",
+    "client": {"ipAddress": "{{ source_ip }}"},
+    "actor": {"id": "{{ actor_id }}", "type": "User", "alternateId": "{{ user_email }}", "displayName": "{{ user_name }}"},
+    "outcome": {"result": "FAILURE", "reason": "Sign-on policy denied access"},
+    "target": [{"id": "{{ application_id }}", "type": "AppInstance", "alternateId": "example-app", "displayName": "Example Application"}],
+    "transaction": {"type": "WEB", "id": "{{ transaction_id }}", "detail": {}}
+  }
+}

@@ -1,0 +1,83 @@
+id: windows-sysmon
+display_name: Windows Sysmon
+version: 1.0.0
+supported_modes:
+- push_webhook
+supported_auth_methods:
+- none
+- basic
+- bearer
+- api_key_header
+scenarios:
+- id: process-create
+  display_name: Process Create
+  description: Synthetic Sysmon 15 event schema process-create event. See source field
+    reference.
+  default_transport: http_webhook
+  template: scenarios/process-create.json
+  config_schema: &id001
+    type: object
+    additionalProperties: false
+    properties:
+      hostname:
+        type: string
+        default: sim-device-01
+      device_ip:
+        type: string
+        default: 192.0.2.10
+      src:
+        type: string
+        default: 198.51.100.20
+      dst:
+        type: string
+        default: 203.0.113.10
+      user:
+        type: string
+        default: labuser
+      spt:
+        type: integer
+        default: 49152
+      dpt:
+        type: integer
+        default: 443
+  supported_modes:
+  - push_webhook
+- id: network-connect
+  display_name: Network Connect
+  description: Synthetic Sysmon 15 event schema network-connect event. See source
+    field reference.
+  default_transport: http_webhook
+  template: scenarios/network-connect.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+- id: file-create
+  display_name: File Create
+  description: Synthetic Sysmon 15 event schema file-create event. See source field
+    reference.
+  default_transport: http_webhook
+  template: scenarios/file-create.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+- id: dns-query
+  display_name: Dns Query
+  description: Synthetic Sysmon 15 event schema dns-query event. See source field
+    reference.
+  default_transport: http_webhook
+  template: scenarios/dns-query.json
+  config_schema: *id001
+  supported_modes:
+  - push_webhook
+supported_transports:
+- syslog
+- http_webhook
+- azure_logs_ingestion
+formats:
+- xml
+- json
+field_references:
+- https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon
+schema_version: Sysmon 15 event schema
+compatibility: Representative synthetic wire format; live vendor parser validation
+  required

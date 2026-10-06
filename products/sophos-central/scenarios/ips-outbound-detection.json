@@ -1,0 +1,23 @@
+{
+  "content_type": "application/json",
+  "method": "GET",
+  "body": {
+    "id": "{{ correlation_id }}",
+    "customer_id": "{{ customer_id }}",
+    "endpoint_id": "{{ endpoint_id }}",
+    "endpoint_type": "computer",
+    "severity": "HIGH",
+    "source": "{{ username }}",
+    "source_info": {"direction": "outbound"},
+    "location": "{{ hostname }}",
+    "when": "{{ generated_at_iso }}",
+    "created_at": "{{ generated_at_iso }}",
+    "name": "Outbound command-and-control connection blocked",
+    "type": "Event::Endpoint::Threat::IpsOutboundDetection",
+    "group": "SECURITY",
+    "threat": "C2 beacon",
+    "user_id": "{{ username }}",
+    "origin": "endpoint",
+    "ips_threat_data": {"remoteIp": "203.0.113.40", "remotePort": "4444", "localPort": "53122"}
+  }
+}

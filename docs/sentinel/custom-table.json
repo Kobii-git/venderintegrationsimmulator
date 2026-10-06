@@ -1,0 +1,15 @@
+{
+  "properties": {
+    "schema": {
+      "name": "SimulatorEvents_CL",
+      "columns": [
+        {"name": "TimeGenerated", "type": "datetime"},
+        {"name": "SourceProfile", "type": "string"},
+        {"name": "Computer", "type": "string"},
+        {"name": "RawData", "type": "string"}
+      ]
+    },
+    "retentionInDays": 30,
+    "totalRetentionInDays": 30
+  }
+}
