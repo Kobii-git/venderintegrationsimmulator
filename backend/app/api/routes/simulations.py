@@ -325,7 +325,8 @@ def preview_target_wire(
 
     from app.core.redaction import redact_secret_values
     from app.domain.enums import FidelityMode
-    from app.formats.source import custom_ingestion_record, render_source
+    from app.formats.azure_ingestion import AZURE_TRANSPORTS, ingestion_record
+    from app.formats.source import render_source
     from app.services.targets import target_configs
     from app.transports.syslog.engine import SyslogDeliveryEngine
     from app.transports.syslog.formats import format_syslog_message, frame_message
@@ -353,7 +354,7 @@ def preview_target_wire(
         payload = {"_syslog_message": payload}
     if simulation.replay_config:
         from app.models import UploadedDataset
-        from app.services.datasets import dataset_directory
+        from app.services.datasets import dataset_directory, replay_payload
 
         row = runtime._db.get(UploadedDataset, simulation.replay_config["dataset_id"])
         if row is None:
@@ -362,23 +363,21 @@ def preview_target_wire(
             encoding="utf-8"
         ) as handle:
             item = json.loads(handle.readline())
-        payload = {
-            "_dataset_payload": item.get("raw", item["payload"]),
-            "_dataset_content_type": item["content_type"],
-        }
+        payload = replay_payload(
+            item,
+            simulation.replay_config.get("rewrite_timestamps", False),
+            simulation.replay_config.get("timestamp_fields"),
+        )
     payload = redact_secret_values(payload, runtime._configured_secret_values(simulation))
     body, content_type = render_source(payload, target.get("payload_format", "default"))
     destination = target["destination"]
     transport_id = destination.get("transport_id", "http_webhook")
-    if transport_id == "azure_logs_ingestion":
-        if (
-            target.get("payload_format", "default") == "default"
-            or content_type != "application/json"
-        ):
-            body = custom_ingestion_record(payload, body, simulation.product_id)
-        elif isinstance(body, str):
-            body = json.loads(body)
-        body = [body] if isinstance(body, dict) else body
+    if transport_id in AZURE_TRANSPORTS:
+        body = [
+            ingestion_record(
+                payload, target.get("payload_format", "default"), simulation.product_id
+            )
+        ]
         content_type = "application/json"
     wire = (
         body.encode("utf-8")

@@ -31,6 +31,9 @@ export function Layout() {
           >
             New Simulation
           </Link>
+          <Link to="/uploads" className={isActive("/uploads") ? "active" : ""}>
+            Upload logs
+          </Link>
           <Link to="/lab" className={isActive("/lab") ? "active" : ""}>
             Log Lab
           </Link>

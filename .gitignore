@@ -53,3 +53,9 @@ build/
 *.oci.tar
 
 **/.venv*
+
+# Azure Function local credentials and generated deployment files
+azure/function-relay/local.settings.json
+azure/function-relay/.python_packages/
+azure/function-relay/infra/main.json
+azure/function-relay/infra/dcr-access.json

@@ -1,5 +1,6 @@
 from app.api.deps import get_http_transport_service, get_transport_delivery_service
 from app.schemas.transport import (
+    AzureTransportRequest,
     DeliveryResultResponse,
     HttpDeliveryResultResponse,
     HttpSendRequest,
@@ -64,3 +65,37 @@ async def send_syslog_message(
 
 router.include_router(http_router)
 router.include_router(syslog_router)
+
+
+@router.post("/azure/test", response_model=DeliveryResultResponse)
+async def test_azure_connection(
+    data: AzureTransportRequest,
+    service: TransportDeliveryService = Depends(get_transport_delivery_service),
+) -> DeliveryResultResponse:
+    result = await service.test_connection(
+        data.destination.transport_id, data.destination.model_dump(), data.auth_config.model_dump()
+    )
+    return DeliveryResultResponse.from_delivery_result(result)
+
+
+@router.post("/azure/send", response_model=DeliveryResultResponse)
+async def send_azure_test_record(
+    data: AzureTransportRequest,
+    service: TransportDeliveryService = Depends(get_transport_delivery_service),
+) -> DeliveryResultResponse:
+    from app.formats.azure_ingestion import validate_record
+    from fastapi import HTTPException
+
+    if data.record is None:
+        raise HTTPException(status_code=422, detail="An explicit test record is required")
+    try:
+        validate_record(data.record, data.destination.batch_max_bytes)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from None
+    result = await service.deliver(
+        data.destination.model_dump(),
+        [data.record],
+        "application/json",
+        data.auth_config.model_dump(),
+    )
+    return DeliveryResultResponse.from_delivery_result(result)

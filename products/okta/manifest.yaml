@@ -9,6 +9,7 @@ supported_transports:
 - http_webhook
 - syslog
 - azure_logs_ingestion
+- azure_function_app
 supported_auth_methods:
 - none
 - basic

@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile
-    image: integration-simulator:0.4.0
+    image: integration-simulator:0.4.1
     ports:
       - "127.0.0.1:8080:8080"
     volumes:

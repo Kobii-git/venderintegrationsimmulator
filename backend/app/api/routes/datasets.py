@@ -6,6 +6,7 @@ from typing import Any, Literal
 from app.core.config import get_settings
 from app.core.database import get_db
 from app.models import Simulation, UploadedDataset
+from app.schemas.dataset import IngestionValidationRequest
 from app.services.datasets import (
     MAX_UPLOAD_BYTES,
     dataset_directory,
@@ -142,3 +143,24 @@ def delete_dataset(dataset_id: str, db: Session = Depends(get_db)) -> None:
     db.delete(row)
     db.commit()
     (dataset_directory(get_settings().resolved_data_dir) / filename).unlink(missing_ok=True)
+
+
+@router.post("/{dataset_id}/validate-ingestion")
+def validate_ingestion(
+    dataset_id: str, body: "IngestionValidationRequest", db: Session = Depends(get_db)
+) -> dict[str, Any]:
+    from app.services.datasets import validate_ingestion_dataset
+
+    row = db.get(UploadedDataset, dataset_id)
+    if row is None:
+        raise HTTPException(status_code=404, detail="Dataset not found")
+    try:
+        return validate_ingestion_dataset(
+            dataset_directory(get_settings().resolved_data_dir) / row.filename,
+            row.format,
+            body.payload_mode,
+            body.rewrite_timestamps,
+            batch_max_bytes=body.batch_max_bytes,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from None

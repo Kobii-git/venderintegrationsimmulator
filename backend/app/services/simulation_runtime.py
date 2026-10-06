@@ -28,7 +28,8 @@ from app.domain.fault_injection import apply_payload_faults, build_fault_metadat
 from app.domain.inbound import InboundConfig
 from app.domain.runtime_state import default_runtime_state, utc_now_iso
 from app.domain.schedule import validate_schedule_config
-from app.formats.source import custom_ingestion_record, render_source
+from app.formats.azure_ingestion import AZURE_TRANSPORTS, ingestion_record
+from app.formats.source import render_source
 from app.models import DeliveryAttempt, DeliveryJob, EventInstance, Simulation
 from app.products.registry import ProductRegistry
 from app.repositories.simulation import (
@@ -197,6 +198,7 @@ class SimulationRuntimeService:
             )
         self._validate_destination(simulation)
         self._validate_auth(simulation)
+        self._validate_azure_replay(simulation)
         self._enforce_concurrent_limit(exclude_id=simulation.id)
 
         runtime = self._ensure_runtime_state(simulation)
@@ -211,6 +213,7 @@ class SimulationRuntimeService:
             "replay_due_at",
             "replay_last_emit_at",
             "rate_credit",
+            "replay_generation_finished",
         ):
             runtime.pop(key, None)
 
@@ -526,6 +529,9 @@ class SimulationRuntimeService:
             return
 
         try:
+            if (simulation.runtime_state or {}).get("replay_generation_finished"):
+                self._finish_replay_if_drained(simulation)
+                return
             rate = (simulation.schedule or {}).get("events_per_second")
             if rate is None:
                 await self._scheduled_event(simulation, enqueue=False)
@@ -546,6 +552,9 @@ class SimulationRuntimeService:
             self._db.commit()
             simulation = self._simulations.get_by_id_or_raise(simulation_id)
             if self._is_finite_complete(simulation):
+                if simulation.replay_config:
+                    self._finish_replay_if_drained(simulation)
+                    return
                 runtime = self._ensure_runtime_state(simulation)
                 runtime["stopped_at"] = utc_now_iso()
                 simulation.runtime_state = runtime
@@ -553,11 +562,7 @@ class SimulationRuntimeService:
                 self._simulations.update(simulation)
         except Exception as exc:
             if isinstance(exc, ValidationAppError) and str(exc) == "Replay dataset is complete":
-                simulation.status = SimulationStatus.COMPLETED.value
-                state = self._ensure_runtime_state(simulation)
-                state["stopped_at"] = utc_now_iso()
-                simulation.runtime_state = state
-                self._db.commit()
+                self._finish_replay_if_drained(simulation)
                 return
             self._db.rollback()
             logger.exception(
@@ -571,6 +576,52 @@ class SimulationRuntimeService:
             simulation.runtime_state = runtime
             simulation.status = SimulationStatus.ERROR.value
             self._simulations.update(simulation)
+
+    def _finish_replay_if_drained(self, simulation: Simulation) -> None:
+        state = self._ensure_runtime_state(simulation)
+        state["replay_generation_finished"] = True
+        pending = (
+            self._db.query(DeliveryJob)
+            .filter(
+                DeliveryJob.simulation_id == simulation.id,
+                DeliveryJob.status.in_(["pending", "active"]),
+            )
+            .count()
+        )
+        if not pending:
+            state["stopped_at"] = utc_now_iso()
+            simulation.status = SimulationStatus.COMPLETED.value
+        simulation.runtime_state = state
+        self._simulations.update(simulation)
+        self._db.commit()
+
+    def _validate_azure_replay(self, simulation: Simulation) -> None:
+        if not simulation.replay_config:
+            return
+        from app.models import UploadedDataset
+        from app.services.datasets import dataset_directory, validate_ingestion_dataset
+
+        dataset = self._db.get(UploadedDataset, simulation.replay_config["dataset_id"])
+        if dataset is None:
+            raise ValidationAppError("Replay dataset not found")
+        for target in target_configs(simulation):
+            if (
+                target.get("enabled", True)
+                and target["destination"].get("transport_id") in AZURE_TRANSPORTS
+            ):
+                try:
+                    fmt = target.get("payload_format", "default")
+                    validate_ingestion_dataset(
+                        dataset_directory(self._settings.resolved_data_dir) / dataset.filename,
+                        dataset.format,
+                        "envelope" if fmt == "default" else fmt,
+                        simulation.replay_config.get("rewrite_timestamps", False),
+                        simulation.product_id,
+                        int(target["destination"].get("batch_max_bytes", 950_000)),
+                        simulation.replay_config.get("timestamp_fields"),
+                    )
+                except ValueError as exc:
+                    raise ValidationAppError(str(exc)) from None
 
     async def _scheduled_event(self, simulation: Simulation, *, enqueue: bool) -> bool:
         if not simulation.replay_config:
@@ -1078,12 +1129,11 @@ class SimulationRuntimeService:
             payload if isinstance(payload, dict) else {"_syslog_message": payload},
             target.get("payload_format", "default"),
         )
-        if destination.get("transport_id") == "azure_logs_ingestion" and (
-            target.get("payload_format", "default") == "default"
-            or content_type != "application/json"
-        ):
-            body = custom_ingestion_record(
-                payload if isinstance(payload, dict) else {}, body, simulation.product_id
+        if destination.get("transport_id") in AZURE_TRANSPORTS:
+            body = ingestion_record(
+                payload if isinstance(payload, dict) else {"_syslog_message": payload},
+                target.get("payload_format", "default"),
+                simulation.product_id,
             )
             content_type = "application/json"
         if delivery_hints and delivery_hints.get("malformed_body"):
@@ -1282,7 +1332,12 @@ class SimulationRuntimeService:
         return target is not None and activation_count >= target
 
     def _validate_schedule_limits(self, simulation: Simulation) -> None:
-        validate_schedule_config(self._schedule_config(simulation), self._settings)
+        from app.services.datasets import schedule_settings_for_replay
+
+        validate_schedule_config(
+            self._schedule_config(simulation),
+            schedule_settings_for_replay(self._db, simulation.replay_config or {}, self._settings),
+        )
 
     def _validate_burst_request(self, request: SimulationBurstRequest) -> None:
         if request.count > self._settings.fault_max_burst_count:
@@ -1345,6 +1400,10 @@ class SimulationRuntimeService:
                 raise ValidationAppError("Basic auth requires username and password")
             if method in {"bearer", "api_key_header"} and not auth.get("token"):
                 raise ValidationAppError(f"{method} auth requires a token")
+            if target["destination"].get("transport_id") == "azure_function_app" and not auth.get(
+                "token"
+            ):
+                raise ValidationAppError("Function App requires a function key")
             if target["destination"].get("transport_id") == "azure_logs_ingestion" and (
                 not auth.get("oauth_client_id") or not auth.get("oauth_client_secret")
             ):

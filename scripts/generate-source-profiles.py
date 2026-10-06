@@ -910,7 +910,7 @@ for pid, name, vendor, product, version, formats, families, reference in SOURCES
     manifest["supported_transports"] = list(
         dict.fromkeys(
             manifest.get("supported_transports", [])
-            + ["syslog", "http_webhook", "azure_logs_ingestion"]
+            + ["syslog", "http_webhook", "azure_logs_ingestion", "azure_function_app"]
         )
     )
     manifest.update(

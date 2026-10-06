@@ -1,3 +1,4 @@
+from app.transports.azure_function_app import AzureFunctionAppTransport
 from app.transports.azure_logs_ingestion import AzureLogsIngestionTransport
 from app.transports.base import Transport
 from app.transports.http_webhook import HttpWebhookTransport
@@ -27,3 +28,4 @@ def register_default_transports() -> None:
     transport_registry.register(HttpWebhookTransport())
     transport_registry.register(SyslogTransport())
     transport_registry.register(AzureLogsIngestionTransport())
+    transport_registry.register(AzureFunctionAppTransport())

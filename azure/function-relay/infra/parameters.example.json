@@ -1,0 +1,15 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "appName": { "value": "YOUR_GLOBALLY_UNIQUE_FUNCTION_APP" },
+    "location": { "value": "YOUR_FLEX_CONSUMPTION_REGION" },
+    "dceEndpoint": { "value": "https://YOUR_DCE.ingest.monitor.azure.com" },
+    "dcrName": { "value": "YOUR_DCR_RESOURCE_NAME" },
+    "dcrResourceGroup": { "value": "YOUR_DCR_RESOURCE_GROUP" },
+    "dcrSubscriptionId": { "value": "YOUR_DCR_SUBSCRIPTION_ID" },
+    "dcrImmutableId": { "value": "dcr-YOUR_IMMUTABLE_ID" },
+    "dcrStream": { "value": "Custom-SimulatorEvents" },
+    "workspaceResourceId": { "value": "/subscriptions/YOUR_SUBSCRIPTION/resourceGroups/YOUR_RESOURCE_GROUP/providers/Microsoft.OperationalInsights/workspaces/YOUR_WORKSPACE" }
+  }
+}

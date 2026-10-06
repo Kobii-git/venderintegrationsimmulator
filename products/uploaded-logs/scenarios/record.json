@@ -1,0 +1,1 @@
+{"content_type":"application/json","body":{"TimeGenerated":"{{ generated_at_iso }}","Message":"Explicit ingestion test record"}}

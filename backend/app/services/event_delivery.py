@@ -168,7 +168,10 @@ class EventDeliveryService:
     def _validate_destination(self, request: ScenarioSendRequest, manifest: Any) -> None:
         destination = request.destination
         transport_id = destination.transport_id or "http_webhook"
-        if transport_id not in manifest.supported_transports:
+        if transport_id not in manifest.supported_transports and transport_id not in {
+            "azure_logs_ingestion",
+            "azure_function_app",
+        }:
             raise ValidationAppError(
                 f"Transport '{transport_id}' is not supported by product '{manifest.id}'",
                 details={"supported_transports": manifest.supported_transports},

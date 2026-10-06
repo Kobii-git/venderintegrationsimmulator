@@ -3,6 +3,13 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 
+class IngestionValidationRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    payload_mode: Literal["envelope", "json"] = "envelope"
+    rewrite_timestamps: bool = False
+    batch_max_bytes: int = Field(default=950_000, ge=1024, le=950_000)
+
+
 class ReplayConfig(BaseModel):
     model_config = ConfigDict(extra="forbid")
     dataset_id: str

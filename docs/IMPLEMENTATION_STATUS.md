@@ -45,7 +45,30 @@ on the local ARM64 Docker host. Published multi-platform digest:
 ## Recovery baseline
 
 The authoritative application repository is now https://github.com/Kobii-git/venderintegrationsimmulator.
-Version 0.4.0 source, deployment configuration and verification scripts are maintained on `main`.
+Version 0.4.1 source, deployment configuration and verification scripts are maintained on `main`.
 Future updates increment the application version and publish versioned and commit-tagged images.
 
 A private source archive was captured before implementation at `/private/tmp/vendor-simulator-before-implementation-20261004.tgz`. No application database was present in the initial workspace. Keep an operator-owned copy before upgrading a deployed instance: `/private/tmp` is temporary. Startup captures a preflight SQLite backup before schema/configuration upgrades; restore the database together with its encryption key for rollback. See [upgrade notes](UPGRADE_0.4.0.md).
+
+
+## Azure uploads and Function App relay, 6 October 2026 (0.4.1)
+
+- Added one-off **Upload logs**, a generic uploaded-log source and the Function App
+  relay transport in Log Lab. Full-file preflight, wire preview and delivery share
+  timestamp/payload rendering; finite/EOF replay waits for its queue to drain.
+- Added synchronous, function-key protected Python 3.12 relay code, hashed runtime
+  dependencies, Flex Consumption Bicep, scoped managed identity access, packaging
+  and manual deployment instructions. Local parameter/dependency outputs are ignored.
+- Local verification passed the full 293-test backend suite, plus the final legacy
+  batch-size compatibility regression and targeted upload/migration checks; 21 relay
+  tests, 12 frontend tests, eight Chromium workflows, lint/type/build checks, Bicep
+  compilation and source packaging. Locked dependency audits found no known vulnerabilities.
+- Docker black-box upgrade/protocol/persistence checks and fresh standalone startup,
+  UI/API readiness and database/key persistence passed on the local ARM64 host.
+- CI now gates image publication on relay tests, dependency audit, packaging and Bicep
+  compilation as well as existing application checks. Native AMD64/ARM64 images are
+  pulled and tested before version/latest/commit manifests are published.
+- Azure deployment, actual managed identity role propagation and destination-table
+  arrival remain unverified live; no Azure resources were created in this update.
+  See [relay deployment guide](../azure/function-relay/README.md) and
+  [upgrade notes](UPGRADE_0.4.1.md). GitHub Release/source tags remain pending separate approval.

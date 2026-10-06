@@ -1,0 +1,15 @@
+id: uploaded-logs
+display_name: Uploaded logs
+version: 1.0.0
+description: Replay uploaded records through Azure ingestion or a Function App relay.
+supported_modes: [push_webhook]
+supported_transports: [azure_logs_ingestion, azure_function_app, http_webhook]
+supported_auth_methods: [none, basic, bearer, api_key_header]
+formats: [json]
+scenarios:
+- id: record
+  display_name: Uploaded record
+  default_transport: azure_logs_ingestion
+  template: scenarios/record.json
+  supported_modes: [push_webhook]
+  config_schema: {type: object, additionalProperties: false}

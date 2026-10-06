@@ -79,3 +79,21 @@ backend/.venv/bin/python scripts/benchmark-log-lab.py --duration 900 \
 ```
 
 The receiver process and container must share the Linux host; host networking makes the four loopback receivers reachable. The script verifies captures, sequence IDs, missing/duplicate events, parsing errors, management latency and RSS. Record host details and retain the report. A shorter run is a diagnostic, not sustained acceptance. See [implementation and verification status](IMPLEMENTATION_STATUS.md).
+
+
+## Azure uploads and relay (0.4.1)
+
+Use **Upload logs** for a one-off file, or select **Uploaded logs** in Log Lab for
+vendor-neutral timed/looping replay. Direct Azure ingestion uses the DCE endpoint,
+DCR immutable ID, stream and client credentials. The **Azure Function App relay**
+destination uses the function ingestion URL and encrypted key; routing is configured
+in the relay app settings and the relay uses managed identity. Both transports use
+the same payload rendering, validation, byte batching and acceptance semantics.
+
+Choose `default` for the custom-table envelope or `json` for unchanged JSON/NDJSON
+objects. Azure replay is preflighted before starting. Generated logs are validated
+before each send. Authentication checks send no logs; **Send test record** explicitly
+uploads a record. Replay completion waits for the delivery queue; an accepted API
+request is not a table-arrival check. Stop prevents generation while queued delivery
+may continue. See [relay deployment guide](../azure/function-relay/README.md) and
+[0.4.1 upgrade notes](UPGRADE_0.4.1.md).

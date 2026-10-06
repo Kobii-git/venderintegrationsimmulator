@@ -96,6 +96,8 @@ class DestinationConfig(BaseModel):
 
     @model_validator(mode="after")
     def validate_destination_values(self) -> Self:
+        # Accept 0.4.0 configurations while applying the new wire-size cap.
+        self.batch_max_bytes = min(self.batch_max_bytes, 950_000)
         if self.transport_id == "azure_logs_ingestion":
             if (
                 not self.endpoint
@@ -116,6 +118,24 @@ class DestinationConfig(BaseModel):
                 or parsed_endpoint.fragment
             ):
                 raise ValueError("Azure endpoint cannot contain credentials, query or fragment")
+        if self.transport_id == "azure_function_app":
+            parsed = urlsplit(self.url or "")
+            if (
+                parsed.scheme != "https"
+                or not parsed.hostname
+                or parsed.username
+                or parsed.password
+                or parsed.query
+                or parsed.fragment
+            ):
+                raise ValueError(
+                    "Function App requires an HTTPS URL without credentials, query or fragment"
+                )
+            if self.headers or self.query_params:
+                raise ValueError("Function App authentication uses the encrypted function key only")
+            self.method = "POST"
+            self.verify_tls = True
+            self.follow_redirects = False
         if self.transport_id == "syslog" and self.host:
             from app.transports.syslog.models import SyslogDestination
 

@@ -10,14 +10,17 @@ from typing import Any
 from urllib.parse import quote
 
 import httpx
+from app.formats.azure_ingestion import MAX_BATCH_BYTES, validate_record
 from app.transports.delivery_result import DeliveryResult
 
 
 def json_batches(records: list[dict[str, Any]], limit: int = 950_000) -> list[bytes]:
+    limit = min(limit, MAX_BATCH_BYTES)
     batches: list[bytes] = []
     parts: list[bytes] = []
     size = 2
     for record in records:
+        validate_record(record, limit)
         encoded = json.dumps(record, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
         if len(encoded) + 2 > limit:
             raise ValueError("A single JSON record exceeds the batch byte limit")
@@ -93,6 +96,20 @@ class AzureLogsIngestionTransport:
                     pass
         return float(min(2**attempt, 16))
 
+    def _delivery_url(self, destination: dict[str, Any]) -> str:
+        endpoint = str(destination["endpoint"]).rstrip("/")
+        if not endpoint.startswith("https://"):
+            raise ValueError("Azure ingestion endpoint must use HTTPS")
+        dcr = quote(str(destination["dcr_immutable_id"]), safe="")
+        stream = quote(str(destination["stream"]), safe="")
+        return f"{endpoint}/dataCollectionRules/{dcr}/streams/{stream}?api-version=2023-01-01"
+
+    def _headers(self, token: str) -> dict[str, str]:
+        return {"Content-Type": "application/json", "Authorization": f"Bearer {token}"}
+
+    def _accepted(self, response: httpx.Response, batch: bytes) -> bool:
+        return response.status_code == 204
+
     async def deliver(
         self,
         destination: dict[str, Any],
@@ -107,12 +124,7 @@ class AzureLogsIngestionTransport:
         category: str | None = None
         retries = int(destination.get("max_retries", 3))
         try:
-            endpoint = str(destination["endpoint"]).rstrip("/")
-            if not endpoint.startswith("https://"):
-                raise ValueError("Azure ingestion endpoint must use HTTPS")
-            dcr = quote(str(destination["dcr_immutable_id"]), safe="")
-            stream = quote(str(destination["stream"]), safe="")
-            url = f"{endpoint}/dataCollectionRules/{dcr}/streams/{stream}" "?api-version=2023-01-01"
+            url = self._delivery_url(destination)
             records = json.loads(payload)
             if isinstance(records, dict):
                 records = [records]
@@ -135,27 +147,25 @@ class AzureLogsIngestionTransport:
                     response = await self._client.post(
                         url,
                         content=batch,
-                        headers={
-                            "Content-Type": "application/json",
-                            "Authorization": f"Bearer {token}",
-                        },
+                        headers=self._headers(token),
                         timeout=float(destination.get("timeout_seconds", 30)),
                     )
                     status = response.status_code
-                    if status == 401 and not refreshed:
+                    if (
+                        status == 401
+                        and not refreshed
+                        and self.transport_id == "azure_logs_ingestion"
+                    ):
                         token = await self._token(destination, auth_config, force=True)
                         refreshed = True
                         response = await self._client.post(
                             url,
                             content=batch,
-                            headers={
-                                "Content-Type": "application/json",
-                                "Authorization": f"Bearer {token}",
-                            },
+                            headers=self._headers(token),
                             timeout=float(destination.get("timeout_seconds", 30)),
                         )
                         status = response.status_code
-                    if status == 204:
+                    if self._accepted(response, batch):
                         break
                     if status in (429, 500, 502, 503, 504) and attempt < retries:
                         delay = self._retry_delay(response, attempt)
@@ -194,10 +204,7 @@ class AzureLogsIngestionTransport:
             destination=url,
             request_url_redacted=url,
             method="POST",
-            request_headers_redacted={
-                "Content-Type": "application/json",
-                "Authorization": "***REDACTED***",
-            },
+            request_headers_redacted=self._headers("***REDACTED***"),
             request_body=payload.decode("utf-8", errors="replace")[:20000],
             response_status_code=status,
             error_message=error,

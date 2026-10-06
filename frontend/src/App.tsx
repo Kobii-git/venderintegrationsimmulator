@@ -1,5 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
+import { UploadLogsPage } from "./pages/UploadLogsPage";
 import { LogLabPage } from "./pages/LogLabPage";
 import { Layout } from "./components/Layout";
 import { DashboardPage } from "./pages/DashboardPage";
@@ -16,6 +17,7 @@ export default function App() {
       <Routes>
         <Route element={<Layout />}>
           <Route index element={<DashboardPage />} />
+          <Route path="uploads" element={<UploadLogsPage />} />
           <Route path="lab" element={<LogLabPage />} />
           <Route path="lab/:id" element={<LogLabPage />} />
           <Route path="simulations/new" element={<SimulationFormPage />} />

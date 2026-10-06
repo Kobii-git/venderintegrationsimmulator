@@ -11,7 +11,7 @@ from typing import Any
 from sqlalchemy.orm import Session
 
 from app.core.database import get_session_factory
-from app.formats.source import custom_ingestion_record, render_source
+from app.formats.azure_ingestion import AZURE_TRANSPORTS, ingestion_record
 from app.models import DeliveryJob, EventInstance, Simulation
 from app.services.destination_config import destination_for_delivery
 from app.services.simulation_runtime import SimulationRuntimeService
@@ -160,7 +160,7 @@ class DeliveryQueue:
         event_ids: dict[str, str],
         configs: dict[str, dict[str, Any]],
     ) -> list[DeliveryResult]:
-        if configs[ids[0]]["destination"].get("transport_id") == "azure_logs_ingestion" and not (
+        if configs[ids[0]]["destination"].get("transport_id") in AZURE_TRANSPORTS and not (
             simulation.fault_config or {}
         ).get("enabled"):
             try:
@@ -172,7 +172,10 @@ class DeliveryQueue:
                     event = db.get(EventInstance, event_ids[job_id])
                     if event is not None:
                         runtime._persist_attempt(
-                            event, result, "azure_logs_ingestion", target_id=configs[job_id]["id"]
+                            event,
+                            result,
+                            configs[job_id]["destination"]["transport_id"],
+                            target_id=configs[job_id]["id"],
                         )
                     results.append(result)
                 return results
@@ -218,7 +221,7 @@ class DeliveryQueue:
             target["destination"], target.get("destination_secret_values", {}), self.encryptor
         )
         auth = self.encryptor.decrypt_auth_config(target.get("auth_config", {}))
-        limit = int(destination.get("batch_max_bytes", 950000))
+        limit = min(int(destination.get("batch_max_bytes", 950000)), 950000)
         records: list[dict[str, Any]] = []
         groups: list[tuple[list[str], list[dict[str, Any]]]] = []
         group_ids: list[str] = []
@@ -226,16 +229,9 @@ class DeliveryQueue:
         for job_id in ids:
             event = db.get(EventInstance, event_ids[job_id])
             assert event is not None
-            body, content_type = render_source(
-                event.payload, target.get("payload_format", "default")
+            body = ingestion_record(
+                event.payload, target.get("payload_format", "default"), simulation.product_id
             )
-            if (
-                target.get("payload_format", "default") == "default"
-                or content_type != "application/json"
-            ):
-                body = custom_ingestion_record(event.payload, body, simulation.product_id)
-            elif isinstance(body, str):
-                body = json.loads(body)
             encoded_size = len(json.dumps(body, ensure_ascii=False, separators=(",", ":")).encode())
             if records and size + encoded_size + 1 > limit:
                 groups.append((group_ids, records))

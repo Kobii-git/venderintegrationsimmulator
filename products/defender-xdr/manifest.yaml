@@ -72,6 +72,7 @@ supported_transports:
 - syslog
 - http_webhook
 - azure_logs_ingestion
+- azure_function_app
 formats:
 - json
 field_references:

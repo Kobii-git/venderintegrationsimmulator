@@ -223,6 +223,19 @@ def custom_ingestion_record(payload: dict[str, Any], body: Any, product_id: str)
 
     logical = payload.get("_source_event", {})
     record = body if isinstance(body, dict) else {}
+    if "_dataset_payload" in payload:
+        captured = payload.get("_dataset_record", record)
+        record = captured if isinstance(captured, dict) else {}
+        if isinstance(body, str) and payload.get("_dataset_content_type") == "application/json":
+            record = json.loads(body)
+        from app.services.datasets import timestamps
+
+        paths, _ = timestamps(record)
+        if paths and "TimeGenerated" not in record:
+            stamp = record
+            for part in paths[0].split("."):
+                stamp = stamp[part]
+            record = {**record, "TimeGenerated": stamp}
     return {
         "TimeGenerated": logical.get(
             "time", record.get("TimeGenerated", datetime.now(UTC).isoformat())

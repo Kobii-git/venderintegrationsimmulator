@@ -8,6 +8,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, TextIO
 
+from app.core.config import Settings
 from app.core.exceptions import ValidationAppError
 
 MAX_UPLOAD_BYTES = 100 * 1024 * 1024
@@ -236,9 +237,19 @@ def replay_record(db: Any, simulation: Any, data_dir: Path) -> tuple[dict[str, A
         if previous is not None:
             delay = min(max(current - previous, 0), config.max_original_gap_seconds)
         state["replay_last_timestamp"] = current
-    if config.rewrite_timestamps:
-        payload = rewrite_timestamps(payload, paths, datetime.now(UTC).isoformat())
-        raw_payload = (
+    simulation.runtime_state = state
+    return replay_payload(record, config.rewrite_timestamps, paths), delay
+
+
+def replay_payload(
+    record: dict[str, Any], rewrite: bool = False, paths: list[str] | None = None
+) -> dict[str, Any]:
+    """Render the captured record identically for preflight, previews and replay."""
+    payload = record["payload"]
+    if rewrite:
+        recognized, _ = timestamps(payload)
+        payload = rewrite_timestamps(payload, paths or recognized, datetime.now(UTC).isoformat())
+        raw = (
             payload
             if record["content_type"] == "application/json"
             else _csv_values(payload)
@@ -246,9 +257,12 @@ def replay_record(db: Any, simulation: Any, data_dir: Path) -> tuple[dict[str, A
             else payload
         )
     else:
-        raw_payload = record.get("raw", payload)
-    simulation.runtime_state = state
-    return {"_dataset_payload": raw_payload, "_dataset_content_type": record["content_type"]}, delay
+        raw = record.get("raw", payload)
+    return {
+        "_dataset_payload": raw,
+        "_dataset_record": payload,
+        "_dataset_content_type": record["content_type"],
+    }
 
 
 def _csv_values(record: dict[str, Any]) -> str:
@@ -257,3 +271,58 @@ def _csv_values(record: dict[str, Any]) -> str:
     out = io.StringIO(newline="")
     csv.writer(out, lineterminator="").writerow(record.values())
     return out.getvalue()
+
+
+def validate_ingestion_dataset(
+    path: Path,
+    fmt: str,
+    payload_mode: str,
+    rewrite: bool = False,
+    product_id: str = "uploaded-logs",
+    batch_max_bytes: int = 950_000,
+    timestamp_fields: list[str] | None = None,
+) -> dict[str, Any]:
+    from app.formats.azure_ingestion import ingestion_record, validate_record
+
+    if payload_mode == "json" and fmt not in {"json", "ndjson"}:
+        raise ValueError("Unchanged JSON mode requires a JSON or NDJSON dataset")
+    preview: list[dict[str, Any]] = []
+    count = 0
+    with path.open(encoding="utf-8") as handle:
+        for count, line in enumerate(handle, 1):
+            item = json.loads(line)
+            try:
+                record = ingestion_record(
+                    replay_payload(item, rewrite, timestamp_fields),
+                    "default" if payload_mode == "envelope" else payload_mode,
+                    product_id,
+                )
+                validate_record(record, batch_max_bytes)
+            except (ValueError, TypeError) as exc:
+                raise ValueError(f"Record {count}: {exc}") from None
+            if len(preview) < 5:
+                preview.append(record)
+    return {
+        "record_count": count,
+        "records": preview,
+        "payload_mode": payload_mode,
+        "schema_verified": False,
+    }
+
+
+def schedule_settings_for_replay(db: Any, config: dict[str, Any], settings: Settings) -> Settings:
+    """A finite upload can cover its complete file while remaining byte/rate bounded."""
+    from app.models import UploadedDataset
+
+    dataset = (
+        db.get(UploadedDataset, config.get("dataset_id")) if config.get("dataset_id") else None
+    )
+    if dataset is None:
+        return settings
+    return settings.model_copy(
+        update={
+            "scheduler_max_event_count": max(
+                settings.scheduler_max_event_count, dataset.record_count
+            )
+        }
+    )

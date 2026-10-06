@@ -1,6 +1,6 @@
 # Integration Simulator
 
-Self-hosted `0.4.0` tool for security engineers to **simulate**, **test**, and **troubleshoot** push, Syslog, and pull-based vendor integrations.
+Self-hosted `0.4.1` tool for security engineers to **simulate**, **test**, and **troubleshoot** push, Syslog, and pull-based vendor integrations.
 
 Generate realistic vendor payloads, deliver them to your webhook endpoint, inspect request/response details, replay events, inject faults, and validate ingestion pipelines — without needing the real UpGuard product.
 
@@ -20,7 +20,9 @@ Generate realistic vendor payloads, deliver them to your webhook endpoint, inspe
 
 ## Log Lab
 
-Release 0.4.0 adds 30 source profiles, device identities, independent collectors, Azure Logs Ingestion, rate scheduling and uploaded-log replay. Open **Log Lab** in the navigation to configure a simulation. See [the deployment/operator guide](docs/LOG_LAB.md), [Sentinel smoke test](docs/SENTINEL_SMOKE_TEST.md) and [implementation status](docs/IMPLEMENTATION_STATUS.md). Live Sentinel/parser compatibility requires verification in your environment.
+Release 0.4.0 added 30 source profiles, device identities, independent collectors, Azure Logs Ingestion, rate scheduling and uploaded-log replay. Open **Log Lab** in the navigation to configure a simulation. See [the deployment/operator guide](docs/LOG_LAB.md), [Sentinel smoke test](docs/SENTINEL_SMOKE_TEST.md) and [implementation status](docs/IMPLEMENTATION_STATUS.md). Live Sentinel/parser compatibility requires verification in your environment.
+
+Release 0.4.1 adds **Upload logs** for one-off Azure ingestion and a **Function App → DCE** relay destination for one-off uploads and Log Lab replay. Validate every record, preview unchanged JSON or a custom-table envelope, and track acceptance/failures until delivery drains. [Relay code and deployment guide](azure/function-relay/README.md) · [Upgrade notes](docs/UPGRADE_0.4.1.md).
 
 ## Published Docker image
 
@@ -44,7 +46,7 @@ Public packages can be pulled without this login step.
 docker run -d --name integration-simulator --restart unless-stopped \
   -p 127.0.0.1:8080:8080 \
   -v integration-simulator-data:/data \
-  ghcr.io/kobii-git/venderintegrationsimmulator:0.4.0
+  ghcr.io/kobii-git/venderintegrationsimmulator:0.4.1
 ```
 
 Docker pulls the image automatically when needed. Open **http://localhost:8080**.
@@ -58,7 +60,7 @@ For Compose without a source build:
 docker compose -f docker-compose.image.yml up -d
 ```
 
-Set `SIMULATOR_VERSION=0.4.0` to pin a version; the image-only file defaults to `latest`.
+Set `SIMULATOR_VERSION=0.4.1` to pin a version; the image-only file defaults to `latest`.
 See [installation and updates](docs/INSTALLATION.md) for pulling and replacing containers.
 
 ## Build from GitHub source

@@ -13,6 +13,7 @@ from app.domain.fault_injection import validate_fault_config
 from app.domain.inbound import InboundConfig
 from app.domain.runtime_state import default_runtime_state
 from app.domain.schedule import validate_schedule_config
+from app.formats.azure_ingestion import AZURE_TRANSPORTS
 from app.models import Simulation
 from app.products.registry import ProductRegistry
 from app.repositories.simulation import SimulationRepository
@@ -67,7 +68,7 @@ class SimulationService:
             self._validate_product_and_scenario(data.product_id, scenario_id)
         self._validate_simulation_mode(data.product_id, data.simulation_mode.value)
         self._validate_scenario_modes(data.product_id, scenario_ids, data.simulation_mode.value)
-        self._validate_schedule_limits(data.schedule)
+        self._validate_schedule_limits(data.schedule, data.replay_config)
         self._validate_weights(data.schedule.model_dump(), scenario_ids)
         self._validate_scenario_overrides(data.product_id, scenario_ids, data.scenario_overrides)
         validate_fault_config(data.fault_config, self._settings)
@@ -167,7 +168,10 @@ class SimulationService:
         if "scenario_overrides" in updates:
             simulation.scenario_overrides = updates["scenario_overrides"]
         if "schedule" in updates and data.schedule is not None:
-            self._validate_schedule_limits(data.schedule)
+            self._validate_schedule_limits(
+                data.schedule,
+                data.replay_config if data.replay_config is not None else simulation.replay_config,
+            )
             simulation.schedule = updates["schedule"]
         if "fault_config" in updates and data.fault_config is not None:
             validate_fault_config(data.fault_config, self._settings)
@@ -303,11 +307,13 @@ class SimulationService:
             raise ValidationAppError(
                 f"Unsupported payload format for {product_id}: {target.payload_format}"
             )
-        if (
-            target.destination.transport_id == "azure_logs_ingestion"
-            and target.payload_format
-            not in {"json", "default", "SecurityEvent", "WindowsEvent", "CommonSecurityLog"}
-        ):
+        if target.destination.transport_id in AZURE_TRANSPORTS and target.payload_format not in {
+            "json",
+            "default",
+            "SecurityEvent",
+            "WindowsEvent",
+            "CommonSecurityLog",
+        }:
             raise ValidationAppError("Azure ingestion requires JSON or an explicit table mapping")
 
     def _validate_replay(self, config: dict[str, Any]) -> None:
@@ -361,8 +367,15 @@ class SimulationService:
                     details={"supported_modes": scenario.supported_modes},
                 )
 
-    def _validate_schedule_limits(self, schedule: ScheduleConfig) -> None:
-        validate_schedule_config(schedule.model_dump(mode="json"), self._settings)
+    def _validate_schedule_limits(
+        self, schedule: ScheduleConfig, replay_config: dict[str, Any] | None = None
+    ) -> None:
+        from app.services.datasets import schedule_settings_for_replay
+
+        validate_schedule_config(
+            schedule.model_dump(mode="json"),
+            schedule_settings_for_replay(self._repo._db, replay_config or {}, self._settings),
+        )
 
     def _validate_destination_for_product(
         self, product_id: str, destination: DestinationConfig
@@ -372,7 +385,7 @@ class SimulationService:
             raise NotFoundError(f"Product not found: {product_id}")
         if (
             destination.transport_id not in manifest.supported_transports
-            and destination.transport_id != "azure_logs_ingestion"
+            and destination.transport_id not in AZURE_TRANSPORTS
         ):
             raise ValidationAppError(
                 f"Transport '{destination.transport_id}' is not supported by "
@@ -485,6 +498,10 @@ class SimulationService:
                 if method == "basic" and not target_auth.get("has_password"):
                     target_missing.append("auth_config.password")
                 if method in {"bearer", "api_key_header"} and not target_auth.get("has_token"):
+                    target_missing.append("auth_config.token")
+                if config["destination"].get(
+                    "transport_id"
+                ) == "azure_function_app" and not target_auth.get("has_token"):
                     target_missing.append("auth_config.token")
                 if config["destination"].get("transport_id") == "azure_logs_ingestion" and not (
                     target_auth.get("has_oauth_client_secret")

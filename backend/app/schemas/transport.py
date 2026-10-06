@@ -1,7 +1,7 @@
 from typing import Any, Literal, Self
 
 from app.core.http_url import reject_embedded_url_credentials
-from app.schemas.simulation import AuthConfigInput
+from app.schemas.simulation import AuthConfigInput, DestinationConfig
 from app.transports.delivery_result import DeliveryResult
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -111,3 +111,16 @@ class DeliveryResultResponse(BaseModel):
 
 class HttpDeliveryResultResponse(DeliveryResultResponse):
     """Backward-compatible alias for HTTP transport responses."""
+
+
+class AzureTransportRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    destination: "DestinationConfig"
+    auth_config: AuthConfigInput = Field(default_factory=AuthConfigInput)
+    record: dict[str, Any] | None = None
+
+    @model_validator(mode="after")
+    def azure_only(self) -> Self:
+        if self.destination.transport_id not in {"azure_logs_ingestion", "azure_function_app"}:
+            raise ValueError("An Azure ingestion destination is required")
+        return self

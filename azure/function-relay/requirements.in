@@ -1,0 +1,3 @@
+azure-functions
+azure-identity
+httpx==0.28.1

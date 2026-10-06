@@ -7,6 +7,7 @@ import {
   getSimulation,
   updateSimulation,
 } from "../api/simulations";
+import { AzureDestinationEditor } from "../components/AzureDestinationEditor";
 import { ErrorAlert } from "../components/ErrorAlert";
 import { StructuredValueEditor } from "../components/StructuredValueEditor";
 import { ScenarioOverridesSection } from "../components/ScenarioOverridesSection";
@@ -197,8 +198,8 @@ export function LogLabPage() {
           ...scheduled,
           user_pool: scheduled.user_pool?.filter((name) => name.trim()),
           scenario_weights: Object.fromEntries(
-            Object.entries(scheduled.scenario_weights ?? {}).filter(([scenarioId]) =>
-              scenarios.includes(scenarioId),
+            Object.entries(scheduled.scenario_weights ?? {}).filter(
+              ([scenarioId]) => scenarios.includes(scenarioId),
             ),
           ),
         },
@@ -465,6 +466,9 @@ export function LogLabPage() {
                     <option value="azure_logs_ingestion">
                       Azure Logs Ingestion API
                     </option>
+                    <option value="azure_function_app">
+                      Azure Function App relay
+                    </option>
                   </select>
                 </div>
               </div>
@@ -677,63 +681,13 @@ export function LogLabPage() {
                   ) : null}
                 </>
               ) : (
-                <>
-                  <p className="form-hint">
-                    Use JSON or a table mapping. Default text/XML is wrapped in
-                    the custom RawData schema. HTTP 204 confirms API acceptance;
-                    table arrival requires KQL validation.
-                  </p>
-                  {(
-                    [
-                      ["endpoint", "HTTPS ingestion endpoint"],
-                      ["tenant_id", "Tenant ID"],
-                      ["dcr_immutable_id", "DCR immutable ID"],
-                      ["stream", "Stream name"],
-                    ] as const
-                  ).map(([key, label]) => (
-                    <div className="form-row" key={key}>
-                      <label>{label}</label>
-                      <input
-                        required
-                        value={t.destination[key] ?? ""}
-                        onChange={(e) =>
-                          destination(i, { [key]: e.target.value })
-                        }
-                      />
-                    </div>
-                  ))}
-                  <div className="form-row">
-                    <label>Client ID</label>
-                    <input
-                      required
-                      value={t.auth_config.oauth_client_id ?? ""}
-                      onChange={(e) =>
-                        changeTarget(i, {
-                          auth_config: {
-                            ...t.auth_config,
-                            oauth_client_id: e.target.value,
-                          },
-                        })
-                      }
-                    />
-                  </div>
-                  <div className="form-row">
-                    <label>Client secret</label>
-                    <input
-                      type="password"
-                      placeholder="Blank keeps stored secret"
-                      value={t.auth_config.oauth_client_secret ?? ""}
-                      onChange={(e) =>
-                        changeTarget(i, {
-                          auth_config: {
-                            ...t.auth_config,
-                            oauth_client_secret: e.target.value || undefined,
-                          },
-                        })
-                      }
-                    />
-                  </div>
-                </>
+                <AzureDestinationEditor
+                  destination={t.destination}
+                  auth={t.auth_config}
+                  onChange={(d, a) =>
+                    changeTarget(i, { destination: d, auth_config: a })
+                  }
+                />
               )}
               <div className="grid-2">
                 <div className="form-row">
@@ -934,12 +888,17 @@ export function LogLabPage() {
                 id="user-pool"
                 value={(schedule.user_pool ?? []).join("\n")}
                 onChange={(e) =>
-                  setSchedule((v) => ({ ...v, user_pool: e.target.value.split("\n") }))
+                  setSchedule((v) => ({
+                    ...v,
+                    user_pool: e.target.value.split("\n"),
+                  }))
                 }
               />
             </div>
             <div className="form-row">
-              <label htmlFor="incident-preset">Correlated incident preset</label>
+              <label htmlFor="incident-preset">
+                Correlated incident preset
+              </label>
               <select
                 id="incident-preset"
                 value={schedule.incident_preset ?? ""}

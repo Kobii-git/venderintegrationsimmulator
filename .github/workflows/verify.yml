@@ -17,6 +17,22 @@ jobs:
       - run: python -m pip install --require-hashes -r backend/requirements-dev.txt
       - run: scripts/verify-backend.sh
 
+  function-relay:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install --require-hashes -r backend/requirements-dev.txt
+      - run: python -m pip install --require-hashes -r azure/function-relay/requirements.txt
+      - run: python -m pytest azure/function-relay/tests -q
+      - run: python -m ruff check azure/function-relay
+      - run: python -m ruff format --check azure/function-relay
+      - run: python -m pip_audit -r azure/function-relay/requirements.txt
+      - run: python scripts/package-function-relay.py /tmp/function-relay.zip
+      - run: az bicep build --file azure/function-relay/infra/main.bicep --outfile /tmp/function-relay-template.json
+
   frontend:
     runs-on: ubuntu-latest
     steps:
@@ -61,12 +77,12 @@ jobs:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
       - run: scripts/verify-docker.sh
-      - run: docker build -f docker/Dockerfile -t integration-simulator:0.4.0 .
+      - run: docker build -f docker/Dockerfile -t integration-simulator:0.4.1 .
       - run: scripts/verify-standalone-image.sh
 
   native-images:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: [backend, frontend, migrations, browser-workflows, production-image]
+    needs: [backend, function-relay, frontend, migrations, browser-workflows, production-image]
     strategy:
       fail-fast: false
       matrix:
