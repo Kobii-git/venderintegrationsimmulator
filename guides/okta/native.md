@@ -1,6 +1,6 @@
 # Okta: native collection and Sentinel deployment
 
-Reviewed **2026-10-07** · Profile schema **System Log API v1** · Guide version **1.0.0**
+Reviewed **2026-10-07** · Profile schema **System Log API v1** · Guide version **1.1.0**
 
 ## Architecture and connection methods
 
@@ -99,10 +99,10 @@ Expect the original hostname/tenant context, event time, event family and action
 
 ## Tables and KQL verification
 
-Use `YOUR_CONFIGURED_VENDOR_TABLE` for the described native path when that is the table selected by its connector. For a configurable vendor solution replace `YOUR_CONFIGURED_VENDOR_TABLE` with the actual deployed table name from the connector settings. Synthetic custom-envelope events go to IntegrationLab_CL.
+Use `OktaSSO` for the described native path when that is the table selected by its connector. Synthetic custom-envelope events go to IntegrationLab_CL.
 
 ```kusto
-YOUR_CONFIGURED_VENDOR_TABLE
+OktaSSO
 | where TimeGenerated > ago(30m)
 | take 20
 ```
@@ -137,3 +137,150 @@ Keep a copy of the pre-change vendor configuration and DCR/collector settings. M
 - [Official reference 1](https://developer.okta.com/docs/reference/api/system-log/)
 - [Official reference 2](https://learn.microsoft.com/en-us/azure/sentinel/data-connectors-reference)
 - [Official reference 3](https://learn.microsoft.com/en-us/azure/azure-monitor/logs/tutorial-logs-ingestion-portal)
+
+## REST API production deployment
+
+Architecture: Okta → REST API → the configured receiver/collector → its parser and Sentinel table. Support label: **native simulation**. Apply this article's licensing, permission, network and source-version prerequisites before creating this path.
+
+1. Create a dedicated Okta API token under Security > API > Tokens with the creator's minimal log-read admin permissions, or a supported OAuth service application assigned okta.logs.read and the matching admin role. GET /api/v1/logs with since/limit; consume Link rel=next verbatim and checkpoint after downstream processing.
+2. Complete the numbered vendor setup and collector/Sentinel configuration above for the selected path. Record the source account/device, receiver, authentication identity and table/DCR identifiers; protect secret values in the collector settings. Select only the event categories licensed for that source.
+3. Use the source fixture below and the article's complete envelope when normalizing. Preserve its original timestamp and identity; set SourceProfile to `okta` for synthetic custom ingestion. The custom transform is `source` only when the four input columns exactly match the table. Native parsers need the chosen vendor format instead.
+4. Generate one approved source event, inspect each hop and run the table/KQL checks above. Expect populated event identity, time and action; receiver acceptance alone is insufficient. For authentication/connectivity/formatting failures use the troubleshooting checks before advancing any collector checkpoint.
+5. Monitor backlog/event delay and export these settings for rollback. Rotate this method's credential/certificate through a tested overlap, update the corresponding collector/job, then retire the old credential. To roll back, disable only this new method and restore its prior source/parser/checkpoint settings; retain shared tables and infrastructure.
+
+## REST API simulator testing
+
+1. Create the matching `okta` simulation with the method-specific settings above and independent lab credentials. Copy the displayed endpoint/destination exactly, including simulation_id on pull requests.
+2. Generate one raw source example, then run a small manual/finite test. For pull follow the returned checkpoint until exhausted; for push inspect the native envelope/framing and receiver acknowledgment.
+3. Compare the complete raw fields and source time below to the processed result. Stop the test while retaining the saved dataset/key when repeatable downloads/replay are needed.
+4. Run the article's Sentinel verification query against the configured table, preserving `okta` in the custom SourceProfile. Exercise wrong credentials, no records and a bounded rate/format failure before increasing volume.
+5. Record this local result separately from live vendor/parser acceptance; rotate only lab credentials and stop the test path for rollback.
+
+## Webhook production deployment
+
+Architecture: Okta → Webhook → the configured receiver/collector → its parser and Sentinel table. Support label: **generic synthetic delivery**. Apply this article's licensing, permission, network and source-version prerequisites before creating this path.
+
+1. Workflow > Event Hooks: create HTTPS URL, shared Authorization value and hook-eligible event subscriptions. Respond to verification GET X-Okta-Verification-Challenge with JSON verification, verify/activate and trigger a safe event. Set the receiver to the Okta hook envelope, not a bare System Log object.
+2. Complete the numbered vendor setup and collector/Sentinel configuration above for the selected path. Record the source account/device, receiver, authentication identity and table/DCR identifiers; protect secret values in the collector settings. Select only the event categories licensed for that source.
+3. Use the source fixture below and the article's complete envelope when normalizing. Preserve its original timestamp and identity; set SourceProfile to `okta` for synthetic custom ingestion. The custom transform is `source` only when the four input columns exactly match the table. Native parsers need the chosen vendor format instead.
+4. Generate one approved source event, inspect each hop and run the table/KQL checks above. Expect populated event identity, time and action; receiver acceptance alone is insufficient. For authentication/connectivity/formatting failures use the troubleshooting checks before advancing any collector checkpoint.
+5. Monitor backlog/event delay and export these settings for rollback. Rotate this method's credential/certificate through a tested overlap, update the corresponding collector/job, then retire the old credential. To roll back, disable only this new method and restore its prior source/parser/checkpoint settings; retain shared tables and infrastructure.
+
+## Webhook simulator testing
+
+1. Create the matching `okta` simulation with the method-specific settings above and independent lab credentials. Copy the displayed endpoint/destination exactly, including simulation_id on pull requests.
+2. Generate one raw source example, then run a small manual/finite test. For pull follow the returned checkpoint until exhausted; for push inspect the native envelope/framing and receiver acknowledgment.
+3. Compare the complete raw fields and source time below to the processed result. Stop the test while retaining the saved dataset/key when repeatable downloads/replay are needed.
+4. Run the article's Sentinel verification query against the configured table, preserving `okta` in the custom SourceProfile. Exercise wrong credentials, no records and a bounded rate/format failure before increasing volume.
+5. Record this local result separately from live vendor/parser acceptance; rotate only lab credentials and stop the test path for rollback.
+
+## Complete source fixture
+
+The following source fixture is generated from this profile's first scenario at a fixed UTC time. Select the required event family in Generate raw log for a fresh timestamp. Stored fixtures are readable and contain no receiver credentials.
+
+```json
+{
+  "uuid": "11111111-2222-4333-8444-555555555555",
+  "published": "2026-10-07T12:00:00+00:00",
+  "eventType": "user.session.start",
+  "version": "0",
+  "displayMessage": "User login to Okta",
+  "severity": "INFO",
+  "client": {
+    "ipAddress": "192.0.2.25",
+    "userAgent": {
+      "rawUserAgent": "Mozilla/5.0",
+      "os": "Other",
+      "browser": "OTHER"
+    }
+  },
+  "actor": {
+    "id": "00u1c80317fa3b1799d",
+    "type": "User",
+    "alternateId": "analyst@example.com",
+    "displayName": "Example Analyst"
+  },
+  "outcome": {
+    "result": "SUCCESS",
+    "reason": null
+  },
+  "target": [
+    {
+      "id": "00ubdd640fb06671ad1",
+      "type": "User",
+      "alternateId": "analyst@example.com",
+      "displayName": "Example Analyst"
+    }
+  ],
+  "transaction": {
+    "type": "WEB",
+    "id": "1a3d1fa7bc8960a923b8c1e9392456de",
+    "detail": {}
+  },
+  "debugContext": {
+    "debugData": {
+      "requestId": "1a3d1fa7bc8960a923b8c1e9392456de"
+    }
+  },
+  "authenticationContext": {
+    "authenticationStep": 0,
+    "externalSessionId": "1a3d1fa7bc8960a923b8c1e9392456de"
+  },
+  "securityContext": {
+    "isProxy": false
+  }
+}
+```
+
+## Documentation and deployment verification
+
+Documentation status: complete. This means every listed method has a production procedure, a simulator test or explicit alternative, a valid source example, operational checks and official references. It does not certify live vendor, licensed feature, parser or Sentinel acceptance. Review date: 2026-10-07; revision: 1.1.0. Use the method metadata to record those acceptance results separately. Commands are displayed only and require operator-supplied placeholders.
+
+[Current Sentinel connector/table inventory](https://learn.microsoft.com/en-us/azure/sentinel/sentinel-tables-connectors-reference). Match the deployed connector revision and table overrides; retired Function connector tables differ from current CCF tables.
+
+## Unified connector production deployment
+
+1. Assign Log Analytics Contributor and Microsoft Sentinel Contributor on the workspace. Obtain an Okta API token from a dedicated log-read administrator; enable HTTPS egress to the org.
+2. In the Defender portal open System > Data management > Data connectors > Unified connectors > Okta Single Sign-On > Connect a connector. Enter a descriptive Name, bare Domain name such as YOUR_ORG.okta.com, and the raw API token in API key.
+3. Select SIEM, the connected Sentinel workspace and table manager; select Connect. This route is in the connectors gallery, rather than Content Hub. The initial collection covers one hour before creation; allow up to 30 minutes for the first table.
+4. Generate a permitted sign-in test and verify the selected workspace:
+
+```kusto
+OktaSystemLogs
+| where TimeGenerated > ago(30m)
+| take 20
+```
+
+5. Troubleshoot domain/prefix mistakes, token creator permissions, org egress and workspace role propagation. Rotate with Manage, validate renewed ingestion, then retire the old token. For rollback disable the new collector and restore the former path/checkpoint; retain the table and avoid running duplicate collectors.
+
+## Unified connector simulator testing
+
+1. Choose Okta in Generate raw log and download the source fixture below. For a fresh event, use a current timestamp and a documentation-only identity.
+2. Use the [custom Azure ingestion procedure](/guides/okta/azure-ingestion) with SourceProfile `okta`, a four-column envelope and a small manual run. This container does not emulate the managed `Unified connector` connector; it tests the downstream transformation through HTTP/Azure delivery.
+3. Verify IntegrationLab_CL with the synthetic query above. Native connector table arrival must be tested against the licensed vendor separately; this alternative omits its credentials, discovery, pagination and storage checkpoints.
+4. Stop the simulator test for rollback, preserve the dataset and encryption key and record local acceptance independently of production acceptance.
+
+[Official connector reference](https://learn.microsoft.com/en-us/azure/sentinel/unified-connector-integration).
+
+## Legacy Function connector production deployment
+
+1. Inventory an existing deprecated Okta Function connector, its protected org/token settings, timer state and Okta_CL analytics dependencies. Prefer the current Unified or CCF connector for a new installation.
+2. For maintenance of an existing deployment, follow the installed Function revision's application settings and Azure runtime requirements. Its API token uses System Log read permissions; allow org HTTPS and preserve checkpoint storage before replacing the function.
+3. Capture a bounded System Log API example with the REST command above, verify its UUID/time and confirm the older table:
+
+```kusto
+Okta_CL
+| where TimeGenerated > ago(30m)
+| take 20
+```
+
+4. Migrate by enabling one current collector, recording its initial time window and updating old table/parser references in analytics. Verify continuity and duplicate UUIDs before stopping the Function timer. Keep its state/config for rollback; rotate tokens through a tested overlap and retain history tables.
+
+## Legacy Function connector simulator testing
+
+1. Choose Okta in Generate raw log and download the source fixture below. For a fresh event, use a current timestamp and a documentation-only identity.
+2. Use the [custom Azure ingestion procedure](/guides/okta/azure-ingestion) with SourceProfile `okta`, a four-column envelope and a small manual run. This container does not emulate the managed `Legacy Function connector` connector; it tests the downstream transformation through HTTP/Azure delivery.
+3. Verify IntegrationLab_CL with the synthetic query above. Native connector table arrival must be tested against the licensed vendor separately; this alternative omits its credentials, discovery, pagination and storage checkpoints.
+4. Stop the simulator test for rollback, preserve the dataset and encryption key and record local acceptance independently of production acceptance.
+
+[Official connector reference](https://learn.microsoft.com/en-us/azure/sentinel/data-connectors-reference).

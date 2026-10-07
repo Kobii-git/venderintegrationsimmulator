@@ -1,0 +1,8 @@
+[
+  {
+    "TimeGenerated": "2026-10-07T12:00:00+00:00",
+    "SourceProfile": "vmware-esxi",
+    "Computer": "sim-device-01",
+    "RawData": "Hostd: [Originator@6876 sub=Vimsvc.ha-eventmgr] Event 123 : User labuser@198.51.100.20 logged in as VMware-client"
+  }
+]

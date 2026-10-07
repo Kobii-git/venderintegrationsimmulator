@@ -161,6 +161,8 @@ class ProductCatalogService:
                     description=schema.get("description"),
                     default=schema.get("default"),
                     required=name in required,
+                    hidden=bool(schema.get("hidden", False)),
+                    deprecated=bool(schema.get("deprecated", False)),
                 )
             )
         return variables

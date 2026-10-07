@@ -391,3 +391,45 @@ def test_legacy_batch_limits_normalize_and_remain_readable():
     legacy = {**destination(False), "batch_max_bytes": 1000000}
     assert DestinationConfig.model_validate(legacy).batch_max_bytes == 950000
     assert DestinationConfigResponse.model_validate(legacy).batch_max_bytes == 1000000
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("stage", ["token", "ingest", "function", "health"])
+@pytest.mark.parametrize("encoding", ["identity", "gzip", "br"])
+async def test_all_azure_http_paths_bound_and_close_responses(stage, encoding):
+    import gzip
+
+    from tests.test_http_boundaries import Chunks
+
+    body = b"x" * (1024 * 1024 + 1)
+    stream = Chunks([gzip.compress(body) if encoding == "gzip" else body, b"unread"])
+    calls = []
+
+    def handler(req):
+        calls.append(req)
+        if stage != "token" and req.url.host == "login.microsoftonline.com":
+            return httpx.Response(200, json={"access_token": "token-canary", "expires_in": 3600})
+        return httpx.Response(200, headers={"Content-Encoding": encoding}, stream=stream)
+
+    is_function = stage in {"function", "health"}
+    cls = AzureFunctionAppTransport if is_function else AzureLogsIngestionTransport
+    transport = cls(httpx.AsyncClient(transport=httpx.MockTransport(handler)))
+    try:
+        if stage == "health":
+            result = await transport.test_destination(destination(True), auth(True))
+        else:
+            result = await transport.deliver(
+                destination(is_function),
+                b'[{"Message":"hello"}]',
+                "application/json",
+                auth(is_function),
+            )
+        assert not result.success
+        assert result.error_category == (
+            "invalid_response" if encoding == "br" else "response_too_large"
+        )
+        assert stream.closed and stream.read <= 1
+        assert "canary" not in result.model_dump_json()
+        assert len(calls) == (2 if stage == "ingest" else 1)
+    finally:
+        await transport.close()

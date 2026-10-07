@@ -1,6 +1,6 @@
 id: mimecast
 display_name: Mimecast
-version: 1.0.0
+version: 1.1.0
 description: Representative synthetic security events and native connection workflows.
 supported_modes:
 - push_webhook
@@ -32,15 +32,21 @@ scenarios:
   config_schema:
     type: object
     additionalProperties: false
-    properties: &id001
+    properties:
       hostname:
         type: string
         default: sim-device-01
         maxLength: 1024
+        description: Collector hostname in the Azure ingestion envelope (Computer);
+          native record unchanged.
       device_ip:
         type: string
         default: 192.0.2.10
         maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
       src:
         type: string
         default: 198.51.100.20
@@ -49,6 +55,322 @@ scenarios:
         type: string
         default: 203.0.113.10
         maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
+      user:
+        type: string
+        default: labuser
+        maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
+      host:
+        type: string
+        default: app.example.test
+        maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
+      uri:
+        type: string
+        default: /login
+        maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
+      sender:
+        type: string
+        default: sender@example.test
+        maxLength: 1024
+      recipient:
+        type: string
+        default: recipient@example.test
+        maxLength: 1024
+      subject:
+        type: string
+        default: Integration test message
+        maxLength: 1024
+      action:
+        type: string
+        default: allow
+        maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
+- id: email-delivery
+  display_name: Email Delivery
+  default_transport: http_webhook
+  template: scenarios/email-delivery.json
+  config_schema:
+    type: object
+    additionalProperties: false
+    properties:
+      hostname:
+        type: string
+        default: sim-device-01
+        maxLength: 1024
+        description: Collector hostname in the Azure ingestion envelope (Computer);
+          native record unchanged.
+      device_ip:
+        type: string
+        default: 192.0.2.10
+        maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
+      src:
+        type: string
+        default: 198.51.100.20
+        maxLength: 1024
+      dst:
+        type: string
+        default: 203.0.113.10
+        maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
+      user:
+        type: string
+        default: labuser
+        maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
+      host:
+        type: string
+        default: app.example.test
+        maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
+      uri:
+        type: string
+        default: /login
+        maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
+      sender:
+        type: string
+        default: sender@example.test
+        maxLength: 1024
+      recipient:
+        type: string
+        default: recipient@example.test
+        maxLength: 1024
+      subject:
+        type: string
+        default: Integration test message
+        maxLength: 1024
+      action:
+        type: string
+        default: allow
+        maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
+- id: email-rejection
+  display_name: Email Rejection
+  default_transport: http_webhook
+  template: scenarios/email-rejection.json
+  config_schema:
+    type: object
+    additionalProperties: false
+    properties:
+      hostname:
+        type: string
+        default: sim-device-01
+        maxLength: 1024
+        description: Collector hostname in the Azure ingestion envelope (Computer);
+          native record unchanged.
+      device_ip:
+        type: string
+        default: 192.0.2.10
+        maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
+      src:
+        type: string
+        default: 198.51.100.20
+        maxLength: 1024
+      dst:
+        type: string
+        default: 203.0.113.10
+        maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
+      user:
+        type: string
+        default: labuser
+        maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
+      host:
+        type: string
+        default: app.example.test
+        maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
+      uri:
+        type: string
+        default: /login
+        maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
+      sender:
+        type: string
+        default: sender@example.test
+        maxLength: 1024
+      recipient:
+        type: string
+        default: recipient@example.test
+        maxLength: 1024
+      subject:
+        type: string
+        default: Integration test message
+        maxLength: 1024
+      action:
+        type: string
+        default: allow
+        maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
+- id: email-bounce
+  display_name: Email Bounce
+  default_transport: http_webhook
+  template: scenarios/email-bounce.json
+  config_schema:
+    type: object
+    additionalProperties: false
+    properties:
+      hostname:
+        type: string
+        default: sim-device-01
+        maxLength: 1024
+        description: Collector hostname in the Azure ingestion envelope (Computer);
+          native record unchanged.
+      device_ip:
+        type: string
+        default: 192.0.2.10
+        maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
+      src:
+        type: string
+        default: 198.51.100.20
+        maxLength: 1024
+      dst:
+        type: string
+        default: 203.0.113.10
+        maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
+      user:
+        type: string
+        default: labuser
+        maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
+      host:
+        type: string
+        default: app.example.test
+        maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
+      uri:
+        type: string
+        default: /login
+        maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
+      sender:
+        type: string
+        default: sender@example.test
+        maxLength: 1024
+      recipient:
+        type: string
+        default: recipient@example.test
+        maxLength: 1024
+      subject:
+        type: string
+        default: Integration test message
+        maxLength: 1024
+      action:
+        type: string
+        default: allow
+        maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
+- id: url-protection
+  display_name: URL Protection
+  default_transport: http_webhook
+  template: scenarios/url-protection.json
+  config_schema:
+    type: object
+    additionalProperties: false
+    properties:
+      hostname:
+        type: string
+        default: sim-device-01
+        maxLength: 1024
+        description: Collector hostname in the Azure ingestion envelope (Computer);
+          native record unchanged.
+      device_ip:
+        type: string
+        default: 192.0.2.10
+        maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
+      src:
+        type: string
+        default: 198.51.100.20
+        maxLength: 1024
+      dst:
+        type: string
+        default: 203.0.113.10
+        maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
       user:
         type: string
         default: labuser
@@ -77,38 +399,10 @@ scenarios:
         type: string
         default: allow
         maxLength: 1024
-- id: email-delivery
-  display_name: Email Delivery
-  default_transport: http_webhook
-  template: scenarios/email-delivery.json
-  config_schema:
-    type: object
-    additionalProperties: false
-    properties: *id001
-- id: email-rejection
-  display_name: Email Rejection
-  default_transport: http_webhook
-  template: scenarios/email-rejection.json
-  config_schema:
-    type: object
-    additionalProperties: false
-    properties: *id001
-- id: email-bounce
-  display_name: Email Bounce
-  default_transport: http_webhook
-  template: scenarios/email-bounce.json
-  config_schema:
-    type: object
-    additionalProperties: false
-    properties: *id001
-- id: url-protection
-  display_name: URL Protection
-  default_transport: http_webhook
-  template: scenarios/url-protection.json
-  config_schema:
-    type: object
-    additionalProperties: false
-    properties: *id001
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
 - id: attachment-protection
   display_name: Attachment Protection
   default_transport: http_webhook
@@ -116,7 +410,77 @@ scenarios:
   config_schema:
     type: object
     additionalProperties: false
-    properties: *id001
+    properties:
+      hostname:
+        type: string
+        default: sim-device-01
+        maxLength: 1024
+        description: Collector hostname in the Azure ingestion envelope (Computer);
+          native record unchanged.
+      device_ip:
+        type: string
+        default: 192.0.2.10
+        maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
+      src:
+        type: string
+        default: 198.51.100.20
+        maxLength: 1024
+      dst:
+        type: string
+        default: 203.0.113.10
+        maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
+      user:
+        type: string
+        default: labuser
+        maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
+      host:
+        type: string
+        default: app.example.test
+        maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
+      uri:
+        type: string
+        default: /login
+        maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
+      sender:
+        type: string
+        default: sender@example.test
+        maxLength: 1024
+      recipient:
+        type: string
+        default: recipient@example.test
+        maxLength: 1024
+      subject:
+        type: string
+        default: Integration test message
+        maxLength: 1024
+      action:
+        type: string
+        default: allow
+        maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
 - id: impersonation
   display_name: Impersonation
   default_transport: http_webhook
@@ -124,7 +488,77 @@ scenarios:
   config_schema:
     type: object
     additionalProperties: false
-    properties: *id001
+    properties:
+      hostname:
+        type: string
+        default: sim-device-01
+        maxLength: 1024
+        description: Collector hostname in the Azure ingestion envelope (Computer);
+          native record unchanged.
+      device_ip:
+        type: string
+        default: 192.0.2.10
+        maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
+      src:
+        type: string
+        default: 198.51.100.20
+        maxLength: 1024
+      dst:
+        type: string
+        default: 203.0.113.10
+        maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
+      user:
+        type: string
+        default: labuser
+        maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
+      host:
+        type: string
+        default: app.example.test
+        maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
+      uri:
+        type: string
+        default: /login
+        maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
+      sender:
+        type: string
+        default: sender@example.test
+        maxLength: 1024
+      recipient:
+        type: string
+        default: recipient@example.test
+        maxLength: 1024
+      subject:
+        type: string
+        default: Integration test message
+        maxLength: 1024
+      action:
+        type: string
+        default: allow
+        maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
 - id: dlp
   display_name: DLP
   default_transport: http_webhook
@@ -132,7 +566,77 @@ scenarios:
   config_schema:
     type: object
     additionalProperties: false
-    properties: *id001
+    properties:
+      hostname:
+        type: string
+        default: sim-device-01
+        maxLength: 1024
+        description: Collector hostname in the Azure ingestion envelope (Computer);
+          native record unchanged.
+      device_ip:
+        type: string
+        default: 192.0.2.10
+        maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
+      src:
+        type: string
+        default: 198.51.100.20
+        maxLength: 1024
+      dst:
+        type: string
+        default: 203.0.113.10
+        maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
+      user:
+        type: string
+        default: labuser
+        maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
+      host:
+        type: string
+        default: app.example.test
+        maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
+      uri:
+        type: string
+        default: /login
+        maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
+      sender:
+        type: string
+        default: sender@example.test
+        maxLength: 1024
+      recipient:
+        type: string
+        default: recipient@example.test
+        maxLength: 1024
+      subject:
+        type: string
+        default: Integration test message
+        maxLength: 1024
+      action:
+        type: string
+        default: allow
+        maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
 - id: audit
   display_name: Audit
   default_transport: http_webhook
@@ -140,7 +644,85 @@ scenarios:
   config_schema:
     type: object
     additionalProperties: false
-    properties: *id001
+    properties:
+      hostname:
+        type: string
+        default: sim-device-01
+        maxLength: 1024
+        description: Collector hostname in the Azure ingestion envelope (Computer);
+          native record unchanged.
+      device_ip:
+        type: string
+        default: 192.0.2.10
+        maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
+      src:
+        type: string
+        default: 198.51.100.20
+        maxLength: 1024
+      dst:
+        type: string
+        default: 203.0.113.10
+        maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
+      user:
+        type: string
+        default: labuser
+        maxLength: 1024
+      host:
+        type: string
+        default: app.example.test
+        maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
+      uri:
+        type: string
+        default: /login
+        maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
+      sender:
+        type: string
+        default: sender@example.test
+        maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
+      recipient:
+        type: string
+        default: recipient@example.test
+        maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
+      subject:
+        type: string
+        default: Integration test message
+        maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
+      action:
+        type: string
+        default: allow
+        maxLength: 1024
+        deprecated: true
+        hidden: true
+        description: Legacy override accepted for compatibility; does not change this
+          native record.
 connection_profiles:
 - id: api-2
   display_name: API 2.0 OAuth and SIEM batch downloads

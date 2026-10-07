@@ -1,0 +1,8 @@
+[
+  {
+    "TimeGenerated": "2026-10-07T12:00:00+00:00",
+    "SourceProfile": "linux",
+    "Computer": "sim-device-01",
+    "RawData": "sshd[1234]: Accepted password for labuser from 198.51.100.20 port 49152 ssh2"
+  }
+]

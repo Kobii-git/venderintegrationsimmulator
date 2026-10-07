@@ -1,0 +1,8 @@
+[
+  {
+    "TimeGenerated": "2026-10-07T12:00:00+00:00",
+    "SourceProfile": "azure-activity",
+    "Computer": "sim-device-01",
+    "RawData": "{\"time\":\"2026-10-07T12:00:00+00:00\",\"resourceId\":\"/subscriptions/11111111-2222-4333-8444-555555555555/resourceGroups/lab/providers/Microsoft.Compute/virtualMachines/vm01\",\"operationName\":\"Microsoft.Compute/virtualMachines/write\",\"category\":\"Administrative\",\"resultType\":\"Success\",\"caller\":\"labuser@example.test\",\"correlationId\":\"11111111-2222-4333-8444-555555555555\",\"level\":\"Informational\",\"properties\":{\"statusCode\":\"OK\"},\"claims\":{\"ipaddr\":\"198.51.100.20\"}}"
+  }
+]

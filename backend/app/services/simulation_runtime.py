@@ -1044,6 +1044,9 @@ class SimulationRuntimeService:
                     target_id=target["id"],
                     status=status,
                     config=target,
+                    # SQLite server timestamps have second precision; preserve FIFO
+                    # for new jobs generated or edited within the same second.
+                    created_at=datetime.now(UTC),
                 )
             )
         self._db.flush()

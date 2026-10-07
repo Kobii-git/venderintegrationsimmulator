@@ -78,6 +78,8 @@ export function ScenarioOverridesSection({
             string,
             {
               type?: string;
+              hidden?: boolean;
+              deprecated?: boolean;
               title?: string;
               description?: string;
               default?: unknown;
@@ -86,7 +88,7 @@ export function ScenarioOverridesSection({
           >;
           required?: string[];
         };
-        const properties = schema.properties ?? {};
+        const properties = Object.fromEntries(Object.entries(schema.properties ?? {}).filter(([, property]) => !property.hidden));
         const required = new Set(schema.required ?? []);
         return (
           <fieldset className="scenario-fieldset" key={scenario.id}>

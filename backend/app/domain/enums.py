@@ -40,6 +40,9 @@ class SimulationMode(StrEnum):
 
 
 class DeliveryErrorCategory(StrEnum):
+    RESPONSE_TOO_LARGE = "response_too_large"
+    INVALID_RESPONSE = "invalid_response"
+    REDIRECT_REJECTED = "redirect_rejected"
     DNS = "dns"
     CONNECTION = "connection"
     CONNECTION_TIMEOUT = "connection_timeout"

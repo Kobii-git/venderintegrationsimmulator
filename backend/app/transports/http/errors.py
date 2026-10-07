@@ -19,6 +19,12 @@ def categorize_http_status(status_code: int) -> DeliveryErrorCategory | None:
 
 
 def categorize_exception(exc: Exception) -> tuple[DeliveryErrorCategory, str]:
+    if getattr(exc, "category", None) in {
+        "response_too_large",
+        "invalid_response",
+        "redirect_rejected",
+    }:
+        return DeliveryErrorCategory(exc.category), str(exc)  # type: ignore[attr-defined]
     if isinstance(exc, httpx.InvalidURL):
         return DeliveryErrorCategory.MALFORMED_DESTINATION, f"Invalid URL: {exc}"
 

@@ -77,7 +77,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
       - run: scripts/verify-docker.sh
-      - run: docker build -f docker/Dockerfile -t integration-simulator:0.4.6 .
+      - run: docker build -f docker/Dockerfile -t integration-simulator:0.4.7 .
       - run: scripts/verify-standalone-image.sh
 
   native-images:

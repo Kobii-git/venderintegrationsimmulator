@@ -91,6 +91,12 @@ test("Upload logs creates a target without randomUUID", async ({ page }) => {
     expect(body.targets[0].id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
     await route.fulfill({ status: 422, json: { error: { code: "validation_error", message: "Target creation verified" } } });
   });
+  let releaseList!: () => void;
+  const delayedList = new Promise<void>((resolve) => { releaseList = resolve; });
+  await page.route("**/api/v1/datasets", async (route) => {
+    await delayedList;
+    await route.fulfill({ status: 200, json: [] });
+  });
   await page.goto("/uploads");
   await page.getByRole("combobox", { name: "File format", exact: true }).selectOption("json");
   await page.getByLabel("Log file", { exact: true }).setInputFiles({
@@ -98,6 +104,8 @@ test("Upload logs creates a target without randomUUID", async ({ page }) => {
     mimeType: "application/json",
     buffer: Buffer.from('[{"Time":"2026-10-06T20:00:00Z","Application":"IntegrationSimulator","RawData":"HTTP LAN test"}]'),
   });
+  await expect(page.getByLabel("Dataset")).not.toHaveValue("");
+  releaseList();
   await expect(page.getByLabel("Dataset")).not.toHaveValue("");
   await page.getByRole("combobox", { name: "Payload mode", exact: true }).selectOption("json");
   await page.getByLabel("DCE endpoint").fill("https://example.ingest.monitor.azure.com");

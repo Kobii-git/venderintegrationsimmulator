@@ -1,0 +1,8 @@
+[
+  {
+    "TimeGenerated": "2026-10-07T12:00:00+00:00",
+    "SourceProfile": "netscaler",
+    "Computer": "sim-device-01",
+    "RawData": "sim-device-01 0-PPE-0 : default HTTP REQUEST 1234 0 : Client_ip 198.51.100.20 Client_port 49152 Vserver_ip 203.0.113.10 Vserver_port 443 Method GET Url /lab"
+  }
+]

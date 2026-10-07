@@ -1,0 +1,8 @@
+[
+  {
+    "TimeGenerated": "2026-10-07T11:17:10.373739+00:00",
+    "SourceProfile": "upguard",
+    "Computer": "simulator",
+    "RawData": "{\"notification\":{\"id\":93810,\"type\":\"CustomerCSTARUnderThreshold\",\"description\":\"The score for 'Example Company' dropped below 600 with a score of 599\",\"occurredAt\":\"2026-10-07T12:00:00+00:00\",\"context\":{\"LatestScore\":599,\"PrevScore\":732,\"Threshold\":600}}}"
+  }
+]

@@ -11,6 +11,6 @@ args = parser.parse_args()
 source = Path(__file__).resolve().parents[1] / "azure/function-relay"
 args.output.parent.mkdir(parents=True, exist_ok=True)
 with ZipFile(args.output, "w", ZIP_DEFLATED) as archive:
-    for name in ("function_app.py", "host.json", "requirements.txt"):
+    for name in ("function_app.py", "http_response.py", "host.json", "requirements.txt"):
         archive.write(source / name, name)
 print(f"Relay source package: {args.output.resolve()}")

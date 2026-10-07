@@ -66,6 +66,8 @@ class ScenarioVariableResponse(BaseModel):
     description: str | None = None
     default: Any = None
     required: bool = False
+    hidden: bool = False
+    deprecated: bool = False
 
 
 class ScenarioDetailResponse(ScenarioSummaryResponse):

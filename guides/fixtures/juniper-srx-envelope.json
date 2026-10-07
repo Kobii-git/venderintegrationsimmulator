@@ -1,0 +1,8 @@
+[
+  {
+    "TimeGenerated": "2026-10-07T12:00:00+00:00",
+    "SourceProfile": "juniper-srx",
+    "Computer": "sim-device-01",
+    "RawData": "RT_FLOW: RT_FLOW_SESSION_CREATE: session created 198.51.100.20/49152->203.0.113.10/443 junos-https 198.51.100.20/49152->203.0.113.10/443 None None 6 LAB trust untrust 1234 N/A(N/A) ge-0/0/0.0 UNKNOWN UNKNOWN UNKNOWN"
+  }
+]

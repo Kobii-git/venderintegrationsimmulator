@@ -1,0 +1,8 @@
+[
+  {
+    "TimeGenerated": "2026-10-07T12:00:00+00:00",
+    "SourceProfile": "entra-id",
+    "Computer": "sim-device-01",
+    "RawData": "{\"TimeGenerated\":\"2026-10-07T12:00:00+00:00\",\"Id\":\"11111111-2222-4333-8444-555555555555\",\"UserPrincipalName\":\"labuser@example.test\",\"UserId\":\"11111111-2222-4333-8444-555555555555\",\"AppDisplayName\":\"Lab application\",\"AppId\":\"11111111-2222-4333-8444-666666666666\",\"IPAddress\":\"198.51.100.20\",\"ResultType\":\"0\",\"ResultDescription\":\"Success\",\"ConditionalAccessStatus\":\"success\",\"ClientAppUsed\":\"Browser\",\"IsInteractive\":true}"
+  }
+]

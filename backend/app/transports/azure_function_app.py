@@ -6,6 +6,7 @@ from typing import Any
 from urllib.parse import urlsplit, urlunsplit
 
 import httpx
+from app.core.http_response import InvalidResponseError, ResponseLimitError, bounded_request
 from app.transports.azure_logs_ingestion import AzureLogsIngestionTransport
 from app.transports.delivery_result import DeliveryResult
 
@@ -70,7 +71,9 @@ class AzureFunctionAppTransport(AzureLogsIngestionTransport):
             token = await self._token(destination, auth_config)
             if self._client is None:
                 self._client = httpx.AsyncClient(follow_redirects=False)
-            response = await self._client.get(
+            response = await bounded_request(
+                self._client,
+                "GET",
                 url,
                 headers=self._headers(token),
                 timeout=float(destination.get("timeout_seconds", 60)),
@@ -79,7 +82,13 @@ class AzureFunctionAppTransport(AzureLogsIngestionTransport):
             if status != 200 or response.json().get("configured") is not True:
                 raise ValueError(f"Function health check rejected (HTTP {status})")
             error = None
-        except (ValueError, KeyError, TypeError, AttributeError, httpx.HTTPError):
+            category = None
+        except (ValueError, KeyError, TypeError, AttributeError, httpx.HTTPError) as exc:
+            category = (
+                exc.category
+                if isinstance(exc, ResponseLimitError | InvalidResponseError)
+                else "auth"
+            )
             error = (
                 "Function authentication/configuration check failed; "
                 "verify URL, function key and relay settings"
@@ -95,7 +104,7 @@ class AzureFunctionAppTransport(AzureLogsIngestionTransport):
             method="GET",
             response_status_code=status,
             error_message=error,
-            error_category="auth" if error else None,
+            error_category=category,
             request_headers_redacted=self._headers("***REDACTED***"),
             delivery_note=(
                 "Function authentication and configuration only; "

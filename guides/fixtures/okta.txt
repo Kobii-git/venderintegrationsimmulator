@@ -1,0 +1,51 @@
+{
+  "uuid": "11111111-2222-4333-8444-555555555555",
+  "published": "2026-10-07T12:00:00+00:00",
+  "eventType": "user.session.start",
+  "version": "0",
+  "displayMessage": "User login to Okta",
+  "severity": "INFO",
+  "client": {
+    "ipAddress": "192.0.2.25",
+    "userAgent": {
+      "rawUserAgent": "Mozilla/5.0",
+      "os": "Other",
+      "browser": "OTHER"
+    }
+  },
+  "actor": {
+    "id": "00u1c80317fa3b1799d",
+    "type": "User",
+    "alternateId": "analyst@example.com",
+    "displayName": "Example Analyst"
+  },
+  "outcome": {
+    "result": "SUCCESS",
+    "reason": null
+  },
+  "target": [
+    {
+      "id": "00ubdd640fb06671ad1",
+      "type": "User",
+      "alternateId": "analyst@example.com",
+      "displayName": "Example Analyst"
+    }
+  ],
+  "transaction": {
+    "type": "WEB",
+    "id": "1a3d1fa7bc8960a923b8c1e9392456de",
+    "detail": {}
+  },
+  "debugContext": {
+    "debugData": {
+      "requestId": "1a3d1fa7bc8960a923b8c1e9392456de"
+    }
+  },
+  "authenticationContext": {
+    "authenticationStep": 0,
+    "externalSessionId": "1a3d1fa7bc8960a923b8c1e9392456de"
+  },
+  "securityContext": {
+    "isProxy": false
+  }
+}

@@ -160,6 +160,31 @@ class DeliveryQueue:
         event_ids: dict[str, str],
         configs: dict[str, dict[str, Any]],
     ) -> list[DeliveryResult]:
+        # Snapshots are immutable. Partition consecutive jobs, not all matching jobs,
+        # so an A/B/A backlog retains its FIFO destination and authentication order.
+        groups: list[list[str]] = []
+        for job_id in ids:
+            if not groups or configs[groups[-1][0]] != configs[job_id]:
+                groups.append([])
+            groups[-1].append(job_id)
+        results: list[DeliveryResult] = []
+        for group in groups:
+            results.extend(
+                await self._deliver_homogeneous_batch(
+                    db, runtime, simulation, group, event_ids, configs
+                )
+            )
+        return results
+
+    async def _deliver_homogeneous_batch(
+        self,
+        db: Session,
+        runtime: SimulationRuntimeService,
+        simulation: Simulation,
+        ids: list[str],
+        event_ids: dict[str, str],
+        configs: dict[str, dict[str, Any]],
+    ) -> list[DeliveryResult]:
         if configs[ids[0]]["destination"].get("transport_id") == "cloudflare_logpush" and not (
             simulation.fault_config or {}
         ).get("enabled"):
@@ -254,7 +279,7 @@ class DeliveryQueue:
                 event = db.get(EventInstance, event_ids[job_id])
                 assert event is not None
                 runtime._persist_attempt(
-                    event, result, "azure_logs_ingestion", target_id=target["id"]
+                    event, result, destination["transport_id"], target_id=target["id"]
                 )
                 outcomes[job_id] = result
         return [outcomes[job_id] for job_id in ids]

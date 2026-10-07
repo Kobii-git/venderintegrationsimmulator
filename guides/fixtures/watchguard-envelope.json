@@ -1,0 +1,8 @@
+[
+  {
+    "TimeGenerated": "2026-10-07T12:00:00+00:00",
+    "SourceProfile": "watchguard",
+    "Computer": "sim-device-01",
+    "RawData": "sim-device-01 Allow 198.51.100.20 203.0.113.10 https/tcp 49152 443 Trusted External (LabPolicy) proc_id=\"firewall\" rc=\"100\" msg_id=\"3000-0148\""
+  }
+]

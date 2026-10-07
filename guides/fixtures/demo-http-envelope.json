@@ -1,0 +1,8 @@
+[
+  {
+    "TimeGenerated": "2026-10-07T11:17:10.351564+00:00",
+    "SourceProfile": "demo-http",
+    "Computer": "simulator",
+    "RawData": "{\"event\":\"ping\",\"message\":\"hello\",\"sent_at\":\"2026-10-07T12:00:00+00:00\",\"event_id\":\"11111111-2222-4333-8444-555555555555\",\"random_value\":\"655\"}"
+  }
+]

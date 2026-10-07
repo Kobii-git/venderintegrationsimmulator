@@ -15,7 +15,16 @@ from fastapi import Request
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
-from app.core.redaction import REDACTED, truncate_body
+from app.core.http_request import RequestBodyTooLarge, read_request
+from app.core.redaction import (
+    REDACTED,
+    collect_http_secret_values,
+    is_sensitive_key,
+    redact_headers,
+    redact_mapping,
+    redact_secret_values,
+    truncate_body,
+)
 from app.core.security import SecretEncryptor
 from app.domain.enums import SimulationMode, SimulationStatus
 from app.domain.inbound import InboundConfig
@@ -95,6 +104,27 @@ class OAuthTokenService:
                 status_code=400,
             )
 
+        try:
+            form = await self._parse_token_request(request)
+            request.scope["oauth_submitted_form"] = form
+        except (ValueError, UnicodeError, RecursionError) as exc:
+            request.scope["oauth_invalid_body"] = True
+            response = oauth_error(
+                "invalid_request",
+                "Request body too large"
+                if isinstance(exc, RequestBodyTooLarge)
+                else "Malformed OAuth request",
+                status_code=413 if isinstance(exc, RequestBodyTooLarge) else 400,
+            )
+            self._persist_token_log(
+                simulation,
+                request,
+                response,
+                auth_result=InboundAuthResult(success=False, method_id="oauth2_client_credentials"),
+                started=started,
+                token_metadata=None,
+            )
+            return response
         fault = inbound_settings.oauth_fault_config
         if fault.enabled and fault.token_endpoint_failure:
             status = fault.token_endpoint_status or 503
@@ -113,7 +143,6 @@ class OAuthTokenService:
             )
             return response
 
-        form = await self._parse_token_request(request)
         grant_type = form.get("grant_type", [""])[0]
         if grant_type != "client_credentials":
             response = oauth_error(
@@ -421,17 +450,42 @@ class OAuthTokenService:
         return pull_running[0] if len(pull_running) == 1 else None
 
     async def _parse_token_request(self, request: Request) -> dict[str, list[str]]:
+        body = await read_request(request, 16 * 1024)
         content_type = request.headers.get("content-type", "")
         if "application/json" in content_type:
-            payload = await request.json()
-            if isinstance(payload, dict):
-                return {str(k): [str(v)] for k, v in payload.items()}
-            return {}
-        body = await request.body()
+            property_count = 0
+
+            def object_pairs(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+                nonlocal property_count
+                property_count += len(pairs)
+                if property_count > 64:
+                    raise RequestBodyTooLarge("Too many OAuth properties")
+                submitted_secrets = request.scope.setdefault("oauth_json_secret_values", set())
+                for key, value in pairs:
+                    if is_sensitive_key(key) and isinstance(value, str) and value:
+                        submitted_secrets.add(value)
+                return dict(pairs)
+
+            def invalid_constant(value: str) -> Any:
+                raise ValueError("Invalid JSON constant")
+
+            payload = json.loads(
+                body, object_pairs_hook=object_pairs, parse_constant=invalid_constant
+            )
+            if not isinstance(payload, dict):
+                raise ValueError("OAuth JSON must be an object")
+            return {str(k): [str(v)] for k, v in payload.items()}
         if not body:
             return {}
-        decoded = body.decode("utf-8", errors="replace")
-        return parse_qs(decoded, keep_blank_values=True)
+        decoded = body.decode("utf-8", errors="strict")
+        if len(decoded.split("&")) > 64:
+            raise RequestBodyTooLarge("Too many OAuth fields")
+        # Invalid percent escapes are malformed rather than silently repaired.
+        import re
+
+        if re.search(r"%(?![0-9a-fA-F]{2})", decoded):
+            raise ValueError("Invalid form escape")
+        return parse_qs(decoded, keep_blank_values=True, max_num_fields=64, errors="strict")
 
     def _extract_client_credentials(
         self, request: Request, form: dict[str, list[str]]
@@ -464,12 +518,11 @@ class OAuthTokenService:
             headers={"Cache-Control": "no-store", "Pragma": "no-cache"},
         )
 
-    def _redact_token_request_body(self, form: dict[str, list[str]]) -> str:
-        redacted = {
-            key: (REDACTED if key == "client_secret" else values[0] if values else "")
-            for key, values in form.items()
-        }
-        return truncate_body(json.dumps(redacted, separators=(",", ":"))) or ""
+    def _redact_token_request_body(self, form: dict[str, list[str]]) -> dict[str, Any]:
+        redacted = {key: (values[0] if values else "") for key, values in form.items()}
+        safe_form = redact_mapping(redacted)
+        assert isinstance(safe_form, dict)
+        return safe_form
 
     def _redact_token_response_body(self, response: JSONResponse) -> str:
         raw = ""
@@ -485,14 +538,14 @@ class OAuthTokenService:
         try:
             content = json.loads(raw)
         except json.JSONDecodeError:
-            return truncate_body(raw) or ""
+            return raw
         if not isinstance(content, dict):
-            return truncate_body(raw) or ""
+            return raw
         redacted = dict(content)
         for field in ("access_token", "refresh_token"):
             if field in redacted:
                 redacted[field] = REDACTED
-        return truncate_body(json.dumps(redacted, separators=(",", ":"))) or ""
+        return json.dumps(redacted, separators=(",", ":"))
 
     def _persist_token_log(
         self,
@@ -503,14 +556,39 @@ class OAuthTokenService:
         auth_result: InboundAuthResult,
         started: float,
         token_metadata: dict[str, Any] | None,
-        request_body: str | None = None,
+        request_body: str | dict[str, Any] | None = None,
     ) -> None:
-        from app.core.redaction import redact_headers
+        configured_secret = self._encryptor.decrypt_auth_config(simulation.auth_config).get(
+            "oauth_client_secret"
+        )
+        submitted = request.scope.get("oauth_submitted_form", {})
+        secrets_to_redact = collect_http_secret_values(
+            auth_config={"oauth_client_secret": configured_secret},
+            headers=dict(request.headers),
+            query_params={
+                name: request.query_params.getlist(name) for name in request.query_params
+            },
+        )
+        secrets_to_redact.update(
+            collect_http_secret_values(auth_config={}, headers={}, query_params=submitted)
+        )
+        secrets_to_redact.update(request.scope.get("oauth_json_secret_values", set()))
+        # Include a Basic password even on failed authentication.
+        _, submitted_secret = self._extract_client_credentials(request, submitted)
+        if submitted_secret:
+            secrets_to_redact.add(submitted_secret)
+
+        def safe(value: Any) -> Any:
+            return redact_secret_values(redact_mapping(value), secrets_to_redact)
 
         headers = redact_headers(
             {k: v for k, v in request.headers.items()},
             extra_sensitive={"authorization"},
         )
+        if request.scope.get("oauth_invalid_body"):
+            # A rejected body is not parsed beyond its limit. Do not persist arbitrary
+            # header echoes of credentials that could not be extracted safely.
+            headers = {name: REDACTED for name in headers}
         log = InboundRequestLog(
             simulation_id=simulation.id,
             product_id=simulation.product_id,
@@ -518,19 +596,23 @@ class OAuthTokenService:
             received_at=datetime.now(UTC),
             request_method=request.method.upper(),
             request_path=request.url.path,
-            request_query_params=dict(request.query_params),
-            request_headers_redacted=headers,
-            request_body=request_body,
+            request_query_params=safe(dict(request.query_params)),
+            request_headers_redacted=safe(headers),
+            request_body=truncate_body(
+                json.dumps(safe(request_body), separators=(",", ":"))
+                if isinstance(request_body, dict)
+                else safe(request_body)
+            ),
             response_status_code=response.status_code,
-            response_headers=dict(response.headers),
-            response_body=self._redact_token_response_body(response),
+            response_headers=safe(dict(response.headers)),
+            response_body=truncate_body(safe(self._redact_token_response_body(response))),
             auth_method_id=auth_result.method_id,
             auth_result="success" if auth_result.success else "failed",
             latency_ms=max(int((time.perf_counter() - started) * 1000), 0),
             items_returned=0,
             error_message=None if auth_result.success else auth_result.message,
             request_kind="token",
-            token_metadata=token_metadata,
+            token_metadata=safe(token_metadata),
         )
         self._inbound_logs.create(log)
         self._db.commit()

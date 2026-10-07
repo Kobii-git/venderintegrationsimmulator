@@ -1,0 +1,8 @@
+[
+  {
+    "TimeGenerated": "2026-10-07T12:00:00+00:00",
+    "SourceProfile": "infoblox",
+    "Computer": "sim-device-01",
+    "RawData": "named[1234]: client 198.51.100.20#49152 (example.test): query: example.test IN A + (192.0.2.10)"
+  }
+]

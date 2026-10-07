@@ -1,6 +1,6 @@
 # AWS CloudTrail: native collection and Sentinel deployment
 
-Reviewed **2026-10-07** · Profile schema **CloudTrail eventVersion 1.09** · Guide version **1.0.0**
+Reviewed **2026-10-07** · Profile schema **CloudTrail eventVersion 1.09** · Guide version **1.1.0**
 
 ## Architecture and connection methods
 
@@ -98,7 +98,7 @@ Expect the original hostname/tenant context, event time, event family and action
 
 ## Tables and KQL verification
 
-Use `AWSCloudTrail` for the described native path when that is the table selected by its connector. For a configurable vendor solution replace `YOUR_CONFIGURED_VENDOR_TABLE` with the actual deployed table name from the connector settings. Synthetic custom-envelope events go to IntegrationLab_CL.
+Use `AWSCloudTrail` for the described native path when that is the table selected by its connector. Synthetic custom-envelope events go to IntegrationLab_CL.
 
 ```kusto
 AWSCloudTrail
@@ -136,3 +136,93 @@ Keep a copy of the pre-change vendor configuration and DCR/collector settings. M
 - [Official reference 1](https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-event-reference-record-contents.html)
 - [Official reference 2](https://learn.microsoft.com/en-us/azure/sentinel/data-connectors-reference)
 - [Official reference 3](https://learn.microsoft.com/en-us/azure/azure-monitor/logs/tutorial-logs-ingestion-portal)
+
+## S3/SQS production deployment
+
+Architecture: AWS CloudTrail → S3/SQS → the configured receiver/collector → its parser and Sentinel table. Support label: **production only**. Apply this article's licensing, permission, network and source-version prerequisites before creating this path.
+
+1. Enable a multi-region CloudTrail trail into the protected S3 bucket. Use the Sentinel AWS S3 connector's deployment template for its external-ID/assume-role trust. Scope reader s3:GetObject/ListBucket, sqs:ReceiveMessage/DeleteMessage/GetQueueAttributes and KMS decrypt where needed; configure ObjectCreated notifications on the intended AWSLogs prefix and enter role ARN/queue URL in Sentinel.
+2. Complete the numbered vendor setup and collector/Sentinel configuration above for the selected path. Record the source account/device, receiver, authentication identity and table/DCR identifiers; protect secret values in the collector settings. Select only the event categories licensed for that source.
+3. Use the source fixture below and the article's complete envelope when normalizing. Preserve its original timestamp and identity; set SourceProfile to `aws-cloudtrail` for synthetic custom ingestion. The custom transform is `source` only when the four input columns exactly match the table. Native parsers need the chosen vendor format instead.
+4. Generate one approved source event, inspect each hop and run the table/KQL checks above. Expect populated event identity, time and action; receiver acceptance alone is insufficient. For authentication/connectivity/formatting failures use the troubleshooting checks before advancing any collector checkpoint.
+5. Monitor backlog/event delay and export these settings for rollback. Rotate this method's credential/certificate through a tested overlap, update the corresponding collector/job, then retire the old credential. To roll back, disable only this new method and restore its prior source/parser/checkpoint settings; retain shared tables and infrastructure.
+
+## S3/SQS simulator testing
+
+1. Generate/download the readable `aws-cloudtrail` source fixture. Test an operator-owned normalizer against those fields, or manually load the fixture using the destination's documented test tooling in a separate authorized lab.
+2. Use this article's HTTP/Azure custom-ingestion alternative for downstream verification; this container has no `S3/SQS` producer/collector emulator and performs no cloud provisioning.
+3. Match the destination's timestamp representation, compression, batch envelope and selected fields explicitly. This alternative omits production IAM, licensing, discovery/retention and provider checkpoints; verify those externally before claiming native acceptance.
+4. Run the article's Sentinel verification query against the configured table, preserving `aws-cloudtrail` in the custom SourceProfile. Exercise wrong credentials, no records and a bounded rate/format failure before increasing volume.
+5. Record this local result separately from live vendor/parser acceptance; rotate only lab credentials and stop the test path for rollback.
+
+## CloudWatch Logs production deployment
+
+Architecture: AWS CloudTrail → CloudWatch Logs → the configured receiver/collector → its parser and Sentinel table. Support label: **production only**. Apply this article's licensing, permission, network and source-version prerequisites before creating this path.
+
+1. CloudTrail > Trail settings: enable delivery to the intended CloudWatch log group with its CloudTrail-to-CloudWatch IAM role. Add a subscription filter to the selected Kinesis/Firehose/Lambda receiver, decode the base64-gzip awslogs.data envelope, extract logEvents.message CloudTrail objects and maintain retries/deduplication before a custom DCR.
+2. Complete the numbered vendor setup and collector/Sentinel configuration above for the selected path. Record the source account/device, receiver, authentication identity and table/DCR identifiers; protect secret values in the collector settings. Select only the event categories licensed for that source.
+3. Use the source fixture below and the article's complete envelope when normalizing. Preserve its original timestamp and identity; set SourceProfile to `aws-cloudtrail` for synthetic custom ingestion. The custom transform is `source` only when the four input columns exactly match the table. Native parsers need the chosen vendor format instead.
+4. Generate one approved source event, inspect each hop and run the table/KQL checks above. Expect populated event identity, time and action; receiver acceptance alone is insufficient. For authentication/connectivity/formatting failures use the troubleshooting checks before advancing any collector checkpoint.
+5. Monitor backlog/event delay and export these settings for rollback. Rotate this method's credential/certificate through a tested overlap, update the corresponding collector/job, then retire the old credential. To roll back, disable only this new method and restore its prior source/parser/checkpoint settings; retain shared tables and infrastructure.
+
+## CloudWatch Logs simulator testing
+
+1. Generate/download the readable `aws-cloudtrail` source fixture. Test an operator-owned normalizer against those fields, or manually load the fixture using the destination's documented test tooling in a separate authorized lab.
+2. Use this article's HTTP/Azure custom-ingestion alternative for downstream verification; this container has no `CloudWatch Logs` producer/collector emulator and performs no cloud provisioning.
+3. Match the destination's timestamp representation, compression, batch envelope and selected fields explicitly. This alternative omits production IAM, licensing, discovery/retention and provider checkpoints; verify those externally before claiming native acceptance.
+4. Run the article's Sentinel verification query against the configured table, preserving `aws-cloudtrail` in the custom SourceProfile. Exercise wrong credentials, no records and a bounded rate/format failure before increasing volume.
+5. Record this local result separately from live vendor/parser acceptance; rotate only lab credentials and stop the test path for rollback.
+
+## REST API production deployment
+
+Architecture: AWS CloudTrail → REST API → the configured receiver/collector → its parser and Sentinel table. Support label: **production only**. Apply this article's licensing, permission, network and source-version prerequisites before creating this path.
+
+1. Use an IAM role with cloudtrail:LookupEvents read access and aws cloudtrail lookup-events --lookup-attributes AttributeKey=EventSource,AttributeValue=iam.amazonaws.com --start-time YOUR_START_TIME --end-time YOUR_END_TIME. Follow NextToken and parse CloudTrailEvent JSON. LookupEvents is regional management-event history, not a replacement for full trail/data-event storage.
+2. Complete the numbered vendor setup and collector/Sentinel configuration above for the selected path. Record the source account/device, receiver, authentication identity and table/DCR identifiers; protect secret values in the collector settings. Select only the event categories licensed for that source.
+3. Use the source fixture below and the article's complete envelope when normalizing. Preserve its original timestamp and identity; set SourceProfile to `aws-cloudtrail` for synthetic custom ingestion. The custom transform is `source` only when the four input columns exactly match the table. Native parsers need the chosen vendor format instead.
+4. Generate one approved source event, inspect each hop and run the table/KQL checks above. Expect populated event identity, time and action; receiver acceptance alone is insufficient. For authentication/connectivity/formatting failures use the troubleshooting checks before advancing any collector checkpoint.
+5. Monitor backlog/event delay and export these settings for rollback. Rotate this method's credential/certificate through a tested overlap, update the corresponding collector/job, then retire the old credential. To roll back, disable only this new method and restore its prior source/parser/checkpoint settings; retain shared tables and infrastructure.
+
+## REST API simulator testing
+
+1. Generate/download the readable `aws-cloudtrail` source fixture. Test an operator-owned normalizer against those fields, or manually load the fixture using the destination's documented test tooling in a separate authorized lab.
+2. Use this article's HTTP/Azure custom-ingestion alternative for downstream verification; this container has no `REST API` producer/collector emulator and performs no cloud provisioning.
+3. Match the destination's timestamp representation, compression, batch envelope and selected fields explicitly. This alternative omits production IAM, licensing, discovery/retention and provider checkpoints; verify those externally before claiming native acceptance.
+4. Run the article's Sentinel verification query against the configured table, preserving `aws-cloudtrail` in the custom SourceProfile. Exercise wrong credentials, no records and a bounded rate/format failure before increasing volume.
+5. Record this local result separately from live vendor/parser acceptance; rotate only lab credentials and stop the test path for rollback.
+
+## Complete source fixture
+
+The following source fixture is generated from this profile's first scenario at a fixed UTC time. Select the required event family in Generate raw log for a fresh timestamp. Stored fixtures are readable and contain no receiver credentials.
+
+```json
+{
+  "eventVersion": "1.09",
+  "userIdentity": {
+    "type": "IAMUser",
+    "principalId": "AIDALAB",
+    "arn": "arn:aws:iam::123456789012:user/labuser",
+    "accountId": "123456789012",
+    "userName": "labuser"
+  },
+  "eventTime": "2026-10-07T12:00:00+00:00",
+  "eventSource": "signin.amazonaws.com",
+  "eventName": "ConsoleLogin",
+  "awsRegion": "us-east-1",
+  "sourceIPAddress": "198.51.100.20",
+  "userAgent": "Lab Simulator",
+  "requestParameters": null,
+  "responseElements": {
+    "ConsoleLogin": "Success"
+  },
+  "eventID": "11111111-2222-4333-8444-555555555555",
+  "eventType": "AwsConsoleSignIn",
+  "managementEvent": true,
+  "recipientAccountId": "123456789012",
+  "eventCategory": "Management"
+}
+```
+
+## Documentation and deployment verification
+
+Documentation status: complete. This means every listed method has a production procedure, a simulator test or explicit alternative, a valid source example, operational checks and official references. It does not certify live vendor, licensed feature, parser or Sentinel acceptance. Review date: 2026-10-07; revision: 1.1.0. Use the method metadata to record those acceptance results separately. Commands are displayed only and require operator-supplied placeholders.

@@ -208,3 +208,136 @@ def test_oauth_create_requires_client_credentials(client: ASGITestClient) -> Non
     created = response.json()
     start = client.post(f"/api/v1/simulations/{created['id']}/start")
     assert start.status_code in {400, 422}
+
+
+def test_oauth_bounded_and_malformed_input(client):
+    import json
+
+    created = client.post("/api/v1/simulations", json=_oauth_pull_payload()).json()
+    client.post(f"/api/v1/simulations/{created['id']}/start")
+    path = f"/api/v1/oauth2/token?simulation_id={created['id']}"
+    for body, ct, status in [
+        (b"x" * 16385, "application/x-www-form-urlencoded", 413),
+        (b"&".join([b"x=1"] * 65), "application/x-www-form-urlencoded", 413),
+        (b"{" + b",".join([b'"x":1'] * 65) + b"}", "application/json", 413),
+        (b"{", "application/json", 400),
+        (b"[]", "application/json", 400),
+        (b"x=%ZZ", "application/x-www-form-urlencoded", 400),
+    ]:
+        response = client.post(path, content=body, headers={"Content-Type": ct})
+        assert response.status_code == status, response.text
+        assert response.headers["Cache-Control"] == "no-store"
+    valid = {
+        "grant_type": "client_credentials",
+        "client_id": "sim-client-001",
+        "client_secret": "super-secret-client-value",
+    }
+    response = client.post(
+        path, content=json.dumps(valid), headers={"Content-Type": "application/json"}
+    )
+    assert response.status_code == 200
+
+
+def test_oauth_secret_canaries_in_all_persisted_evidence(client):
+    import json
+
+    from app.core.database import get_session_factory
+    from app.models import InboundRequestLog
+
+    created = client.post("/api/v1/simulations", json=_oauth_pull_payload()).json()
+    client.post(f"/api/v1/simulations/{created['id']}/start")
+    for secret in ["super-secret-client-value", "wrong-secret-canary"]:
+        response = client.post(
+            f"/api/v1/oauth2/token?simulation_id={created['id']}&client_secret={secret}&echo={secret}",
+            data={
+                "grant_type": "client_credentials",
+                "client_id": "sim-client-001",
+                "client_secret": secret,
+                "echo": secret,
+                "custom_token": "submitted-token-canary",
+            },
+            headers={"X-Comment": secret, "X-Api-Key": "header-canary"},
+        )
+        assert response.status_code in {200, 401}
+    history = client.get(
+        f"/api/v1/simulations/{created['id']}/inbound-requests?request_kind=token"
+    ).json()
+    for entry in history:
+        evidence = client.get(
+            f"/api/v1/simulations/{created['id']}/inbound-requests/{entry['id']}"
+        ).text
+        assert all(
+            canary not in evidence
+            for canary in [
+                "super-secret-client-value",
+                "wrong-secret-canary",
+                "submitted-token-canary",
+                "header-canary",
+            ]
+        )
+    with get_session_factory()() as db:
+        for log in db.query(InboundRequestLog).filter_by(simulation_id=created["id"]):
+            evidence = json.dumps(
+                {k: v for k, v in vars(log).items() if k != "_sa_instance_state"}, default=str
+            )
+            assert all(
+                canary not in evidence
+                for canary in [
+                    "super-secret-client-value",
+                    "wrong-secret-canary",
+                    "submitted-token-canary",
+                    "header-canary",
+                ]
+            )
+
+
+def test_oauth_escaped_basic_and_duplicate_query_secrets(client):
+    import base64
+    import json
+
+    created = client.post("/api/v1/simulations", json=_oauth_pull_payload()).json()
+    client.post(f"/api/v1/simulations/{created['id']}/start")
+    secret = 'q"canary☃'
+    response = client.post(
+        f"/api/v1/oauth2/token?simulation_id={created['id']}&token=first-canary&token=second-canary",
+        data={"grant_type": "bad", "echo": secret},
+        headers={
+            "Authorization": "Basic " + base64.b64encode(("user:" + secret).encode()).decode(),
+            "X-Comment": "first-canary",
+        },
+    )
+    assert response.status_code == 400
+    entry = client.get(
+        f"/api/v1/simulations/{created['id']}/inbound-requests?request_kind=token"
+    ).json()[0]
+    detail = client.get(
+        f"/api/v1/simulations/{created['id']}/inbound-requests/{entry['id']}"
+    ).json()
+    assert json.loads(detail["request_body"])["echo"] == "***REDACTED***"
+    assert detail["request_headers_redacted"]["x-comment"] == "***REDACTED***"
+
+
+def test_duplicate_json_credential_echo_is_redacted(client):
+    import json
+
+    created = client.post("/api/v1/simulations", json=_oauth_pull_payload()).json()
+    client.post(f"/api/v1/simulations/{created['id']}/start")
+    body = (
+        '{"grant_type":"client_credentials","client_id":"sim-client-001",'
+        + '"client_secret":"discarded-secret-canary","client_secret":"super-secret-client-value",'
+        + '"trace":"discarded-secret-canary"}'
+    )
+    response = client.post(
+        f"/api/v1/oauth2/token?simulation_id={created['id']}",
+        content=body,
+        headers={"Content-Type": "application/json", "X-Trace": "discarded-secret-canary"},
+    )
+    assert response.status_code == 200, response.text
+    from app.core.database import get_session_factory
+    from app.models import InboundRequestLog
+
+    with get_session_factory()() as db:
+        log = db.query(InboundRequestLog).filter_by(simulation_id=created["id"]).one()
+        assert "discarded-secret-canary" not in json.dumps(log.request_headers_redacted)
+        assert "discarded-secret-canary" not in log.request_body
+        assert "super-secret-client-value" not in log.request_body

@@ -18,6 +18,14 @@ interface Guide {
   support: string;
   reviewed_at: string;
   content?: string;
+  documentation_status?: string;
+  method_inventory?: {
+    method: string;
+    support: string;
+    documentation_status: string;
+    production_verification: { status: string; notes: string };
+    simulator_verification: { status: string; notes: string };
+  }[];
 }
 
 const slug = (value: string) => value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -100,6 +108,13 @@ export function GuidesPage() {
     {productId && !guide && !error && <p>Loading guide…</p>}
     {guide && <>
       <div className="guide-toolbar"><Link to={`/guides?vendor=${guide.product_id}`}>All {guide.product_name} guides</Link><span>{guide.support} · Reviewed {guide.reviewed_at}</span><button type="button" className="btn" onClick={download}>Download Markdown</button><button type="button" className="btn" onClick={() => window.print()}>Print guide</button><Link to={`/raw-logs?product=${guide.product_id}`}>Generate raw log</Link></div>
+      <details className="card guide-verification">
+        <summary>Documentation: {guide.documentation_status ?? "unreviewed"} — deployment verification</summary>
+        <p>Documentation review and local simulator checks are separate from live vendor, parser and Sentinel acceptance.</p>
+        <table><thead><tr><th>Method</th><th>Support</th><th>Production verification</th><th>Simulator verification</th></tr></thead><tbody>
+          {guide.method_inventory?.map(m => <tr key={m.method}><td>{m.method}</td><td>{m.support}</td><td>{m.production_verification.status}: {m.production_verification.notes}</td><td>{m.simulator_verification.status}: {m.simulator_verification.notes}</td></tr>)}
+        </tbody></table>
+      </details>
       <div className="guide-reading"><aside className="guide-contents" aria-label="Guide contents"><strong>Contents</strong>{headings.map(h => <a key={h} href={`#${slug(h)}`}>{h}</a>)}</aside><article className="guide-body"><Markdown remarkPlugins={[remarkGfm]} skipHtml components={components} urlTransform={url => /^(https?:\/\/|#|\/guides(?:\/|\?))/.test(url) ? url : ""}>{guide.content}</Markdown></article></div>
     </>}
   </div>;

@@ -42,7 +42,9 @@ export function UploadLogsPage() {
   const [busy, setBusy] = useState(false);
   useEffect(() => {
     void get<Dataset[]>("/datasets")
-      .then(setDatasets)
+      .then((loaded) => setDatasets((current) => [
+        ...current, ...loaded.filter((item) => !current.some((existing) => existing.id === item.id)),
+      ]))
       .catch((e) => setError(formatApiError(e)));
   }, []);
   useEffect(() => {

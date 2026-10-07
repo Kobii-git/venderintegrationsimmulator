@@ -10,6 +10,7 @@ from typing import Any
 from urllib.parse import quote
 
 import httpx
+from app.core.http_response import InvalidResponseError, ResponseLimitError, bounded_request
 from app.formats.azure_ingestion import MAX_BATCH_BYTES, validate_record
 from app.transports.delivery_result import DeliveryResult
 
@@ -60,7 +61,9 @@ class AzureLogsIngestionTransport:
             if not force and cached and cached[1] > time.monotonic():
                 return cached[0]
             assert self._client is not None
-            response = await self._client.post(
+            response = await bounded_request(
+                self._client,
+                "POST",
                 f'https://login.microsoftonline.com/{quote(tenant, safe="")}/oauth2/v2.0/token',
                 data={
                     "grant_type": "client_credentials",
@@ -144,7 +147,9 @@ class AzureLogsIngestionTransport:
             for batch in batches:
                 refreshed = False
                 for attempt in range(retries + 1):
-                    response = await self._client.post(
+                    response = await bounded_request(
+                        self._client,
+                        "POST",
                         url,
                         content=batch,
                         headers=self._headers(token),
@@ -158,7 +163,9 @@ class AzureLogsIngestionTransport:
                     ):
                         token = await self._token(destination, auth_config, force=True)
                         refreshed = True
-                        response = await self._client.post(
+                        response = await bounded_request(
+                            self._client,
+                            "POST",
                             url,
                             content=batch,
                             headers=self._headers(token),
@@ -184,7 +191,9 @@ class AzureLogsIngestionTransport:
                 else f"Azure ingestion failed ({type(exc).__name__})"
             )
             category = (
-                "auth"
+                exc.category
+                if isinstance(exc, ResponseLimitError | InvalidResponseError)
+                else "auth"
                 if status in (401, 403) or "OAuth" in error
                 else "rate_limit"
                 if status == 429
@@ -226,7 +235,13 @@ class AzureLogsIngestionTransport:
         try:
             await self._token(destination, auth_config)
             error = None
+            exc_category = None
         except (ValueError, httpx.HTTPError, KeyError) as exc:
+            exc_category = (
+                exc.category
+                if isinstance(exc, ResponseLimitError | InvalidResponseError)
+                else "auth"
+            )
             error = str(exc) if isinstance(exc, ValueError) else "OAuth connectivity check failed"
         return DeliveryResult(
             success=error is None,
@@ -237,7 +252,7 @@ class AzureLogsIngestionTransport:
             destination=str(destination.get("endpoint", "")),
             method="POST",
             error_message=error,
-            error_category="auth" if error else None,
+            error_category=(exc_category if error else None),
             delivery_confirmation="api_accepted",
             delivery_note=(
                 "OAuth token acquisition only; no records uploaded "

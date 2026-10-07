@@ -1,6 +1,6 @@
 [project]
 name = "integration-simulator"
-version = "0.4.6"
+version = "0.4.7"
 description = "Vendor-neutral security integration simulation platform"
 requires-python = ">=3.12"
 readme = "../README.md"

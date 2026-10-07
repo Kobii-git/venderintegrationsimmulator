@@ -803,3 +803,160 @@ def test_legacy_fortinet_builtin_mapping_and_disabled_auth(client):
         ),
     )
     assert response.status_code == 201 and response.json()["missing_secrets"] == []
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("family", ["cloudflare", "azure"])
+@respx.mock
+async def test_stop_edit_backlog_restart_uses_each_complete_snapshot(
+    runtime_client, monkeypatch, family
+):
+    import gzip
+
+    client, app = runtime_client
+    client._portal.call(app.state.delivery_queue.close)
+    if family == "cloudflare":
+        configs = [
+            target(
+                "retained",
+                destination={
+                    "transport_id": "cloudflare_logpush",
+                    "url": f"https://{i}.collector.test/events",
+                    "headers": [{"name": "X-API-Key", "value": f"key-{i}", "sensitive": True}],
+                },
+                payload_format="default",
+            )
+            for i in [1, 2]
+        ]
+        configs.append(
+            target(
+                "retained",
+                destination={
+                    "transport_id": "http_webhook",
+                    "url": "https://3.collector.test/events",
+                    "headers": [{"name": "X-API-Key", "value": "key-3", "sensitive": True}],
+                },
+                payload_format="json",
+            )
+        )
+        changes = {"product_id": "cloudflare", "scenario_ids": ["http-request"]}
+    else:
+        configs = [
+            target(
+                "retained",
+                destination={
+                    "transport_id": "azure_logs_ingestion",
+                    "endpoint": f"https://{i}.ingest.monitor.azure.com",
+                    "tenant_id": "tenant",
+                    "dcr_immutable_id": f"dcr-{i}",
+                    "stream": f"Custom-{i}",
+                },
+                auth_config={
+                    "auth_method_id": "none",
+                    "oauth_client_id": f"client-{i}",
+                    "oauth_client_secret": f"secret-{i}",
+                },
+                payload_format="default",
+            )
+            for i in [1, 2]
+        ]
+        configs.append(
+            target(
+                "retained",
+                destination={
+                    "transport_id": "azure_function_app",
+                    "url": "https://3.collector.test/api/ingest",
+                },
+                auth_config={"auth_method_id": "none", "token": "key-3"},
+                payload_format="json",
+            )
+        )
+        changes = {"product_id": "mimecast", "scenario_ids": ["email-receipt"]}
+    body = simulation_body(
+        **changes,
+        targets=[configs[0]],
+        schedule={"type": "continuous", "events_per_second": 20},
+    )
+    saved = client.post("/api/v1/simulations", json=body)
+    assert saved.status_code == 201, saved.text
+    sid = saved.json()["id"]
+    for index, config in enumerate(configs):
+        if index:
+            changed = client.patch(f"/api/v1/simulations/{sid}", json={"targets": [config]})
+            assert changed.status_code == 200, changed.text
+        with get_session_factory()() as db:
+            service = runtime(db)
+            service.start(sid)
+            await service.tick(sid)
+            service.stop(sid)
+            db.commit()
+    calls = []
+    tokens = []
+
+    def handler(req):
+        if req.url.host == "login.microsoftonline.com":
+            import urllib.parse
+
+            form = urllib.parse.parse_qs(req.content.decode())
+            tokens.append((form["client_id"][0], form["client_secret"][0]))
+            return httpx.Response(
+                200, json={"access_token": "token-" + form["client_id"][0], "expires_in": 3600}
+            )
+        calls.append(req)
+        if req.url.host == "3.collector.test" and family == "azure":
+            return httpx.Response(
+                200, json={"accepted_records": 2, "downstream_status": 204, "request_id": "ack"}
+            )
+        return httpx.Response(204 if family == "azure" else 200)
+
+    respx.route().mock(side_effect=handler)
+    # Recover jobs claimed before process exit, with the current saved config already changed.
+    with get_session_factory()() as db:
+        db.query(DeliveryJob).filter_by(simulation_id=sid).update({"status": "active"})
+        db.commit()
+        assert db.query(DeliveryJob).filter_by(simulation_id=sid).count() == 6
+    queue = DeliveryQueue(
+        get_product_registry(),
+        TransportDeliveryService(transport_registry),
+        SecretEncryptor("test-secret-key-for-encryption-only"),
+    )
+    queue.start()
+    try:
+        for _ in range(150):
+            with get_session_factory()() as db:
+                if (
+                    db.query(DeliveryJob).filter_by(simulation_id=sid, status="delivered").count()
+                    == 6
+                ):
+                    break
+            await asyncio.sleep(0.02)
+        with get_session_factory()() as db:
+            assert (
+                db.query(DeliveryJob).filter_by(simulation_id=sid, status="delivered").count() == 6
+            )
+        if family == "cloudflare":
+            assert [r.url.host for r in calls] == [
+                "1.collector.test",
+                "2.collector.test",
+                "3.collector.test",
+                "3.collector.test",
+            ]
+            assert [r.headers["X-API-Key"] for r in calls] == ["key-1", "key-2", "key-3", "key-3"]
+            assert all(len(gzip.decompress(r.content).splitlines()) == 2 for r in calls[:2])
+            assert "RayID" in json.loads(calls[2].content)
+        else:
+            assert [r.url.host for r in calls] == [
+                "1.ingest.monitor.azure.com",
+                "2.ingest.monitor.azure.com",
+                "3.collector.test",
+            ]
+            assert tokens == [("client-1", "secret-1"), ("client-2", "secret-2")]
+            assert [r.headers.get("Authorization") for r in calls[:2]] == [
+                "Bearer token-client-1",
+                "Bearer token-client-2",
+            ]
+            assert calls[2].headers["x-functions-key"] == "key-3"
+            assert "RawData" in json.loads(calls[0].content)[0]
+            assert "messageId" in json.loads(calls[2].content)[0]
+    finally:
+        await queue.close()

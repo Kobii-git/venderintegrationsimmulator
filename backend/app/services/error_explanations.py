@@ -3,6 +3,16 @@
 from app.domain.enums import DeliveryErrorCategory
 
 EXPLANATIONS: dict[str, str] = {
+    DeliveryErrorCategory.RESPONSE_TOO_LARGE: (
+        "The receiver response exceeds the 1 MiB encoded or decoded limit."
+    ),
+    DeliveryErrorCategory.INVALID_RESPONSE: (
+        "The receiver used an unsupported or malformed response encoding."
+    ),
+    DeliveryErrorCategory.REDIRECT_REJECTED: (
+        "The redirect crossed an origin with credentials, downgraded HTTPS, "
+        "or exceeded five hops."
+    ),
     DeliveryErrorCategory.DNS: "The destination hostname could not be resolved.",
     DeliveryErrorCategory.CONNECTION: (
         "A network connection to the destination could not be established."

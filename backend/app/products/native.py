@@ -1,16 +1,25 @@
 """Optional request-body/binary response extension; existing workflow plugins are unchanged."""
 
-from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any
+from typing import Any, Protocol
 
 from app.products.workflow import WorkflowResponse
 
-PageReader = Callable[
-    [str, int, str | None, datetime | None, datetime | None, set[str] | None],
-    tuple[list[dict[str, Any]], str | None, str, int],
-]
+
+class PageReader(Protocol):
+    def __call__(
+        self,
+        route_id: str,
+        limit: int,
+        cursor: str | None,
+        since: datetime | None,
+        until: datetime | None,
+        types: set[str] | None,
+        *,
+        reverse: bool = False,
+        query_context: dict[str, Any] | None = None,
+    ) -> tuple[list[dict[str, Any]], str | None, str, int]: ...
 
 
 @dataclass

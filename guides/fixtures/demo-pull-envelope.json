@@ -1,0 +1,8 @@
+[
+  {
+    "TimeGenerated": "2026-10-07T11:17:10.352276+00:00",
+    "SourceProfile": "demo-pull",
+    "Computer": "simulator",
+    "RawData": "{\"id\":\"11111111-2222-4333-8444-555555555555\",\"eventType\":\"SecurityEvent\",\"severity\":\"medium\",\"timestamp\":\"2026-10-07T12:00:00+00:00\",\"source\":\"demo-pull-simulator\",\"description\":\"Simulated security event #0\",\"plugin_marker\":\"demo-pull-plugin-active\"}"
+  }
+]

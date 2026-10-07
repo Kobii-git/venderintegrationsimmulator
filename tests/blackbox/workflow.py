@@ -105,7 +105,7 @@ def push_payload(name: str, destination: dict[str, Any]) -> dict[str, Any]:
 def main() -> None:
     wait_for_health()
     status, version = request("GET", "/version")
-    assert status == 200 and version["version"] == "0.4.6", version
+    assert status == 200 and version["version"] == "0.4.7", version
     status, retained = request("GET", "/simulations/blackbox-legacy-simulation")
     assert status == 200 and retained["name"] == "Retained 0.1.0 simulation", retained
     assert retained["scenario_overrides"] == {

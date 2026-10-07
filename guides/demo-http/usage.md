@@ -1,6 +1,6 @@
 # Demo HTTP Product: usage and receiver deployment
 
-Reviewed **2026-10-07** · Guide version **1.0.0** · Support: **generic synthetic delivery**
+Reviewed **2026-10-07** · Guide version **1.1.0** · Support: **generic synthetic delivery**
 
 ## Architecture and connection methods
 
@@ -41,11 +41,20 @@ Record receiver URL/port, authentication method, workspace ID, DCR immutable ID/
 
 ## Sample payload and expected output
 
+This complete synthetic ingestion fixture preserves the source record as text in RawData. Use a current event time for recent-window queries.
+
 ```json
-{"TimeGenerated":"2026-10-07T12:00:00Z","SourceProfile":"demo-http","Computer":"lab-host","RawData":"sanitized raw record"}
+[
+  {
+    "TimeGenerated": "2026-10-07T11:17:10.351564+00:00",
+    "SourceProfile": "demo-http",
+    "Computer": "simulator",
+    "RawData": "{\"event\":\"ping\",\"message\":\"hello\",\"sent_at\":\"2026-10-07T12:00:00+00:00\",\"event_id\":\"11111111-2222-4333-8444-555555555555\",\"random_value\":\"655\"}"
+  }
+]
 ```
 
-For an uploaded file, the source record remains the reviewed uploaded content; it is not silently replaced by this example. Expect the original encoding/fields or your explicitly configured normalization.
+The readable source is also included in the method-specific procedure. A 204 response or an accepted-record relay count must be followed by the table query.
 
 ## Tables and KQL verification
 
@@ -71,3 +80,39 @@ Version sanitized fixtures, monitor replay rates and stop tests after use. Rotat
 ## Official references
 
 [Logs Ingestion API](https://learn.microsoft.com/en-us/azure/azure-monitor/logs/tutorial-logs-ingestion-portal) · [CEF/Syslog with AMA](https://learn.microsoft.com/en-us/azure/sentinel/connect-cef-syslog-ama). Demo behavior is defined by this repository's manifest and endpoint documentation.
+
+## Webhook production deployment
+
+Architecture: Demo HTTP Product → Webhook → the configured receiver/collector → its parser and Sentinel table. Support label: **generic synthetic delivery**. Apply this article's licensing, permission, network and source-version prerequisites before creating this path.
+
+1. Deploy an HTTPS test receiver accepting the demo JSON object. Configure POST and its required Basic/Bearer/API-key header credential; preserve the demo event identity and timestamp before custom-table normalization.
+2. Complete the numbered vendor setup and collector/Sentinel configuration above for the selected path. Record the source account/device, receiver, authentication identity and table/DCR identifiers; protect secret values in the collector settings. Select only the event categories licensed for that source.
+3. Use the source fixture below and the article's complete envelope when normalizing. Preserve its original timestamp and identity; set SourceProfile to `demo-http` for synthetic custom ingestion. The custom transform is `source` only when the four input columns exactly match the table. Native parsers need the chosen vendor format instead.
+4. Generate one approved source event, inspect each hop and run the table/KQL checks above. Expect populated event identity, time and action; receiver acceptance alone is insufficient. For authentication/connectivity/formatting failures use the troubleshooting checks before advancing any collector checkpoint.
+5. Monitor backlog/event delay and export these settings for rollback. Rotate this method's credential/certificate through a tested overlap, update the corresponding collector/job, then retire the old credential. To roll back, disable only this new method and restore its prior source/parser/checkpoint settings; retain shared tables and infrastructure.
+
+## Webhook simulator testing
+
+1. Create the matching `demo-http` simulation with the method-specific settings above and independent lab credentials. Copy the displayed endpoint/destination exactly, including simulation_id on pull requests.
+2. Generate one raw source example, then run a small manual/finite test. For pull follow the returned checkpoint until exhausted; for push inspect the native envelope/framing and receiver acknowledgment.
+3. Compare the complete raw fields and source time below to the processed result. Stop the test while retaining the saved dataset/key when repeatable downloads/replay are needed.
+4. Run the article's Sentinel verification query against the configured table, preserving `demo-http` in the custom SourceProfile. Exercise wrong credentials, no records and a bounded rate/format failure before increasing volume.
+5. Record this local result separately from live vendor/parser acceptance; rotate only lab credentials and stop the test path for rollback.
+
+## Complete source fixture
+
+The following source fixture is generated from this profile's first scenario at a fixed UTC time. Select the required event family in Generate raw log for a fresh timestamp. Stored fixtures are readable and contain no receiver credentials.
+
+```json
+{
+  "event": "ping",
+  "message": "hello",
+  "sent_at": "2026-10-07T12:00:00+00:00",
+  "event_id": "11111111-2222-4333-8444-555555555555",
+  "random_value": "655"
+}
+```
+
+## Documentation and deployment verification
+
+Documentation status: complete. This means every listed method has a production procedure, a simulator test or explicit alternative, a valid source example, operational checks and official references. It does not certify live vendor, licensed feature, parser or Sentinel acceptance. Review date: 2026-10-07; revision: 1.1.0. Use the method metadata to record those acceptance results separately. Commands are displayed only and require operator-supplied placeholders.

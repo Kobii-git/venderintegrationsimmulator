@@ -53,7 +53,7 @@ def test_guide_coverage_sections_metadata_links_and_samples(client):
             assert f"## {section}" in content, (g["file"], section)
         assert len(content.split()) >= 500, g["file"]
         for pid, mid in re.findall(r"\]\(/guides/([^/\s]+)/([^\s)]+)\)", content):
-            assert (pid, mid) in keys, (g["file"], pid, mid)
+            assert (pid, mid.split("#", 1)[0]) in keys, (g["file"], pid, mid)
         for body in re.findall(r"```json\n(.*?)\n```", content, re.S):
             json.loads(body)
         # Index format must resolve to an actual known profile/version.
@@ -84,3 +84,10 @@ def test_guides_filters_unknown_and_readonly(client):
     assert client.get("/api/v1/guides/cloudflare/not-a-method").status_code == 404
     assert client.post("/api/v1/guides", json={}).status_code == 405
     assert client.get("/api/v1/guides", params={"q": "x" * 201}).status_code == 422
+
+
+def test_method_documentation_gate():
+    import runpy
+
+    gate = runpy.run_path(str(ROOT / "scripts" / "validate-guides.py"))
+    assert gate["validate"](ROOT) == (90, 220)

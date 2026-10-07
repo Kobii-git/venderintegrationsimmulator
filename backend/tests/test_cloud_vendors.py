@@ -385,3 +385,89 @@ def test_mimecast_dlp_is_separate_from_cg_batch(client):
         json={"data": [{}]},
     )
     assert len(dlp.json()["data"][0]["dlpLogs"]) == 20
+
+
+@pytest.mark.parametrize(
+    "route,field",
+    [
+        ("api/ttp/url/get-logs", "clickLogs"),
+        ("api/ttp/attachment/get-logs", "attachmentLogs"),
+        ("api/ttp/impersonation/get-logs", "impersonationLogs"),
+        ("api/dlp/get-logs", "dlpLogs"),
+    ],
+)
+def test_mimecast_orders_query_context_and_legacy_post_checkpoint(client, route, field):
+    import base64
+
+    sim, auth = mimecast(client)
+    path = f"/api/v1/mock/mimecast/{route}?simulation_id={sim['id']}"
+    traversals = []
+    for query in [{}, {"oldestFirst": False}, {"oldestFirst": True}]:
+        body = {"meta": {"pagination": {"pageSize": 2}}, "data": [query]}
+        records = []
+        while True:
+            response = client.post(path, headers=auth, json=body)
+            assert response.status_code == 200, response.text
+            records.extend(response.json()["data"][0][field])
+            cursor = response.json()["meta"]["pagination"]["next"]
+            if not cursor:
+                break
+            body["meta"]["pagination"]["pageToken"] = cursor
+        assert len(records) == 5
+        traversals.append(records)
+    assert traversals[0] == traversals[1] == list(reversed(traversals[2]))
+    body = {"meta": {"pagination": {"pageSize": 2}}, "data": [{}]}
+    cursor = client.post(path, headers=auth, json=body).json()["meta"]["pagination"]["next"]
+    body["meta"]["pagination"]["pageToken"] = cursor
+    body["data"] = [{"oldestFirst": True}]
+    response = client.post(path, headers=auth, json=body)
+    assert response.status_code == 400 and "restart" in response.text
+    payload = json.loads(base64.urlsafe_b64decode(cursor + "=" * (-len(cursor) % 4)))
+    payload.pop("query")
+    body["meta"]["pagination"]["pageToken"] = base64.urlsafe_b64encode(
+        json.dumps(payload).encode()
+    ).decode()
+    body["data"] = [{}]
+    response = client.post(path, headers=auth, json=body)
+    assert response.status_code == 400 and "Legacy POST" in response.text
+    for value in ["true", 1, None]:
+        response = client.post(path, headers=auth, json={"data": [{"oldestFirst": value}]})
+        assert response.status_code == 400
+
+
+def test_cloud_vendor_visible_fields_affect_native_or_envelope_and_legacy_controls(client):
+    from datetime import UTC, datetime
+
+    from app.api.deps import get_product_registry
+    from app.domain.enums import FidelityMode
+    from app.formats.azure_ingestion import ingestion_record
+
+    registry = get_product_registry()
+    for vendor in ["cloudflare", "mimecast"]:
+        for ref in registry.get_scenarios(vendor):
+            definition = registry.get_scenario(vendor, ref.id)
+
+            def render(overrides, definition=definition, vendor=vendor):
+                payload = registry.renderer.render_scenario(
+                    definition,
+                    fidelity_mode=FidelityMode.VENDOR_ACCURATE,
+                    correlation_id="11111111-2222-4333-8444-555555555555",
+                    overrides=overrides,
+                    plugin=registry.get_plugin(vendor),
+                    render_time=datetime(2026, 10, 7, tzinfo=UTC),
+                )
+                return payload, ingestion_record(payload, "default", vendor)
+
+            payload, base = render({})
+            for name, prop in definition.config_schema["properties"].items():
+                if prop.get("hidden"):
+                    assert prop["deprecated"]
+                    continue
+                changed, envelope = render({name: "changed-canary"})
+                assert changed["record"] != payload["record"] or envelope != base, (
+                    vendor,
+                    definition.id,
+                    name,
+                )
+            legacy, _ = render({"action": "contradictory-legacy-value"})
+            assert legacy["record"] == payload["record"]

@@ -1,6 +1,6 @@
 # Cloudflare: native collection and Sentinel deployment
 
-Reviewed **2026-10-07** · Profile schema **Logpush datasets (2026)** · Guide version **1.0.0**
+Reviewed **2026-10-07** · Profile schema **Logpush datasets (2026)** · Guide version **1.1.0**
 
 ## Architecture and connection methods
 
@@ -80,10 +80,10 @@ Expect the original hostname/tenant context, event time, event family and action
 
 ## Tables and KQL verification
 
-Use `YOUR_CONFIGURED_VENDOR_TABLE` for the described native path when that is the table selected by its connector. For a configurable vendor solution replace `YOUR_CONFIGURED_VENDOR_TABLE` with the actual deployed table name from the connector settings. Synthetic custom-envelope events go to IntegrationLab_CL.
+Use `IntegrationLab_CL` for the described native path when that is the table selected by its connector. Synthetic custom-envelope events go to IntegrationLab_CL.
 
 ```kusto
-YOUR_CONFIGURED_VENDOR_TABLE
+IntegrationLab_CL
 | where TimeGenerated > ago(30m)
 | take 20
 ```
@@ -119,3 +119,43 @@ Keep a copy of the pre-change vendor configuration and DCR/collector settings. M
 - [Official reference 2](https://developers.cloudflare.com/logs/logpush/logpush-job/enable-destinations/http/)
 - [Official reference 3](https://learn.microsoft.com/en-us/azure/sentinel/data-connectors-reference)
 - [Official reference 4](https://learn.microsoft.com/en-us/azure/azure-monitor/logs/tutorial-logs-ingestion-portal)
+
+## HTTP Logpush production deployment
+
+Architecture: Cloudflare → HTTP Logpush → the configured receiver/collector → its parser and Sentinel table. Support label: **native simulation**. Apply this article's licensing, permission, network and source-version prerequisites before creating this path.
+
+1. Logpush zone/account > HTTP destination: protected HTTPS URL, encoded header_* credentials, selected dataset and field_names, RFC3339 timestamps; validate gzip test.txt.gz before enabling. HTTP uploads are gzip NDJSON with separate jobs for incompatible datasets.
+2. Complete the numbered vendor setup and collector/Sentinel configuration above for the selected path. Record the source account/device, receiver, authentication identity and table/DCR identifiers; protect secret values in the collector settings. Select only the event categories licensed for that source.
+3. Use the source fixture below and the article's complete envelope when normalizing. Preserve its original timestamp and identity; set SourceProfile to `cloudflare` for synthetic custom ingestion. The custom transform is `source` only when the four input columns exactly match the table. Native parsers need the chosen vendor format instead.
+4. Generate one approved source event, inspect each hop and run the table/KQL checks above. Expect populated event identity, time and action; receiver acceptance alone is insufficient. For authentication/connectivity/formatting failures use the troubleshooting checks before advancing any collector checkpoint.
+5. Monitor backlog/event delay and export these settings for rollback. Rotate this method's credential/certificate through a tested overlap, update the corresponding collector/job, then retire the old credential. To roll back, disable only this new method and restore its prior source/parser/checkpoint settings; retain shared tables and infrastructure.
+
+## HTTP Logpush simulator testing
+
+1. Create the matching `cloudflare` simulation with the method-specific settings above and independent lab credentials. Copy the displayed endpoint/destination exactly, including simulation_id on pull requests.
+2. Generate one raw source example, then run a small manual/finite test. For pull follow the returned checkpoint until exhausted; for push inspect the native envelope/framing and receiver acknowledgment.
+3. Compare the complete raw fields and source time below to the processed result. Stop the test while retaining the saved dataset/key when repeatable downloads/replay are needed.
+4. Run the article's Sentinel verification query against the configured table, preserving `cloudflare` in the custom SourceProfile. Exercise wrong credentials, no records and a bounded rate/format failure before increasing volume.
+5. Record this local result separately from live vendor/parser acceptance; rotate only lab credentials and stop the test path for rollback.
+
+## Complete source fixture
+
+The following source fixture is generated from this profile's first scenario at a fixed UTC time. Select the required event family in Generate raw log for a fresh timestamp. Stored fixtures are readable and contain no receiver credentials.
+
+```json
+{
+  "RayID": "1111111122224333",
+  "ClientIP": "198.51.100.20",
+  "ClientRequestHost": "app.example.test",
+  "ClientRequestMethod": "GET",
+  "ClientRequestURI": "/login",
+  "EdgeResponseStatus": 200,
+  "EdgeStartTimestamp": "2026-10-07T12:00:00+00:00",
+  "EdgeEndTimestamp": "2026-10-07T12:00:00+00:00",
+  "CacheCacheStatus": "miss"
+}
+```
+
+## Documentation and deployment verification
+
+Documentation status: complete. This means every listed method has a production procedure, a simulator test or explicit alternative, a valid source example, operational checks and official references. It does not certify live vendor, licensed feature, parser or Sentinel acceptance. Review date: 2026-10-07; revision: 1.1.0. Use the method metadata to record those acceptance results separately. Commands are displayed only and require operator-supplied placeholders.

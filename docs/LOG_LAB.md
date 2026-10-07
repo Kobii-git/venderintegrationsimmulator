@@ -98,4 +98,4 @@ request is not a table-arrival check. Stop prevents generation while queued deli
 may continue. See [relay deployment guide](../azure/function-relay/README.md) and
 [0.4.1 upgrade notes](UPGRADE_0.4.1.md).
 
-Deployment Guides at `/guides` cover every catalog profile plus UpGuard and utilities. Cloudflare native HTTP Logpush can be selected as a collector; Mimecast native API 2.0 pull is configured in the simulation form. See [0.4.6 notes](UPGRADE_0.4.6.md).
+Deployment Guides at `/guides` cover every catalog profile plus UpGuard and utilities. Cloudflare native HTTP Logpush can be selected as a collector; Mimecast native API 2.0 pull is configured in the simulation form. See [0.4.7 notes](UPGRADE_0.4.7.md).

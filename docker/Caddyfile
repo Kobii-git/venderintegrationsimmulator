@@ -5,6 +5,9 @@
  tls internal
  @vendor path /api/v1/mock/* /api/v1/oauth2/token
  handle @vendor {
+  request_body {
+   max_size 1048576
+  }
   reverse_proxy integration-simulator:8080
  }
  handle {

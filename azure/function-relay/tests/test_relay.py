@@ -1,5 +1,6 @@
 import importlib.util
 import json
+import sys
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -8,6 +9,7 @@ import httpx
 import pytest
 
 SOURCE = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(SOURCE))
 spec = importlib.util.spec_from_file_location(
     "vendor_function_relay", SOURCE / "function_app.py"
 )
@@ -172,3 +174,42 @@ def test_invalid_configuration_is_not_ready(monkeypatch):
     monkeypatch.setenv("DCE_ENDPOINT", "https://dce.test?code=secret-canary")
     result = health(request())
     assert result.status_code == 503 and b"secret-canary" not in result.get_body()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("encoding", ["identity", "gzip", "br"])
+async def test_downstream_response_bounds_close_without_reading_rest(
+    monkeypatch, encoding
+):
+    import gzip
+
+    class Stream(httpx.AsyncByteStream):
+        closed = False
+        reads = 0
+
+        async def __aiter__(self):
+            body = b"x" * (1024 * 1024 + 1)
+            for chunk in [
+                gzip.compress(body) if encoding == "gzip" else body,
+                b"unread",
+            ]:
+                self.reads += 1
+                yield chunk
+
+        async def aclose(self):
+            self.closed = True
+
+    stream = Stream()
+    async with httpx.AsyncClient(
+        transport=httpx.MockTransport(
+            lambda _: httpx.Response(
+                200, headers={"Content-Encoding": encoding}, stream=stream
+            )
+        )
+    ) as client:
+        monkeypatch.setattr(relay, "client", client)
+        result = await ingest(request())
+    assert result.status_code == 502
+    assert stream.closed and stream.reads <= 1
+    code = "invalid_response" if encoding == "br" else "response_too_large"
+    assert code.encode() in result.get_body() and len(result.get_body()) < 1024

@@ -1,6 +1,6 @@
 # Mimecast: native collection and Sentinel deployment
 
-Reviewed **2026-10-07** · Profile schema **API 2.0** · Guide version **1.0.0**
+Reviewed **2026-10-07** · Profile schema **API 2.0** · Guide version **1.1.0**
 
 ## Architecture and connection methods
 
@@ -26,6 +26,14 @@ Native simulation refers to the emulated wire workflow; generic synthetic delive
 ## Prerequisites and licensing
 
 Mimecast Email Security MX with Enhanced Logging and licensed protection products; API integration role with SIEM, audit, URL, attachment, impersonation and DLP read permissions for selected categories. The profile describes API 2.0; check the installed product's release and solution template before using a different version. Budget for workspace ingestion, collector compute and any optional vendor service. No production account/resource is provisioned by the simulator.
+
+## Mimecast application, enterprise identity and role setup
+
+1. In Integrations Hub > Microsoft Sentinel > Configure New retain the default API products. Select Basic Administrator or a custom read role covering Account Logs, Awareness Training Dashboard, Monitoring Attachment/Impersonation/URL Protection and Data Leak Prevention, Services Gateway/Tracking, and Security Events and Data Retrieval SIEM. Save the separate Mimecast client ID/secret.
+2. In Entra App registrations > New registration create the connector application. Record Application/client ID and tenant ID. Certificates & secrets > New client secret: store its **Value**, expiry and rotation owner.
+3. In Entra Enterprise applications find that application and copy its **Object ID**. Do not use the App registration object ID.
+4. At the workspace's resource group > IAM assign **Microsoft Sentinel Contributor** to that enterprise application. Capture the workspace ARM Resource ID from workspace Properties.
+5. Deploy each selected connector template with Subscription, Resource group, Function Name, Workspace Name, Azure Client ID/Secret/Tenant ID/Entra Object ID, Mimecast Base URL/Client ID/Secret, table-name overrides, optional Start Date, nonempty Quartz Schedule, Log Level and App Insights Workspace Resource ID. Record the template revision; different connector families have separate Functions and checkpoints.
 
 ## Production deployment
 
@@ -91,10 +99,10 @@ Expect the original hostname/tenant context, event time, event family and action
 
 ## Tables and KQL verification
 
-Use `YOUR_CONFIGURED_VENDOR_TABLE` for the described native path when that is the table selected by its connector. For a configurable vendor solution replace `YOUR_CONFIGURED_VENDOR_TABLE` with the actual deployed table name from the connector settings. Synthetic custom-envelope events go to IntegrationLab_CL.
+Use `Seg_Cg_CL` for the described native path when that is the table selected by its connector. Synthetic custom-envelope events go to IntegrationLab_CL.
 
 ```kusto
-YOUR_CONFIGURED_VENDOR_TABLE
+Seg_Cg_CL
 | where TimeGenerated > ago(30m)
 | take 20
 ```
@@ -128,7 +136,7 @@ curl --fail -X POST 'https://api.services.mimecast.com/api/audit/get-audit-event
 curl --fail -X POST 'https://api.services.mimecast.com/api/ttp/url/get-logs'  -H 'Authorization: Bearer REPLACE_WITH_ACCESS_TOKEN' -H 'Content-Type: application/json'  --data '{"meta":{"pagination":{"pageSize":20}},"data":[{"from":"2026-10-07T11:00:00Z","to":"2026-10-07T12:00:00Z","oldestFirst":true}]}'
 ```
 
-For the protection calls substitute the required route and check its corresponding response array. Continue POST pagination using meta.pagination.pageToken from returned meta.pagination.next. Use current UTC windows containing the generated data. Current connector defaults include Seg_Cg, Seg_Dlp, Audit, Ttp_Url, Ttp_Attachment and Ttp_Impersonation (custom Log Analytics names normally include _CL); inspect deployed DCR/template overrides before choosing the query. For example, when deployed with the default custom table:
+For the protection calls substitute the required route and check its corresponding response array. Continue POST pagination using meta.pagination.pageToken from returned meta.pagination.next. Protection/DLP default to newest first; set oldestFirst=true for oldest first. Keep normalized time filters and ordering fixed while traversing pages. A pre-0.4.7 POST token without query context is rejected with a restart instruction; discard only that query token and begin the same bounded window again. SIEM CG checkpoints/downloads are unchanged. Use current UTC windows containing the generated data. Current connector defaults include Seg_Cg, Seg_Dlp, Audit, Ttp_Url, Ttp_Attachment and Ttp_Impersonation (custom Log Analytics names normally include _CL); inspect deployed DCR/template overrides before choosing the query. For example, when deployed with the default custom table:
 
 ```kusto
 Seg_Cg_CL
@@ -161,3 +169,83 @@ Keep a copy of the pre-change vendor configuration and DCR/collector settings. M
 - [Official reference 2](https://github.com/Azure/Azure-Sentinel/tree/master/Solutions/Mimecast/Data%20Connectors)
 - [Official reference 3](https://learn.microsoft.com/en-us/azure/sentinel/data-connectors-reference)
 - [Official reference 4](https://learn.microsoft.com/en-us/azure/azure-monitor/logs/tutorial-logs-ingestion-portal)
+
+## API 2.0 production deployment
+
+Architecture: Mimecast → API 2.0 → the configured receiver/collector → its parser and Sentinel table. Support label: **native simulation**. Apply this article's licensing, permission, network and source-version prerequisites before creating this path.
+
+1. Use the Mimecast application/enterprise-role procedure above, then configure the Secure Email Gateway/Audit/TTP connector Functions. Protection/DLP POST data filters use from/to/oldestFirst and meta.pagination; Audit uses startDateTime/endDateTime. Bind checkpoints to a stable query and commit only after processing the complete page.
+2. Complete the numbered vendor setup and collector/Sentinel configuration above for the selected path. Record the source account/device, receiver, authentication identity and table/DCR identifiers; protect secret values in the collector settings. Select only the event categories licensed for that source.
+3. Use the source fixture below and the article's complete envelope when normalizing. Preserve its original timestamp and identity; set SourceProfile to `mimecast` for synthetic custom ingestion. The custom transform is `source` only when the four input columns exactly match the table. Native parsers need the chosen vendor format instead.
+4. Generate one approved source event, inspect each hop and run the table/KQL checks above. Expect populated event identity, time and action; receiver acceptance alone is insufficient. For authentication/connectivity/formatting failures use the troubleshooting checks before advancing any collector checkpoint.
+5. Monitor backlog/event delay and export these settings for rollback. Rotate this method's credential/certificate through a tested overlap, update the corresponding collector/job, then retire the old credential. To roll back, disable only this new method and restore its prior source/parser/checkpoint settings; retain shared tables and infrastructure.
+
+## API 2.0 simulator testing
+
+1. Create the matching `mimecast` simulation with the method-specific settings above and independent lab credentials. Copy the displayed endpoint/destination exactly, including simulation_id on pull requests.
+2. Generate one raw source example, then run a small manual/finite test. For pull follow the returned checkpoint until exhausted; for push inspect the native envelope/framing and receiver acknowledgment.
+3. Compare the complete raw fields and source time below to the processed result. Stop the test while retaining the saved dataset/key when repeatable downloads/replay are needed.
+4. Run the article's Sentinel verification query against the configured table, preserving `mimecast` in the custom SourceProfile. Exercise wrong credentials, no records and a bounded rate/format failure before increasing volume.
+5. Record this local result separately from live vendor/parser acceptance; rotate only lab credentials and stop the test path for rollback.
+
+## OAuth production deployment
+
+Architecture: Mimecast → OAuth → the configured receiver/collector → its parser and Sentinel table. Support label: **native simulation**. Apply this article's licensing, permission, network and source-version prerequisites before creating this path.
+
+1. POST /oauth/token as application/x-www-form-urlencoded with grant_type client_credentials and the separate Mimecast client_id/client_secret; use the returned Bearer access token and refresh before expires_in. Never substitute Azure application credentials here.
+2. Complete the numbered vendor setup and collector/Sentinel configuration above for the selected path. Record the source account/device, receiver, authentication identity and table/DCR identifiers; protect secret values in the collector settings. Select only the event categories licensed for that source.
+3. Use the source fixture below and the article's complete envelope when normalizing. Preserve its original timestamp and identity; set SourceProfile to `mimecast` for synthetic custom ingestion. The custom transform is `source` only when the four input columns exactly match the table. Native parsers need the chosen vendor format instead.
+4. Generate one approved source event, inspect each hop and run the table/KQL checks above. Expect populated event identity, time and action; receiver acceptance alone is insufficient. For authentication/connectivity/formatting failures use the troubleshooting checks before advancing any collector checkpoint.
+5. Monitor backlog/event delay and export these settings for rollback. Rotate this method's credential/certificate through a tested overlap, update the corresponding collector/job, then retire the old credential. To roll back, disable only this new method and restore its prior source/parser/checkpoint settings; retain shared tables and infrastructure.
+
+## OAuth simulator testing
+
+1. Create the matching `mimecast` simulation with the method-specific settings above and independent lab credentials. Copy the displayed endpoint/destination exactly, including simulation_id on pull requests.
+2. Generate one raw source example, then run a small manual/finite test. For pull follow the returned checkpoint until exhausted; for push inspect the native envelope/framing and receiver acknowledgment.
+3. Compare the complete raw fields and source time below to the processed result. Stop the test while retaining the saved dataset/key when repeatable downloads/replay are needed.
+4. Run the article's Sentinel verification query against the configured table, preserving `mimecast` in the custom SourceProfile. Exercise wrong credentials, no records and a bounded rate/format failure before increasing volume.
+5. Record this local result separately from live vendor/parser acceptance; rotate only lab credentials and stop the test path for rollback.
+
+## Batch downloads production deployment
+
+Architecture: Mimecast → Batch downloads → the configured receiver/collector → its parser and Sentinel table. Support label: **native simulation**. Apply this article's licensing, permission, network and source-version prerequisites before creating this path.
+
+1. GET /siem/v1/batch/events/cg with type/pageSize/nextPage, download every value[].url, gzip-decode NDJSON, ingest and only then commit @nextPage. Restrict download hosts to the approved vendor route; signed downloads do not require sending Bearer credentials to the storage host.
+2. Complete the numbered vendor setup and collector/Sentinel configuration above for the selected path. Record the source account/device, receiver, authentication identity and table/DCR identifiers; protect secret values in the collector settings. Select only the event categories licensed for that source.
+3. Use the source fixture below and the article's complete envelope when normalizing. Preserve its original timestamp and identity; set SourceProfile to `mimecast` for synthetic custom ingestion. The custom transform is `source` only when the four input columns exactly match the table. Native parsers need the chosen vendor format instead.
+4. Generate one approved source event, inspect each hop and run the table/KQL checks above. Expect populated event identity, time and action; receiver acceptance alone is insufficient. For authentication/connectivity/formatting failures use the troubleshooting checks before advancing any collector checkpoint.
+5. Monitor backlog/event delay and export these settings for rollback. Rotate this method's credential/certificate through a tested overlap, update the corresponding collector/job, then retire the old credential. To roll back, disable only this new method and restore its prior source/parser/checkpoint settings; retain shared tables and infrastructure.
+
+## Batch downloads simulator testing
+
+1. Create the matching `mimecast` simulation with the method-specific settings above and independent lab credentials. Copy the displayed endpoint/destination exactly, including simulation_id on pull requests.
+2. Generate one raw source example, then run a small manual/finite test. For pull follow the returned checkpoint until exhausted; for push inspect the native envelope/framing and receiver acknowledgment.
+3. Compare the complete raw fields and source time below to the processed result. Stop the test while retaining the saved dataset/key when repeatable downloads/replay are needed.
+4. Run the article's Sentinel verification query against the configured table, preserving `mimecast` in the custom SourceProfile. Exercise wrong credentials, no records and a bounded rate/format failure before increasing volume.
+5. Record this local result separately from live vendor/parser acceptance; rotate only lab credentials and stop the test path for rollback.
+
+## Complete source fixture
+
+The following source fixture is generated from this profile's first scenario at a fixed UTC time. Select the required event family in Generate raw log for a fresh timestamp. Stored fixtures are readable and contain no receiver credentials.
+
+```json
+{
+  "timestamp": 1791374400000,
+  "type": "receipt",
+  "action": "Acc",
+  "accountId": "CUSB4A274",
+  "messageId": "<11111111-2222-4333-8444-555555555555@example.test>",
+  "senderEnvelope": "sender@example.test",
+  "senderHeader": "sender@example.test",
+  "recipients": "recipient@example.test",
+  "subject": "Integration test message",
+  "senderIp": "198.51.100.20",
+  "direction": "Inbound"
+}
+```
+
+## Documentation and deployment verification
+
+Documentation status: complete. This means every listed method has a production procedure, a simulator test or explicit alternative, a valid source example, operational checks and official references. It does not certify live vendor, licensed feature, parser or Sentinel acceptance. Review date: 2026-10-07; revision: 1.1.0. Use the method metadata to record those acceptance results separately. Commands are displayed only and require operator-supplied placeholders.
+
+[Current Sentinel connector/table inventory](https://learn.microsoft.com/en-us/azure/sentinel/sentinel-tables-connectors-reference). Match the deployed connector revision and table overrides; retired Function connector tables differ from current CCF tables.

@@ -1,6 +1,6 @@
 # F5 BIG-IP / Advanced WAF: native collection and Sentinel deployment
 
-Reviewed **2026-10-07** · Profile schema **BIG-IP 17 CEF** · Guide version **1.0.0**
+Reviewed **2026-10-07** · Profile schema **BIG-IP 17 CEF** · Guide version **1.1.0**
 
 ## Architecture and connection methods
 
@@ -93,7 +93,7 @@ Expect the original hostname/tenant context, event time, event family and action
 
 ## Tables and KQL verification
 
-Use `CommonSecurityLog` for the described native path when that is the table selected by its connector. For a configurable vendor solution replace `YOUR_CONFIGURED_VENDOR_TABLE` with the actual deployed table name from the connector settings. Synthetic custom-envelope events go to IntegrationLab_CL.
+Use `CommonSecurityLog` for the described native path when that is the table selected by its connector. Synthetic custom-envelope events go to IntegrationLab_CL.
 
 ```kusto
 CommonSecurityLog
@@ -143,3 +143,51 @@ For F5 BIG-IP / Advanced WAF, use the vendor export configuration above with the
 - [Official reference 1](https://techdocs.f5.com/en-us/bigip-17-1-0/big-ip-asm-implementations/logging-application-security-events.html)
 - [Official reference 2](https://learn.microsoft.com/en-us/azure/sentinel/connect-cef-syslog-ama)
 - [Official reference 3](https://learn.microsoft.com/en-us/azure/azure-monitor/logs/tutorial-logs-ingestion-portal)
+
+## UDP production deployment
+
+Architecture: F5 BIG-IP / Advanced WAF → UDP → the configured receiver/collector → its parser and Sentinel table. Support label: **generic synthetic delivery**. Apply this article's licensing, permission, network and source-version prerequisites before creating this path.
+
+1. Security > Event Logs > Logging Profiles: Application Security, Remote Storage, UDP/514 and the supported SIEM/CEF format; attach the profile to the application virtual server and select violations.
+2. Complete the numbered vendor setup and collector/Sentinel configuration above for the selected path. Record the source account/device, receiver, authentication identity and table/DCR identifiers; protect secret values in the collector settings. Select only the event categories licensed for that source.
+3. Use the source fixture below and the article's complete envelope when normalizing. Preserve its original timestamp and identity; set SourceProfile to `f5-bigip` for synthetic custom ingestion. The custom transform is `source` only when the four input columns exactly match the table. Native parsers need the chosen vendor format instead.
+4. Generate one approved source event, inspect each hop and run the table/KQL checks above. Expect populated event identity, time and action; receiver acceptance alone is insufficient. For authentication/connectivity/formatting failures use the troubleshooting checks before advancing any collector checkpoint.
+5. Monitor backlog/event delay and export these settings for rollback. Rotate this method's credential/certificate through a tested overlap, update the corresponding collector/job, then retire the old credential. To roll back, disable only this new method and restore its prior source/parser/checkpoint settings; retain shared tables and infrastructure.
+
+## UDP simulator testing
+
+1. Generate `f5-bigip` raw logs and choose the scenario/format used by the installed vendor parser. In Log Lab choose a Syslog collector, UDP, receiver host and port 514.
+2. For TCP select newline or octet_counting to match the receiver; UDP is one datagram per message and provides no remote acknowledgment.
+3. Send one manual event and inspect the receiver input and source identity. Socket success is a transport observation; validate AMA/DCR reception and the vendor parser separately.
+4. Run the article's Sentinel verification query against the configured table, preserving `f5-bigip` in the custom SourceProfile. Exercise wrong credentials, no records and a bounded rate/format failure before increasing volume.
+5. Record this local result separately from live vendor/parser acceptance; rotate only lab credentials and stop the test path for rollback.
+
+## TCP production deployment
+
+Architecture: F5 BIG-IP / Advanced WAF → TCP → the configured receiver/collector → its parser and Sentinel table. Support label: **generic synthetic delivery**. Apply this article's licensing, permission, network and source-version prerequisites before creating this path.
+
+1. In the attached Application Security logging profile choose TCP/514 and the supported remote format. Keep WAF request filters and support ID; configure administration/system syslog independently.
+2. Complete the numbered vendor setup and collector/Sentinel configuration above for the selected path. Record the source account/device, receiver, authentication identity and table/DCR identifiers; protect secret values in the collector settings. Select only the event categories licensed for that source.
+3. Use the source fixture below and the article's complete envelope when normalizing. Preserve its original timestamp and identity; set SourceProfile to `f5-bigip` for synthetic custom ingestion. The custom transform is `source` only when the four input columns exactly match the table. Native parsers need the chosen vendor format instead.
+4. Generate one approved source event, inspect each hop and run the table/KQL checks above. Expect populated event identity, time and action; receiver acceptance alone is insufficient. For authentication/connectivity/formatting failures use the troubleshooting checks before advancing any collector checkpoint.
+5. Monitor backlog/event delay and export these settings for rollback. Rotate this method's credential/certificate through a tested overlap, update the corresponding collector/job, then retire the old credential. To roll back, disable only this new method and restore its prior source/parser/checkpoint settings; retain shared tables and infrastructure.
+
+## TCP simulator testing
+
+1. Generate `f5-bigip` raw logs and choose the scenario/format used by the installed vendor parser. In Log Lab choose a Syslog collector, TCP, receiver host and port 514.
+2. For TCP select newline or octet_counting to match the receiver; UDP is one datagram per message and provides no remote acknowledgment.
+3. Send one manual event and inspect the receiver input and source identity. Socket success is a transport observation; validate AMA/DCR reception and the vendor parser separately.
+4. Run the article's Sentinel verification query against the configured table, preserving `f5-bigip` in the custom SourceProfile. Exercise wrong credentials, no records and a bounded rate/format failure before increasing volume.
+5. Record this local result separately from live vendor/parser acceptance; rotate only lab credentials and stop the test path for rollback.
+
+## Complete source fixture
+
+The following source fixture is generated from this profile's first scenario at a fixed UTC time. Select the required event family in Generate raw log for a fresh timestamp. Stored fixtures are readable and contain no receiver credentials.
+
+```text
+ASM: unit_hostname="sim-device-01",management_ip_address="192.0.2.10",http_class_name="/Common/Lab",policy_name="/Common/Lab",violations="Illegal URL",support_id="123456789",request_status="blocked",ip_client="198.51.100.20",method="GET",uri="/lab"
+```
+
+## Documentation and deployment verification
+
+Documentation status: complete. This means every listed method has a production procedure, a simulator test or explicit alternative, a valid source example, operational checks and official references. It does not certify live vendor, licensed feature, parser or Sentinel acceptance. Review date: 2026-10-07; revision: 1.1.0. Use the method metadata to record those acceptance results separately. Commands are displayed only and require operator-supplied placeholders.

@@ -1,0 +1,17 @@
+{
+  "risks": [
+    {
+      "id": "end_of_life_product:cpe:/a:example:service",
+      "finding": "Unsupported service version detected",
+      "risk": "Vulnerabilities",
+      "severity": "high",
+      "category": "website_sec",
+      "firstDetected": "2026-10-07T12:00:00Z",
+      "hostnames": [
+        "service.example.test"
+      ],
+      "riskType": "end_of_life_product",
+      "riskSubtype": "cpe:/a:example:service"
+    }
+  ]
+}

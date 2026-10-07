@@ -1,0 +1,4 @@
+{
+  "TimeGenerated": "2026-10-07T12:00:00+00:00",
+  "Message": "Explicit ingestion test record"
+}

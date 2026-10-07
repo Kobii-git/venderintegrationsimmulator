@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 set -eu
-image=${1:-integration-simulator:0.4.6}
+image=${1:-integration-simulator:0.4.7}
 root_dir=$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)
 container="simulator-standalone-$$"
 volume="$container-data"

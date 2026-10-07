@@ -15,6 +15,9 @@ export type AuthMethodId = "none" | "basic" | "bearer" | "api_key_header";
 export type InboundAuthMethodId =
   "none" | "api_key" | "basic" | "bearer" | "oauth2_client_credentials";
 export type DeliveryErrorCategory =
+  | "response_too_large"
+  | "invalid_response"
+  | "redirect_rejected"
   | "dns"
   | "connection"
   | "connection_timeout"
@@ -76,6 +79,8 @@ export interface ScenarioSummary {
 }
 
 export interface JsonSchemaProperty {
+  hidden?: boolean;
+  deprecated?: boolean;
   type?: "string" | "integer" | "number" | "boolean";
   title?: string;
   description?: string;

@@ -10,6 +10,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import ValidationAppError
+from app.core.http_request import RequestBodyTooLarge, read_request
 from app.core.redaction import (
     REDACTED,
     redact_headers,
@@ -211,9 +212,16 @@ class InboundMockService:
             try:
                 request_body: dict[str, Any] = {}
                 if request.method == "POST":
-                    raw = await request.body()
-                    if len(raw) > 1_000_000:
-                        raise VendorWorkflowError(413, {"message": "Request body too large"})
+                    try:
+                        raw = await read_request(request, 1_000_000)
+                    except RequestBodyTooLarge as exc:
+                        raise VendorWorkflowError(
+                            413, {"message": "Request body too large"}
+                        ) from exc
+                    except ValueError as exc:
+                        raise VendorWorkflowError(
+                            400, {"message": "Invalid request length"}
+                        ) from exc
                     import json
 
                     try:
@@ -230,6 +238,9 @@ class InboundMockService:
                     since: datetime | None,
                     until: datetime | None,
                     types: set[str] | None,
+                    *,
+                    reverse: bool = False,
+                    query_context: dict[str, Any] | None = None,
                 ) -> tuple[list[dict[str, Any]], str | None, str, int]:
                     nonlocal native_items_returned
                     data_route = next(
@@ -264,6 +275,8 @@ class InboundMockService:
                         since=since,
                         force_empty=fault.enabled and fault.force_empty,
                         transform=transform,
+                        reverse=reverse,
+                        query_context=query_context,
                     )
                     native_items_returned = len(page[0])
                     return page

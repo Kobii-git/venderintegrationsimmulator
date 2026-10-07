@@ -1,6 +1,6 @@
 # UpGuard: native collection and Sentinel deployment
 
-Reviewed **2026-10-07** · Profile schema **current supported product** · Guide version **1.0.0**
+Reviewed **2026-10-07** · Profile schema **current supported product** · Guide version **1.1.0**
 
 ## Architecture and connection methods
 
@@ -27,13 +27,34 @@ UpGuard account with notifications/integration access; API access depends on sub
 
 ## Production deployment
 
-1. Create a receiver for UpGuard notifications. For Sentinel use a Logic App HTTP trigger followed by parsing/normalization and a Logs Ingestion API action or the Function relay described in the custom ingestion guide.
-2. In UpGuard configure the webhook notification destination, authentication supported by that integration, and the score, leak, identity and vulnerability notification categories.
-3. Paste the full Logic App callback URL, including `api-version`, `sp`, `sv` and `sig`, into the simulator Webhook URL. The simulator encrypts those query values on save and retains them during edits.
-4. Configure the Logic App trigger schema from an actual raw example; notification types have different details. Preserve event/type, description, organization/vendor identity and timestamp in RawData when normalizing.
-5. Add explicit branches/normalization for security score threshold, vendor score change, data leak, identity breach and vulnerability. Do not assume all notifications contain identical fields.
-6. For REST collection create the UpGuard API credential and follow the installed product's documented notification/risk API endpoints, using pagination and read-only scope; a webhook simulator does not emulate the complete risk API.
-7. Send one safe test notification and verify Logic App run history, receiver status and the final table query independently.
+Complete the Webhook or REST API procedure below independently. A REST risk snapshot is not a notification stream. Use a dedicated test table and preserve the full source object; notifications vary by selected trigger.
+
+## Webhook production deployment
+
+1. As an UpGuard account administrator open Settings > Integrations > New Integration > Webhook. Enable the intended score, leak, identity and vulnerability triggers available to your subscription.
+2. Name the integration; enter the HTTPS receiver URL and required header/query or Basic credentials. Permit UpGuard's current published egress IPs from `https://cdn.cyber-risk.upguard.com/webhook-ips.json` at the receiver.
+3. Review the Liquid template and sample for each trigger; preserve `notification.id`, `type`, `description`, `occurredAt` and its complete `context`. Use the selected trigger's template rather than inventing shared context fields.
+4. Select Send test message; inspect the receiver response. Confirm and next, enable the integration, then Finish. At the receiver branch on notification.type, set TimeGenerated from occurredAt, and serialize the full body into RawData.
+5. For Sentinel deploy the Logic App/DCR procedure in the linked Azure article. Enable secure inputs/outputs on actions containing signed URLs or secrets. Verify the run's downstream action separately from trigger acceptance.
+
+## REST API production deployment
+
+1. Confirm Breach/Vendor Risk API entitlement and the credential's account access with the account administrator. Create a dedicated API key under Settings > API; store it in the collector's secret store. API access inherits the account's authorization; it is not a notification OAuth scope.
+2. Retrieve the account risk snapshot using the literal API key in Authorization, without a Bearer prefix:
+
+```bash
+curl --fail-with-body 'https://cyber-risk.upguard.com/api/public/risks' \
+  -H 'Authorization: REPLACE_WITH_UPGUARD_API_KEY' -o upguard-risks.json
+jq '.risks[] | {id,finding,severity,firstDetected,hostnames}' upguard-risks.json
+curl --fail-with-body --get 'https://cyber-risk.upguard.com/api/public/available_risks/risk' \
+  -H 'Authorization: REPLACE_WITH_UPGUARD_API_KEY' \
+  --data-urlencode 'risk_id=REPLACE_WITH_RETURNED_RISK_ID'
+```
+
+3. Parse JSON `risks`, retain id/firstDetected/hostnames and the raw object. Do not treat this response as a webhook `notification`. Use account API docs for vendor-scoped endpoints and their exact pagination fields; /risks is an account snapshot.
+4. Run an operator-owned scheduled collector with a durable last-successful poll time and deduplication key `(account,id,firstDetected)`. Ingest bounded arrays through the DCR normalizer. Persist the checkpoint after API retrieval and downstream acceptance; use exponential backoff and Retry-After for 429.
+5. Normalize firstDetected to TimeGenerated, account to Computer and source to upguard-rest. Query that source label independently of the webhook simulation. The container does not poll UpGuard or expose /risks.
+
 
 ## Collector and Sentinel configuration
 
@@ -55,20 +76,32 @@ Record the source product/version, device/tenant/account identifier, selected ca
 
 ## Sample payload and expected output
 
-The following is a representative fixture for this profile, not a guarantee that every firmware/tenant field is present. Generate the selected scenario for a fresh event time.
+This deterministic score-threshold fixture is generated by the simulator. Leak, identity and vulnerability scenarios retain their own type/context. Use current generation when verifying a recent ingestion window.
 
-```text
-{"message":"Use Generate raw log for a sample from the selected scenario."}
+```json
+{
+  "notification": {
+    "id": 93810,
+    "type": "CustomerCSTARUnderThreshold",
+    "description": "The score for 'Example Company' dropped below 600 with a score of 599",
+    "occurredAt": "2026-10-07T12:00:00+00:00",
+    "context": {
+      "LatestScore": 599,
+      "PrevScore": 732,
+      "Threshold": 600
+    }
+  }
+}
 ```
 
-Expect the original hostname/tenant context, event time, event family and action to survive forwarding. Compare the installed vendor parser's required fields and data types before declaring compatibility.
+Expect notification.context.LatestScore=599 and Threshold=600. The native webhook remains a notification; a REST risks response needs its separate transform.
 
 ## Tables and KQL verification
 
-Use `YOUR_CONFIGURED_VENDOR_TABLE` for the described native path when that is the table selected by its connector. For a configurable vendor solution replace `YOUR_CONFIGURED_VENDOR_TABLE` with the actual deployed table name from the connector settings. Synthetic custom-envelope events go to IntegrationLab_CL.
+Use IntegrationLab_CL for the custom UpGuard receiver; no built-in table is populated by this walkthrough.
 
 ```kusto
-YOUR_CONFIGURED_VENDOR_TABLE
+IntegrationLab_CL
 | where TimeGenerated > ago(30m)
 | take 20
 ```
@@ -98,7 +131,80 @@ A signed Logic App callback needs the full api-version/sp/sv/sig query. The simu
 
 Keep a copy of the pre-change vendor configuration and DCR/collector settings. Monitor collector health, queue/backlog and event delay. Rotate API/function credentials with a tested overlap; retain mock encrypted values and `/data/.secret_key` with the database. Renew TLS certificates before expiry and test the replacement CA chain. To roll back disable the new forwarding/connector path, restore its prior configuration and preserve successful checkpoints to avoid replaying or losing data. Restore the simulator image/data together if rolling back an application release.
 
+## Webhook simulator testing
+
+1. Generate each UpGuard scenario and save its raw JSON. Create a Push Webhook simulation with the same selected scenarios.
+2. Paste the complete Logic App callback URL, including api-version/sp/sv/sig. Saving extracts and encrypts query values; preserve masked values during edits. Choose Basic/header auth only when the receiver requires it.
+3. Send one manual event per scenario. Inspect request JSON, history and the Logic App branch selected by notification.type.
+4. Query IntegrationLab_CL, parse RawData and compare notification.id/type/context. This checks receiver parsing and ingestion; it does not trigger real UpGuard detections.
+
+## REST API simulator testing
+
+1. Download a real synthetic notification from Generate raw log; use it to test the webhook/DCR receiver above.
+2. For a risk-object normalizer, use the complete synthetic `risks` fixture below in your authorized collector test harness and feed its extracted objects through the same DCR. Keep its upguard-rest source label distinct.
+3. The application has no UpGuard REST pull emulator: this alternative omits API-key validation, risk inventory, polling and production rate limits. Exercise those with a licensed sandbox separately.
+4. Stop the test collector; retain its checkpoint and revoke only its lab key. Rotate production API keys in the secret store, test the replacement read, then revoke the old key. Roll back by disabling this new poll job or webhook integration and restoring the previous receiver/transform.
+
 ## Official references
+
+- [Webhook configuration and trigger templates](https://help.upguard.com/en/articles/4205928-how-to-integrate-upguard-with-other-services-using-webhooks)
+- [Account risk endpoints and authentication](https://help.upguard.com/en/articles/8264577-how-to-retrieve-risks-detected-for-your-account-using-the-upguard-api)
+- [Account API reference](https://cyber-risk.upguard.com/api/docs)
 
 - [Official reference 1](https://learn.microsoft.com/en-us/azure/sentinel/data-connectors-reference)
 - [Official reference 2](https://learn.microsoft.com/en-us/azure/azure-monitor/logs/tutorial-logs-ingestion-portal)
+
+## Complete source fixture
+
+The following source fixture is generated from this profile's first scenario at a fixed UTC time. Select the required event family in Generate raw log for a fresh timestamp. Stored fixtures are readable and contain no receiver credentials.
+
+```json
+{
+  "notification": {
+    "id": 93810,
+    "type": "CustomerCSTARUnderThreshold",
+    "description": "The score for 'Example Company' dropped below 600 with a score of 599",
+    "occurredAt": "2026-10-07T12:00:00+00:00",
+    "context": {
+      "LatestScore": 599,
+      "PrevScore": 732,
+      "Threshold": 600
+    }
+  }
+}
+```
+
+## Documentation and deployment verification
+
+Documentation status: complete. This means every listed method has a production procedure, a simulator test or explicit alternative, a valid source example, operational checks and official references. It does not certify live vendor, licensed feature, parser or Sentinel acceptance. Review date: 2026-10-07; revision: 1.1.0. Use the method metadata to record those acceptance results separately. Commands are displayed only and require operator-supplied placeholders.
+
+## REST risks fixture and verification
+
+This synthetic account snapshot has the REST schema rather than a notification envelope. Parse each risks object and preserve id/firstDetected/hostnames.
+
+```json
+{
+  "risks": [
+    {
+      "id": "end_of_life_product:cpe:/a:example:service",
+      "finding": "Unsupported service version detected",
+      "risk": "Vulnerabilities",
+      "severity": "high",
+      "category": "website_sec",
+      "firstDetected": "2026-10-07T12:00:00Z",
+      "hostnames": [
+        "service.example.test"
+      ],
+      "riskType": "end_of_life_product",
+      "riskSubtype": "cpe:/a:example:service"
+    }
+  ]
+}
+```
+
+```kusto
+IntegrationLab_CL
+| where SourceProfile == "upguard-rest"
+| extend Risk=parse_json(RawData)
+| project TimeGenerated, Id=tostring(Risk.id), Severity=tostring(Risk.severity), Hostnames=Risk.hostnames
+```

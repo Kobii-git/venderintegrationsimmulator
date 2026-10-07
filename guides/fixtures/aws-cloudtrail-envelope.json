@@ -1,0 +1,8 @@
+[
+  {
+    "TimeGenerated": "2026-10-07T12:00:00+00:00",
+    "SourceProfile": "aws-cloudtrail",
+    "Computer": "sim-device-01",
+    "RawData": "{\"eventVersion\":\"1.09\",\"userIdentity\":{\"type\":\"IAMUser\",\"principalId\":\"AIDALAB\",\"arn\":\"arn:aws:iam::123456789012:user/labuser\",\"accountId\":\"123456789012\",\"userName\":\"labuser\"},\"eventTime\":\"2026-10-07T12:00:00+00:00\",\"eventSource\":\"signin.amazonaws.com\",\"eventName\":\"ConsoleLogin\",\"awsRegion\":\"us-east-1\",\"sourceIPAddress\":\"198.51.100.20\",\"userAgent\":\"Lab Simulator\",\"requestParameters\":null,\"responseElements\":{\"ConsoleLogin\":\"Success\"},\"eventID\":\"11111111-2222-4333-8444-555555555555\",\"eventType\":\"AwsConsoleSignIn\",\"managementEvent\":true,\"recipientAccountId\":\"123456789012\",\"eventCategory\":\"Management\"}"
+  }
+]

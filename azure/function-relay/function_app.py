@@ -10,6 +10,7 @@ from urllib.parse import quote, urlsplit
 
 import azure.functions as func
 import httpx
+from http_response import bounded_request, InvalidResponseError, ResponseLimitError
 from azure.identity import ManagedIdentityCredential
 
 app = func.FunctionApp(http_auth_level=func.AuthLevel.FUNCTION)
@@ -113,7 +114,9 @@ async def ingest(req: func.HttpRequest) -> func.HttpResponse:
             token = await asyncio.to_thread(
                 credential.get_token, "https://monitor.azure.com/.default"
             )
-            downstream = await client.post(
+            downstream = await bounded_request(
+                client,
+                "POST",
                 f"{endpoint}/dataCollectionRules/{quote(dcr, safe='')}/streams/{quote(stream, safe='')}?api-version=2023-01-01",
                 content=json.dumps(
                     records, ensure_ascii=False, separators=(",", ":"), allow_nan=False
@@ -142,6 +145,9 @@ async def ingest(req: func.HttpRequest) -> func.HttpResponse:
             code="downstream_transient" if status == 503 else "downstream_rejected",
             downstream_status=downstream.status_code,
         )
+    except (ResponseLimitError, InvalidResponseError) as exc:
+        status = 502
+        return response(status, request_id, code=exc.category)
     except ValueError:
         status = 424
         return response(status, request_id, code="relay_configuration")

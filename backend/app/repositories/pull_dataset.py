@@ -27,6 +27,15 @@ class PullDatasetRepository:
     def get_activation(self, activation_id: str) -> PullDatasetActivation | None:
         return self._db.get(PullDatasetActivation, activation_id)
 
+    def route_size(self, activation_id: str, route_id: str) -> int:
+        return (
+            self._db.query(PullDatasetItem)
+            .filter(
+                PullDatasetItem.activation_id == activation_id, PullDatasetItem.route_id == route_id
+            )
+            .count()
+        )
+
     def page(
         self,
         *,

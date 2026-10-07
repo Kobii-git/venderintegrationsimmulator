@@ -1,6 +1,6 @@
 # Windows Sysmon: custom Azure ingestion, Function relay and Logic Apps
 
-Reviewed **2026-10-07** · Guide version **1.0.0** · Support: **generic synthetic delivery**
+Reviewed **2026-10-07** · Guide version **1.1.0** · Support: **generic synthetic delivery**
 
 ## Architecture and connection methods
 
@@ -52,11 +52,20 @@ For real Windows Sysmon collection, follow the source-specific native procedure 
 
 ## Sample payload and expected output
 
+This complete synthetic ingestion fixture preserves the source record as text in RawData. Use a current event time for recent-window queries.
+
 ```json
-{"TimeGenerated":"2026-10-07T12:00:00Z","SourceProfile":"windows-sysmon","Computer":"sim-device-01","RawData":"{\"example\":\"Replace with this vendor's generated record\"}"}
+[
+  {
+    "TimeGenerated": "2026-10-07T12:00:00+00:00",
+    "SourceProfile": "windows-sysmon",
+    "Computer": "sim-device-01",
+    "RawData": "<Event xmlns=\"http://schemas.microsoft.com/win/2004/08/events/event\"><System><Provider Name=\"Microsoft-Windows-Sysmon\" /><EventID>1</EventID><Version>0</Version><Level>4</Level><TimeCreated SystemTime=\"2026-10-07T12:00:00+00:00\" /><EventRecordID>1</EventRecordID><Channel>Microsoft-Windows-Sysmon/Operational</Channel><Computer>sim-device-01</Computer></System><EventData><Data Name=\"RuleName\">-</Data><Data Name=\"UtcTime\">2026-10-07T12:00:00+00:00</Data><Data Name=\"ProcessGuid\">11111111-2222-4333-8444-555555555555</Data><Data Name=\"ProcessId\">1234</Data><Data Name=\"Image\">C:\\Windows\\System32\\cmd.exe</Data><Data Name=\"CommandLine\">cmd.exe /c whoami</Data><Data Name=\"User\">labuser</Data><Data Name=\"ParentProcessId\">1000</Data><Data Name=\"ParentImage\">C:\\Windows\\explorer.exe</Data><Data Name=\"Hashes\">SHA256=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</Data></EventData></Event>"
+  }
+]
 ```
 
-The sample demonstrates envelope types. Use Generate raw log for the actual Windows Sysmon event fields; normalization must preserve that complete record as a JSON string.
+The readable source is also included in the method-specific procedure. A 204 response or an accepted-record relay count must be followed by the table query.
 
 ## Tables and KQL verification
 
@@ -80,10 +89,10 @@ SIMULATOR_MONITOR_TOKEN=$(az account get-access-token --resource https://monitor
 cat > /tmp/simulator-envelope.json <<'EOF'
 [
   {
-    "TimeGenerated": "2026-10-07T12:00:00Z",
+    "TimeGenerated": "2026-10-07T12:00:00+00:00",
     "SourceProfile": "windows-sysmon",
     "Computer": "sim-device-01",
-    "RawData": "Replace with reviewed vendor raw record"
+    "RawData": "<Event xmlns=\"http://schemas.microsoft.com/win/2004/08/events/event\"><System><Provider Name=\"Microsoft-Windows-Sysmon\" /><EventID>1</EventID><Version>0</Version><Level>4</Level><TimeCreated SystemTime=\"2026-10-07T12:00:00+00:00\" /><EventRecordID>1</EventRecordID><Channel>Microsoft-Windows-Sysmon/Operational</Channel><Computer>sim-device-01</Computer></System><EventData><Data Name=\"RuleName\">-</Data><Data Name=\"UtcTime\">2026-10-07T12:00:00+00:00</Data><Data Name=\"ProcessGuid\">11111111-2222-4333-8444-555555555555</Data><Data Name=\"ProcessId\">1234</Data><Data Name=\"Image\">C:\\Windows\\System32\\cmd.exe</Data><Data Name=\"CommandLine\">cmd.exe /c whoami</Data><Data Name=\"User\">labuser</Data><Data Name=\"ParentProcessId\">1000</Data><Data Name=\"ParentImage\">C:\\Windows\\explorer.exe</Data><Data Name=\"Hashes\">SHA256=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</Data></EventData></Event>"
   }
 ]
 EOF
@@ -119,3 +128,74 @@ Monitor Function/Logic App errors, DCR changes, data arrival delay and failed si
 - [Official reference 2](https://learn.microsoft.com/en-us/azure/azure-monitor/logs/tutorial-logs-ingestion-portal)
 - [Official reference 3](https://learn.microsoft.com/en-us/azure/azure-functions/flex-consumption-how-to)
 - [Official reference 4](https://learn.microsoft.com/en-us/azure/logic-apps/logic-apps-http-endpoint)
+
+## Source configuration references
+
+- [Source contract](https://learn.microsoft.com/en-us/sysinternals/downloads/sysmon)
+- [Source contract](https://learn.microsoft.com/en-us/azure/azure-monitor/logs/tutorial-logs-ingestion-portal)
+
+## Logs Ingestion API production deployment
+
+Architecture: Windows Sysmon → Logs Ingestion API → the configured receiver/collector → its parser and Sentinel table. Support label: **generic synthetic delivery**. Apply this article's licensing, permission, network and source-version prerequisites before creating this path.
+
+1. Create IntegrationLab_CL and its DCR using the schema below. Input stream Custom-SimulatorEvents: TimeGenerated datetime, Computer string, SourceProfile string, RawData string; transform source, output Custom-IntegrationLab_CL. Assign Monitoring Metrics Publisher at the DCR ARM scope to the ingestion service principal, then record its tenant/client ID/secret, DCR immutable ID and ingestion endpoint. Use Azure Monitor token audience and JSON arrays.
+2. Complete the numbered vendor setup and collector/Sentinel configuration above for the selected path. Record the source account/device, receiver, authentication identity and table/DCR identifiers; protect secret values in the collector settings. Select only the event categories licensed for that source.
+3. Use the source fixture below and the article's complete envelope when normalizing. Preserve its original timestamp and identity; set SourceProfile to `windows-sysmon` for synthetic custom ingestion. The custom transform is `source` only when the four input columns exactly match the table. Native parsers need the chosen vendor format instead.
+4. Generate one approved source event, inspect each hop and run the table/KQL checks above. Expect populated event identity, time and action; receiver acceptance alone is insufficient. For authentication/connectivity/formatting failures use the troubleshooting checks before advancing any collector checkpoint.
+5. Monitor backlog/event delay and export these settings for rollback. Rotate this method's credential/certificate through a tested overlap, update the corresponding collector/job, then retire the old credential. To roll back, disable only this new method and restore its prior source/parser/checkpoint settings; retain shared tables and infrastructure.
+
+## Logs Ingestion API simulator testing
+
+1. Generate `windows-sysmon` raw logs or select this source in Log Lab. Keep the event families and native fields shown in the fixture.
+2. Select Azure Logs Ingestion with endpoint, DCR immutable ID, input stream, tenant/client credentials. For Azure API/Function choose the default custom envelope; for Logic App send the native source and apply its explicit normalizer. Inspect Wire preview for the exact format.
+3. Send one manual record, then a small finite run. Check per-job destination/authentication and acknowledgment; saved backlog uses its original configuration even after a stopped edit.
+4. Run the article's Sentinel verification query against the configured table, preserving `windows-sysmon` in the custom SourceProfile. Exercise wrong credentials, no records and a bounded rate/format failure before increasing volume.
+5. Record this local result separately from live vendor/parser acceptance; rotate only lab credentials and stop the test path for rollback.
+
+## Azure Function production deployment
+
+Architecture: Windows Sysmon → Azure Function → the configured receiver/collector → its parser and Sentinel table. Support label: **generic synthetic delivery**. Apply this article's licensing, permission, network and source-version prerequisites before creating this path.
+
+1. Deploy the repository Function relay with an operator-owned parameters file and the numbered Bicep/package commands above. Configure DCE_ENDPOINT, DCR_IMMUTABLE_ID and DCR_STREAM; its system-assigned identity needs Monitoring Metrics Publisher on the DCR. Use the /api/ingest URL and x-functions-key, without code in the URL. The relay accepts normalized arrays, not raw vendor messages or gzip NDJSON.
+2. Complete the numbered vendor setup and collector/Sentinel configuration above for the selected path. Record the source account/device, receiver, authentication identity and table/DCR identifiers; protect secret values in the collector settings. Select only the event categories licensed for that source.
+3. Use the source fixture below and the article's complete envelope when normalizing. Preserve its original timestamp and identity; set SourceProfile to `windows-sysmon` for synthetic custom ingestion. The custom transform is `source` only when the four input columns exactly match the table. Native parsers need the chosen vendor format instead.
+4. Generate one approved source event, inspect each hop and run the table/KQL checks above. Expect populated event identity, time and action; receiver acceptance alone is insufficient. For authentication/connectivity/formatting failures use the troubleshooting checks before advancing any collector checkpoint.
+5. Monitor backlog/event delay and export these settings for rollback. Rotate this method's credential/certificate through a tested overlap, update the corresponding collector/job, then retire the old credential. To roll back, disable only this new method and restore its prior source/parser/checkpoint settings; retain shared tables and infrastructure.
+
+## Azure Function simulator testing
+
+1. Generate `windows-sysmon` raw logs or select this source in Log Lab. Keep the event families and native fields shown in the fixture.
+2. Select Azure Function App with /api/ingest URL and function key. For Azure API/Function choose the default custom envelope; for Logic App send the native source and apply its explicit normalizer. Inspect Wire preview for the exact format.
+3. Send one manual record, then a small finite run. Check per-job destination/authentication and acknowledgment; saved backlog uses its original configuration even after a stopped edit.
+4. Run the article's Sentinel verification query against the configured table, preserving `windows-sysmon` in the custom SourceProfile. Exercise wrong credentials, no records and a bounded rate/format failure before increasing volume.
+5. Record this local result separately from live vendor/parser acceptance; rotate only lab credentials and stop the test path for rollback.
+
+## Logic App production deployment
+
+Architecture: Windows Sysmon → Logic App → the configured receiver/collector → its parser and Sentinel table. Support label: **generic synthetic delivery**. Apply this article's licensing, permission, network and source-version prerequisites before creating this path.
+
+1. Create When an HTTP request is received (POST). Generate its schema from this vendor fixture, preserving each event family. Enable managed identity and assign DCR-scoped Monitoring Metrics Publisher. Compose the envelope array below, then HTTP POST to the Logs Ingestion API with managed identity audience https://monitor.azure.com; alternatively invoke the protected relay. Keep the signed callback query intact and secure secret-bearing run inputs/outputs.
+2. Complete the numbered vendor setup and collector/Sentinel configuration above for the selected path. Record the source account/device, receiver, authentication identity and table/DCR identifiers; protect secret values in the collector settings. Select only the event categories licensed for that source.
+3. Use the source fixture below and the article's complete envelope when normalizing. Preserve its original timestamp and identity; set SourceProfile to `windows-sysmon` for synthetic custom ingestion. The custom transform is `source` only when the four input columns exactly match the table. Native parsers need the chosen vendor format instead.
+4. Generate one approved source event, inspect each hop and run the table/KQL checks above. Expect populated event identity, time and action; receiver acceptance alone is insufficient. For authentication/connectivity/formatting failures use the troubleshooting checks before advancing any collector checkpoint.
+5. Monitor backlog/event delay and export these settings for rollback. Rotate this method's credential/certificate through a tested overlap, update the corresponding collector/job, then retire the old credential. To roll back, disable only this new method and restore its prior source/parser/checkpoint settings; retain shared tables and infrastructure.
+
+## Logic App simulator testing
+
+1. Generate `windows-sysmon` raw logs or select this source in Log Lab. Keep the event families and native fields shown in the fixture.
+2. Select HTTP Webhook POST with the complete signed Logic App callback URL. For Azure API/Function choose the default custom envelope; for Logic App send the native source and apply its explicit normalizer. Inspect Wire preview for the exact format.
+3. Send one manual record, then a small finite run. Check per-job destination/authentication and acknowledgment; saved backlog uses its original configuration even after a stopped edit.
+4. Run the article's Sentinel verification query against the configured table, preserving `windows-sysmon` in the custom SourceProfile. Exercise wrong credentials, no records and a bounded rate/format failure before increasing volume.
+5. Record this local result separately from live vendor/parser acceptance; rotate only lab credentials and stop the test path for rollback.
+
+## Complete source fixture
+
+The following source fixture is generated from this profile's first scenario at a fixed UTC time. Select the required event family in Generate raw log for a fresh timestamp. Stored fixtures are readable and contain no receiver credentials.
+
+```text
+<Event xmlns="http://schemas.microsoft.com/win/2004/08/events/event"><System><Provider Name="Microsoft-Windows-Sysmon" /><EventID>1</EventID><Version>0</Version><Level>4</Level><TimeCreated SystemTime="2026-10-07T12:00:00+00:00" /><EventRecordID>1</EventRecordID><Channel>Microsoft-Windows-Sysmon/Operational</Channel><Computer>sim-device-01</Computer></System><EventData><Data Name="RuleName">-</Data><Data Name="UtcTime">2026-10-07T12:00:00+00:00</Data><Data Name="ProcessGuid">11111111-2222-4333-8444-555555555555</Data><Data Name="ProcessId">1234</Data><Data Name="Image">C:\Windows\System32\cmd.exe</Data><Data Name="CommandLine">cmd.exe /c whoami</Data><Data Name="User">labuser</Data><Data Name="ParentProcessId">1000</Data><Data Name="ParentImage">C:\Windows\explorer.exe</Data><Data Name="Hashes">SHA256=aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</Data></EventData></Event>
+```
+
+## Documentation and deployment verification
+
+Documentation status: complete. This means every listed method has a production procedure, a simulator test or explicit alternative, a valid source example, operational checks and official references. It does not certify live vendor, licensed feature, parser or Sentinel acceptance. Review date: 2026-10-07; revision: 1.1.0. Use the method metadata to record those acceptance results separately. Commands are displayed only and require operator-supplied placeholders.

@@ -1,0 +1,20 @@
+{
+  "id": "11111111-2222-4333-8444-555555555555",
+  "customer_id": "bdd640fb-0667-1ad1-1c80-317fa3b1799d",
+  "endpoint_id": "23b8c1e9-3924-56de-3eb1-3b9046685257",
+  "endpoint_type": "computer",
+  "severity": "HIGH",
+  "source": "EXAMPLE\\\\analyst",
+  "source_info": {
+    "ip": "192.0.2.10"
+  },
+  "location": "SOPHOS-ENDPOINT-01",
+  "when": "2026-10-07T12:00:00+00:00",
+  "created_at": "2026-10-07T12:00:00+00:00",
+  "name": "Malware detected: EICAR-AV-Test",
+  "type": "Event::Endpoint::CoreDetection",
+  "group": "MALWARE",
+  "threat": "EICAR-AV-Test",
+  "user_id": "EXAMPLE\\\\analyst",
+  "origin": "endpoint"
+}

@@ -4,6 +4,10 @@ import { Buffer } from "node:buffer";
 
 test("offline guides filter, navigate, download, contents and vendor raw logs", async ({ page }) => {
  const errors: string[]=[]; page.on("pageerror", error=>errors.push(error.message));
+ await page.addInitScript(() => {
+  Object.defineProperty(navigator, "clipboard", { value: { writeText: async (value: string) => { document.documentElement.dataset.copied = value; } } });
+  window.print = () => { document.documentElement.dataset.printed = "yes"; };
+ });
  await page.goto("/");
  await page.getByRole("link", { name:"Deployment Guides" }).click();
  await expect(page.getByRole("heading", { name:"Deployment Guides" })).toBeVisible();
@@ -11,6 +15,13 @@ test("offline guides filter, navigate, download, contents and vendor raw logs", 
  await page.getByLabel("Connection method").selectOption("Native connector");
  await page.getByRole("link", { name:"Cloudflare: Azure Blob and Sentinel CCF" }).click();
  await expect(page.getByRole("heading", { name:"Cloudflare: Azure Blob Storage and Sentinel CCF", exact:true })).toBeVisible();
+ await page.getByText("Documentation: complete — deployment verification", {exact:true}).click();
+ await expect(page.getByRole("table").first()).toContainText("not_run");
+ await page.getByRole("button", {name:"Copy command", exact:true}).first().click();
+ await expect(page.getByRole("button", {name:"Copied", exact:true}).first()).toBeVisible();
+ expect(await page.locator("html").getAttribute("data-copied")).toBeTruthy();
+ await page.getByRole("button", {name:"Print guide", exact:true}).click();
+ await expect(page.locator("html")).toHaveAttribute("data-printed", "yes");
  await page.getByRole("link", { name:"Troubleshooting", exact:true }).click();
  await expect(page).toHaveURL(/#troubleshooting$/);
  const downloadPromise=page.waitForEvent("download");
@@ -18,6 +29,7 @@ test("offline guides filter, navigate, download, contents and vendor raw logs", 
  expect((await downloadPromise).suggestedFilename()).toBe("cloudflare-azure-blob.md");
  await page.getByRole("link",{name:"Generate raw log",exact:true}).last().click();
  await expect(page.getByLabel("Product",{exact:true})).toHaveValue("cloudflare");
+ await expect(page.getByLabel("action", {exact:true})).toHaveCount(0);
  await page.getByRole("button",{name:"Generate raw log",exact:true}).click();
  await expect(page.getByLabel("Raw log output")).toHaveValue(/RayID/);
  for (const [vendor,method] of [["fortinet","native"],["upguard","native"],["mimecast","native"],["upguard","azure-ingestion"]]) {

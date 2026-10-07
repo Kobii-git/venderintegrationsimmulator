@@ -1,10 +1,12 @@
-# Current release: 0.4.6
+# Current release: 0.4.7
 
-Cloudflare and Mimecast add 18 scenarios to the retained catalog/workflows. Cloudflare native HTTP Logpush compresses bounded NDJSON batches and validates destinations. Mimecast API 2.0 supports OAuth, discovery/download/checkpoints, POST audit/protection retrieval and expiring scoped links backed by existing persistent datasets. Raw generation remains readable. Download files and the encryption key were verified across ordinary container recreation.
+All nine review findings have source fixes and regression coverage: bounded HTTP/OAuth traffic, redacted request evidence, credential-safe redirects, stored queue snapshots, effective scenario controls, Mimecast ordering/context and strict cursors. All 90 offline articles cover 220 production/simulator method pairs with synthetic fixtures and method-level documentation/acceptance metadata. The Upload logs list race found during verification is also fixed.
 
-The offline Deployment Guides library contains **90 guides for all 37 profiles**: 33 security vendors, three demos and uploaded logs. It includes support inventories, separate production/simulator instructions, current Sentinel Cloudflare CCF/Mimecast API 2.0 setup, other receiver/storage destinations and legacy Logpull/API 1.0 migration. Read-only APIs and safe Markdown navigation support filters, contents, command copy, print and download.
+No database schema migration or encryption-key change is required. Saved simulations, immutable queued configurations and existing materialized/download data are retained. Current and legacy vendor routes remain explicit; live licensed vendor/parser/Sentinel acceptance is separate from local tests. [Release, compatibility, server update and rollback instructions](UPGRADE_0.4.7.md).
 
-Local checks passed: **351 backend tests**, Ruff/mypy, **19 frontend unit tests**, lint/type/build, **14 Chromium workflows**, locked dependency audits, production-image migrations/rollback/real receivers and standalone database/key/Mimecast-download persistence. No database migration or storage transport is added. Live vendor/parser/Sentinel acceptance remains a separate external gate. CI tests native AMD64/ARM64 images before publication. [Release and update instructions](UPGRADE_0.4.6.md).
+Local verification passed: **414 backend tests**, Ruff/mypy, **20 frontend tests**, lint/type/build, **24 relay tests**, **10 migration/rollback tests** and **14 Chromium workflows without retries**. Locked Python/npm audits found no known vulnerabilities. Production-image upgrade, protocol/secret-canary and rollback checks passed. The final local ARM64 image passed fresh startup and database/key/simulation/valid Mimecast-download retention across container recreation. The TLS guide's certificate, rsyslog listener and marker commands passed in an isolated Ubuntu 24.04 collector; the gateway configuration also validated.
+
+Native Linux AMD64/ARM64 publication requires the repository's CI gates and pulled-image checks. Publication evidence is available in [the verification workflows](https://github.com/Kobii-git/venderintegrationsimmulator/actions/workflows/verify.yml); a source tag alone is not evidence that the image is available.
 
 ## Earlier release verification
 
@@ -79,7 +81,7 @@ on the local ARM64 Docker host. Published multi-platform digest:
 ## Recovery baseline
 
 The authoritative application repository is now https://github.com/Kobii-git/venderintegrationsimmulator.
-Version 0.4.6 source, deployment configuration and verification scripts are maintained on `main`.
+Version 0.4.7 source, deployment configuration and verification scripts are maintained on `main`.
 Future updates increment the application version and publish versioned and commit-tagged images.
 
 ## Signed webhook URLs, 7 October 2026 (0.4.5)

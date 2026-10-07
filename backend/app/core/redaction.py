@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import json
 import re
 from typing import Any
+from urllib.parse import quote, quote_plus
 
 SENSITIVE_KEY_PATTERN = re.compile(
     r"(password|token|secret|api[_-]?key|authorization|credential|^sig$)",
@@ -83,7 +85,17 @@ def redact_secret_values(value: Any, secrets: set[str]) -> Any:
         return tuple(redact_secret_values(item, active) for item in value)
     if isinstance(value, str):
         redacted = value
-        for secret in sorted(active, key=len, reverse=True):
+        representations = set(active)
+        for secret in active:
+            representations.update(
+                (
+                    json.dumps(secret, ensure_ascii=True)[1:-1],
+                    json.dumps(secret, ensure_ascii=False)[1:-1],
+                    quote(secret, safe=""),
+                    quote_plus(secret, safe=""),
+                )
+            )
+        for secret in sorted(representations, key=len, reverse=True):
             redacted = redacted.replace(secret, REDACTED)
         return redacted
     return value

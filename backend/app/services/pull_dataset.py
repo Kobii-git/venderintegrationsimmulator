@@ -118,7 +118,13 @@ class PullDatasetService:
         activation = self._repo.get_activation(activation_id) if activation_id else None
         if activation is None or activation.simulation_id != simulation.id:
             raise ValidationAppError("Pull dataset is not active; stop and start the simulation")
-        offset = self._decode_cursor(cursor, activation.id, route.id) if cursor else 0
+        offset = (
+            self._decode_cursor(
+                cursor, activation.id, route.id, self._repo.route_size(activation.id, route.id)
+            )
+            if cursor
+            else 0
+        )
         if page is not None:
             if page < 1:
                 raise ValidationAppError("page must be at least 1")
@@ -157,6 +163,8 @@ class PullDatasetService:
         since: datetime | None,
         force_empty: bool,
         transform: Callable[[list[dict[str, Any]]], list[dict[str, Any]]] | None = None,
+        reverse: bool = False,
+        query_context: dict[str, Any] | None = None,
     ) -> tuple[list[dict[str, Any]], str | None, str, int]:
         """Page a fully transformed route dataset for vendor-specific query semantics."""
         activation_id = str(
@@ -165,7 +173,17 @@ class PullDatasetService:
         activation = self._repo.get_activation(activation_id) if activation_id else None
         if activation is None or activation.simulation_id != simulation.id:
             raise ValidationAppError("Pull dataset is not active; stop and start the simulation")
-        offset = self._decode_cursor(cursor, activation.id, route.id) if cursor else 0
+        offset = (
+            self._decode_cursor(
+                cursor,
+                activation.id,
+                route.id,
+                self._repo.route_size(activation.id, route.id),
+                query_context,
+            )
+            if cursor
+            else 0
+        )
         if force_empty:
             payloads: list[dict[str, Any]] = []
         else:
@@ -177,11 +195,13 @@ class PullDatasetService:
             payloads = [dict(item.payload) for item in raw_items]
             if transform is not None:
                 payloads = transform(payloads)
+        if reverse:
+            payloads.reverse()
         total = len(payloads)
         page_items = payloads[offset : offset + limit]
         next_offset = offset + len(page_items)
         next_cursor = (
-            self._encode_cursor(activation.id, route.id, next_offset)
+            self._encode_cursor(activation.id, route.id, next_offset, query_context)
             if next_offset < total
             else None
         )
@@ -189,6 +209,7 @@ class PullDatasetService:
             activation.id,
             route.id,
             min(next_offset, total),
+            query_context,
         )
         return page_items, next_cursor, terminal_cursor, total
 
@@ -202,23 +223,74 @@ class PullDatasetService:
         return dict(item.payload)
 
     @staticmethod
-    def _encode_cursor(activation_id: str, route_id: str, offset: int) -> str:
-        raw = json.dumps(
-            {"activation": activation_id, "route": route_id, "offset": offset},
-            separators=(",", ":"),
-        ).encode()
+    def _encode_cursor(
+        activation_id: str, route_id: str, offset: int, query_context: dict[str, Any] | None = None
+    ) -> str:
+        payload: dict[str, Any] = {"activation": activation_id, "route": route_id, "offset": offset}
+        if query_context is not None:
+            payload["query"] = query_context
+        raw = json.dumps(payload, separators=(",", ":")).encode()
         return base64.urlsafe_b64encode(raw).decode().rstrip("=")
 
     @staticmethod
-    def _decode_cursor(cursor: str, activation_id: str, route_id: str) -> int:
+    def _decode_cursor(
+        cursor: str,
+        activation_id: str,
+        route_id: str,
+        maximum: int = 10000,
+        query_context: dict[str, Any] | None = None,
+    ) -> int:
+        import binascii
+        import re
+
         try:
+            if (
+                not isinstance(cursor, str)
+                or len(cursor) > 4096
+                or not re.fullmatch(r"[A-Za-z0-9_-]+={0,2}", cursor)
+            ):
+                raise ValueError("invalid token")
             padded = cursor + "=" * (-len(cursor) % 4)
-            payload = json.loads(base64.urlsafe_b64decode(padded.encode()))
+
+            def reject_constant(value: str) -> Any:
+                raise ValueError("non-finite JSON value")
+
+            def unique_object(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+                result: dict[str, Any] = {}
+                for key, value in pairs:
+                    if key in result:
+                        raise ValueError("duplicate JSON property")
+                    result[key] = value
+                return result
+
+            payload = json.loads(
+                base64.b64decode(padded.encode(), altchars=b"-_", validate=True),
+                parse_constant=reject_constant,
+                object_pairs_hook=unique_object,
+            )
+            if not isinstance(payload, dict):
+                raise ValueError("cursor must be an object")
             if payload.get("activation") != activation_id or payload.get("route") != route_id:
                 raise ValueError("cursor does not match the active dataset")
-            offset = int(payload["offset"])
-            if offset < 0:
-                raise ValueError("negative offset")
+            offset = payload.get("offset")
+            if type(offset) is not int or not 0 <= offset <= maximum:
+                raise ValueError("invalid offset")
+            if query_context is not None:
+                if "query" not in payload:
+                    raise ValidationAppError(
+                        "Legacy POST checkpoint: restart the query without pageToken"
+                    )
+                if payload["query"] != query_context:
+                    raise ValidationAppError(
+                        "Checkpoint query changed: restart the query without pageToken"
+                    )
             return offset
-        except (ValueError, KeyError, TypeError, json.JSONDecodeError) as exc:
+        except (
+            ValueError,
+            KeyError,
+            TypeError,
+            UnicodeError,
+            RecursionError,
+            binascii.Error,
+        ) as exc:
             raise ValidationAppError("Invalid or stale pagination cursor") from exc

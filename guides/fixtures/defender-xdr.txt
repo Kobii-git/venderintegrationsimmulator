@@ -1,0 +1,9 @@
+{
+  "Timestamp": "2026-10-07T12:00:00+00:00",
+  "AlertId": "11111111-2222-4333-8444-555555555555",
+  "Title": "Simulated malware detection",
+  "Category": "Malware",
+  "Severity": "High",
+  "ServiceSource": "Microsoft Defender for Endpoint",
+  "DetectionSource": "Antivirus"
+}

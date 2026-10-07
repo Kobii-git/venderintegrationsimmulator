@@ -126,8 +126,18 @@ class MimecastPlugin(NoOpProductPlugin, BaseProductWorkflowPlugin):
             raise VendorWorkflowError(400, {"message": "Expected pageToken string"})
         if since and until and since > until:
             raise VendorWorkflowError(400, {"message": "from must be before to"})
+        oldest_first = query.get("oldestFirst", False)
+        if context.route_id != "audit" and type(oldest_first) is not bool:
+            raise VendorWorkflowError(400, {"message": "oldestFirst must be a boolean"})
+        reverse = context.route_id != "audit" and not oldest_first
+        query_context = {
+            "from": since.astimezone(UTC).isoformat() if since else None,
+            "to": until.astimezone(UTC).isoformat() if until else None,
+            "reverse": reverse,
+        }
         items, next_cursor, _, total = context.page(
-            context.route_id, limit, cursor, since, until, None
+            context.route_id, limit, cursor, since, until, None,
+            reverse=reverse, query_context=query_context,
         )
         field = {
             "url": "clickLogs",

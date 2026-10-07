@@ -1,0 +1,8 @@
+[
+  {
+    "TimeGenerated": "2026-10-07T11:17:10.352568+00:00",
+    "SourceProfile": "demo-syslog",
+    "Computer": "simulator",
+    "RawData": "{\"_syslog_message\":\"integration-simulator demo-syslog ping message=syslog ping event_id=11111111-2222-4333-8444-555555555555\"}"
+  }
+]

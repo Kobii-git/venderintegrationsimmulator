@@ -114,4 +114,10 @@ TCP/TLS and HTTP clients reuse connections. Syslog pacing is isolated by collect
 
 ## Cloudflare HTTP Logpush
 
-`cloudflare_logpush` is the vendor-native Cloudflare HTTP workflow, distinct from generic webhook JSON. It sends POST gzip NDJSON with configurable headers and bounded batches. The destination-validation action sends gzip test.txt.gz. Raw samples stay uncompressed and wire previews expose base64 compressed bytes. Production receiver requirements and other destinations are bundled in Deployment Guides; storage transports and Logpull emulation are not included. See [0.4.6](UPGRADE_0.4.6.md).
+`cloudflare_logpush` is the vendor-native Cloudflare HTTP workflow, distinct from generic webhook JSON. It sends POST gzip NDJSON with configurable headers and bounded batches. The destination-validation action sends gzip test.txt.gz. Raw samples stay uncompressed and wire previews expose base64 compressed bytes. Production receiver requirements and other destinations are bundled in Deployment Guides; storage transports and Logpull emulation are not included. See [0.4.7](UPGRADE_0.4.7.md).
+
+HTTP responses are streamed with separate 1 MiB encoded/decoded caps. Identity, gzip and deflate are supported; malformed, stacked and other encodings fail with invalid_response. Oversized replies fail with response_too_large and the stream closes promptly. Redaction precedes the existing history truncation. Azure OAuth/ingestion/Function health and the packaged relay apply the same response boundary.
+
+Redirects are followed explicitly for at most five hops. Same-origin redirects are permitted. HTTPS downgrades and credential-bearing cross-origin redirects fail with redirect_rejected before a destination call. This includes Basic/Bearer, configured API-key/sensitive headers and sensitive query values. Uncredentialed cross-origin requests retain their behavior. Redirect bodies are discarded, and per-client cookies are cleared even on failure.
+
+Cloudflare/Azure queue batches contain only consecutive jobs with identical complete stored target snapshots; later destination, auth, transport or format edits affect newly queued jobs. Saved pending jobs are not rewritten.

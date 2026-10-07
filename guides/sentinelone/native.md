@@ -1,6 +1,6 @@
 # SentinelOne: native collection and Sentinel deployment
 
-Reviewed **2026-10-07** · Profile schema **Management API v2.1** · Guide version **1.0.0**
+Reviewed **2026-10-07** · Profile schema **Management API v2.1** · Guide version **1.1.0**
 
 ## Architecture and connection methods
 
@@ -91,10 +91,10 @@ Expect the original hostname/tenant context, event time, event family and action
 
 ## Tables and KQL verification
 
-Use `YOUR_CONFIGURED_VENDOR_TABLE` for the described native path when that is the table selected by its connector. For a configurable vendor solution replace `YOUR_CONFIGURED_VENDOR_TABLE` with the actual deployed table name from the connector settings. Synthetic custom-envelope events go to IntegrationLab_CL.
+Use `SentinelOneThreats_CL` for the described native path when that is the table selected by its connector. Synthetic custom-envelope events go to IntegrationLab_CL.
 
 ```kusto
-YOUR_CONFIGURED_VENDOR_TABLE
+SentinelOneThreats_CL
 | where TimeGenerated > ago(30m)
 | take 20
 ```
@@ -129,3 +129,75 @@ Keep a copy of the pre-change vendor configuration and DCR/collector settings. M
 - [Official reference 1](https://learn.microsoft.com/en-us/azure/sentinel/data-connectors/sentinelone)
 - [Official reference 2](https://learn.microsoft.com/en-us/azure/sentinel/data-connectors-reference)
 - [Official reference 3](https://learn.microsoft.com/en-us/azure/azure-monitor/logs/tutorial-logs-ingestion-portal)
+
+## REST API production deployment
+
+Architecture: SentinelOne → REST API → the configured receiver/collector → its parser and Sentinel table. Support label: **production only**. Apply this article's licensing, permission, network and source-version prerequisites before creating this path.
+
+1. Management Console: create a dedicated read API token constrained to the intended account/site, then configure the Sentinel solution connector's console URL/token. GET /web/api/v2.1/threats?limit=10 using Authorization ApiToken; follow pagination.nextCursor and preserve the returned event ID.
+2. Complete the numbered vendor setup and collector/Sentinel configuration above for the selected path. Record the source account/device, receiver, authentication identity and table/DCR identifiers; protect secret values in the collector settings. Select only the event categories licensed for that source.
+3. Use the source fixture below and the article's complete envelope when normalizing. Preserve its original timestamp and identity; set SourceProfile to `sentinelone` for synthetic custom ingestion. The custom transform is `source` only when the four input columns exactly match the table. Native parsers need the chosen vendor format instead.
+4. Generate one approved source event, inspect each hop and run the table/KQL checks above. Expect populated event identity, time and action; receiver acceptance alone is insufficient. For authentication/connectivity/formatting failures use the troubleshooting checks before advancing any collector checkpoint.
+5. Monitor backlog/event delay and export these settings for rollback. Rotate this method's credential/certificate through a tested overlap, update the corresponding collector/job, then retire the old credential. To roll back, disable only this new method and restore its prior source/parser/checkpoint settings; retain shared tables and infrastructure.
+
+## REST API simulator testing
+
+1. Generate/download the readable `sentinelone` source fixture. Test an operator-owned normalizer against those fields, or manually load the fixture using the destination's documented test tooling in a separate authorized lab.
+2. Use this article's HTTP/Azure custom-ingestion alternative for downstream verification; this container has no `REST API` producer/collector emulator and performs no cloud provisioning.
+3. Match the destination's timestamp representation, compression, batch envelope and selected fields explicitly. This alternative omits production IAM, licensing, discovery/retention and provider checkpoints; verify those externally before claiming native acceptance.
+4. Run the article's Sentinel verification query against the configured table, preserving `sentinelone` in the custom SourceProfile. Exercise wrong credentials, no records and a bounded rate/format failure before increasing volume.
+5. Record this local result separately from live vendor/parser acceptance; rotate only lab credentials and stop the test path for rollback.
+
+## Syslog production deployment
+
+Architecture: SentinelOne → Syslog → the configured receiver/collector → its parser and Sentinel table. Support label: **production only**. Apply this article's licensing, permission, network and source-version prerequisites before creating this path.
+
+1. In the console's Syslog integration enter the receiver address, supported protocol/port and the console's native CEF output categories. Verify the licensed management-console release exposes this integration; if it does not, use the read API collector. Synthetic JSON push tests a custom table and does not configure this native CEF export.
+2. Complete the numbered vendor setup and collector/Sentinel configuration above for the selected path. Record the source account/device, receiver, authentication identity and table/DCR identifiers; protect secret values in the collector settings. Select only the event categories licensed for that source.
+3. Use the source fixture below and the article's complete envelope when normalizing. Preserve its original timestamp and identity; set SourceProfile to `sentinelone` for synthetic custom ingestion. The custom transform is `source` only when the four input columns exactly match the table. Native parsers need the chosen vendor format instead.
+4. Generate one approved source event, inspect each hop and run the table/KQL checks above. Expect populated event identity, time and action; receiver acceptance alone is insufficient. For authentication/connectivity/formatting failures use the troubleshooting checks before advancing any collector checkpoint.
+5. Monitor backlog/event delay and export these settings for rollback. Rotate this method's credential/certificate through a tested overlap, update the corresponding collector/job, then retire the old credential. To roll back, disable only this new method and restore its prior source/parser/checkpoint settings; retain shared tables and infrastructure.
+
+## Syslog simulator testing
+
+1. Generate/download the readable `sentinelone` source fixture. Test an operator-owned normalizer against those fields, or manually load the fixture using the destination's documented test tooling in a separate authorized lab.
+2. Use this article's HTTP/Azure custom-ingestion alternative for downstream verification; this container has no `Syslog` producer/collector emulator and performs no cloud provisioning.
+3. Match the destination's timestamp representation, compression, batch envelope and selected fields explicitly. This alternative omits production IAM, licensing, discovery/retention and provider checkpoints; verify those externally before claiming native acceptance.
+4. Run the article's Sentinel verification query against the configured table, preserving `sentinelone` in the custom SourceProfile. Exercise wrong credentials, no records and a bounded rate/format failure before increasing volume.
+5. Record this local result separately from live vendor/parser acceptance; rotate only lab credentials and stop the test path for rollback.
+
+## Complete source fixture
+
+The following source fixture is generated from this profile's first scenario at a fixed UTC time. Select the required event family in Generate raw log for a fresh timestamp. Stored fixtures are readable and contain no receiver credentials.
+
+```json
+{
+  "id": "11111111-2222-4333-8444-555555555555",
+  "createdAt": "2026-10-07T12:00:00+00:00",
+  "activityType": 1,
+  "primaryDescription": "threat",
+  "agent": {
+    "computerName": "sim-device-01",
+    "networkInterfaces": [
+      {
+        "inet": [
+          "192.0.2.10"
+        ]
+      }
+    ]
+  },
+  "threatInfo": {
+    "threatName": "EICAR test file",
+    "classification": "Malware",
+    "confidenceLevel": "malicious",
+    "mitigationStatus": "mitigated"
+  },
+  "activityUuid": "11111111-2222-4333-8444-555555555555"
+}
+```
+
+## Documentation and deployment verification
+
+Documentation status: complete. This means every listed method has a production procedure, a simulator test or explicit alternative, a valid source example, operational checks and official references. It does not certify live vendor, licensed feature, parser or Sentinel acceptance. Review date: 2026-10-07; revision: 1.1.0. Use the method metadata to record those acceptance results separately. Commands are displayed only and require operator-supplied placeholders.
+
+[Current Sentinel connector/table inventory](https://learn.microsoft.com/en-us/azure/sentinel/sentinel-tables-connectors-reference). Match the deployed connector revision and table overrides; retired Function connector tables differ from current CCF tables.
