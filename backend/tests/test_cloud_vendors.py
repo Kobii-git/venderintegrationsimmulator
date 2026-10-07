@@ -344,3 +344,44 @@ async def test_cloudflare_queue_batches_reclaimed_jobs(runtime_client, monkeypat
     finally:
         await queue.close()
         await transport.close()
+
+
+def test_mimecast_dlp_is_separate_from_cg_batch(client):
+    sim = create(
+        client,
+        "mimecast",
+        simulation_mode="pull_api",
+        auth_config={
+            "auth_method_id": "none",
+            "oauth_client_id": "separate-client",
+            "oauth_client_secret": "separate-secret",
+        },
+        inbound_config={"auth_method_id": "oauth2_client_credentials", "dataset_size": 20},
+    )
+    client.post(f"/api/v1/simulations/{sim['id']}/start")
+    token = client.post(
+        f"/api/v1/mock/mimecast/oauth/token?simulation_id={sim['id']}",
+        data={
+            "grant_type": "client_credentials",
+            "client_id": "separate-client",
+            "client_secret": "separate-secret",
+        },
+    )
+    auth = {"Authorization": "Bearer " + token.json()["access_token"]}
+    base = f"/api/v1/mock/mimecast/siem/v1/batch/events/cg?simulation_id={sim['id']}"
+    batch = client.get(base, headers=auth, params={"pageSize": 100})
+    records = list(
+        map(
+            json.loads,
+            gzip.decompress(
+                client.get(local_path(batch.json()["value"][0]["url"])).content
+            ).splitlines(),
+        )
+    )
+    assert len(records) == 20 and all(record["type"] != "dlp" for record in records)
+    dlp = client.post(
+        f"/api/v1/mock/mimecast/api/dlp/get-logs?simulation_id={sim['id']}",
+        headers=auth,
+        json={"data": [{}]},
+    )
+    assert len(dlp.json()["data"][0]["dlpLogs"]) == 20

@@ -111,7 +111,7 @@ The first query confirms native table arrival; the second checks synthetic custo
 
 ## API 2.0 route requests and checkpoints
 
-Use the production base URL for real collection, or the simulation's displayed mock base plus `simulation_id=YOUR_SIMULATION_ID` for local testing. The mock deliberately caps pageSize at 100 and a download at 950000 uncompressed bytes. Discovery accepts `type`, `pageSize` and `nextPage`; a response with `value: []` and a stable `@nextPage` is a valid empty checkpoint.
+Use the production base URL for real collection, or the simulation's displayed mock base plus `simulation_id=YOUR_SIMULATION_ID` for local testing. The mock deliberately caps pageSize at 100 and a download at 950000 uncompressed bytes. DLP records use the dedicated DLP endpoint, not the SIEM CG batch. Discovery accepts `type`, `pageSize` and `nextPage`; a response with `value: []` and a stable `@nextPage` is a valid empty checkpoint.
 
 | Route | Method | Request filters | Returned records |
 |---|---|---|---|

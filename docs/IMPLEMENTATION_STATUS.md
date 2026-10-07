@@ -4,7 +4,7 @@ Cloudflare and Mimecast add 18 scenarios to the retained catalog/workflows. Clou
 
 The offline Deployment Guides library contains **90 guides for all 37 profiles**: 33 security vendors, three demos and uploaded logs. It includes support inventories, separate production/simulator instructions, current Sentinel Cloudflare CCF/Mimecast API 2.0 setup, other receiver/storage destinations and legacy Logpull/API 1.0 migration. Read-only APIs and safe Markdown navigation support filters, contents, command copy, print and download.
 
-Local checks passed: **350 backend tests**, Ruff/mypy, **19 frontend unit tests**, lint/type/build, **14 Chromium workflows**, locked dependency audits, production-image migrations/rollback/real receivers and standalone database/key/Mimecast-download persistence. No database migration or storage transport is added. Live vendor/parser/Sentinel acceptance remains a separate external gate. CI tests native AMD64/ARM64 images before publication. [Release and update instructions](UPGRADE_0.4.6.md).
+Local checks passed: **351 backend tests**, Ruff/mypy, **19 frontend unit tests**, lint/type/build, **14 Chromium workflows**, locked dependency audits, production-image migrations/rollback/real receivers and standalone database/key/Mimecast-download persistence. No database migration or storage transport is added. Live vendor/parser/Sentinel acceptance remains a separate external gate. CI tests native AMD64/ARM64 images before publication. [Release and update instructions](UPGRADE_0.4.6.md).
 
 ## Earlier release verification
 

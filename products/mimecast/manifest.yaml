@@ -177,7 +177,6 @@ mock_routes:
   - url-protection
   - attachment-protection
   - impersonation
-  - dlp
 - id: download
   path: downloads
   scenario_id: email-receipt
