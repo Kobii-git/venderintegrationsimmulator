@@ -1,6 +1,7 @@
 from app.transports.azure_function_app import AzureFunctionAppTransport
 from app.transports.azure_logs_ingestion import AzureLogsIngestionTransport
 from app.transports.base import Transport
+from app.transports.cloudflare_logpush import CloudflareLogpushTransport
 from app.transports.http_webhook import HttpWebhookTransport
 from app.transports.syslog_transport import SyslogTransport
 
@@ -26,6 +27,7 @@ transport_registry = TransportRegistry()
 
 def register_default_transports() -> None:
     transport_registry.register(HttpWebhookTransport())
+    transport_registry.register(CloudflareLogpushTransport())
     transport_registry.register(SyslogTransport())
     transport_registry.register(AzureLogsIngestionTransport())
     transport_registry.register(AzureFunctionAppTransport())

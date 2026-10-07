@@ -1,0 +1,8 @@
+{
+  "Timestamp": "2026-10-04T12:00:00+00:00",
+  "QueryName": "app.example.test",
+  "QueryType": 1,
+  "ResponseCode": 0,
+  "SourceIP": "198.51.100.20",
+  "ColoCode": "JNB"
+}

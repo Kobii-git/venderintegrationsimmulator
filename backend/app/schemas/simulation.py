@@ -122,6 +122,8 @@ class DestinationConfig(BaseModel):
                 or parsed_endpoint.fragment
             ):
                 raise ValueError("Azure endpoint cannot contain credentials, query or fragment")
+        if self.transport_id == "cloudflare_logpush":
+            self.method = "POST"
         if self.transport_id == "azure_function_app":
             parsed = urlsplit(self.url or "")
             if (

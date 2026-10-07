@@ -10,6 +10,7 @@ from app.api.error_handlers import register_exception_handlers
 from app.api.routes import (
     datasets,
     events,
+    guides,
     health,
     inbound,
     mock,
@@ -149,6 +150,7 @@ def create_app() -> FastAPI:
 
     api_v1 = APIRouter(prefix="/api/v1")
     api_v1.include_router(health.router)
+    api_v1.include_router(guides.router)
     api_v1.include_router(datasets.router)
     api_v1.include_router(version.router)
     api_v1.include_router(products.router)

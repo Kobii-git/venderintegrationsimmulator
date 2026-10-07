@@ -1,3 +1,13 @@
+# Current release: 0.4.6
+
+Cloudflare and Mimecast add 18 scenarios to the retained catalog/workflows. Cloudflare native HTTP Logpush compresses bounded NDJSON batches and validates destinations. Mimecast API 2.0 supports OAuth, discovery/download/checkpoints, POST audit/protection retrieval and expiring scoped links backed by existing persistent datasets. Raw generation remains readable. Download files and the encryption key were verified across ordinary container recreation.
+
+The offline Deployment Guides library contains **90 guides for all 37 profiles**: 33 security vendors, three demos and uploaded logs. It includes support inventories, separate production/simulator instructions, current Sentinel Cloudflare CCF/Mimecast API 2.0 setup, other receiver/storage destinations and legacy Logpull/API 1.0 migration. Read-only APIs and safe Markdown navigation support filters, contents, command copy, print and download.
+
+Local checks passed: **350 backend tests**, Ruff/mypy, **19 frontend unit tests**, lint/type/build, **14 Chromium workflows**, locked dependency audits, production-image migrations/rollback/real receivers and standalone database/key/Mimecast-download persistence. No database migration or storage transport is added. Live vendor/parser/Sentinel acceptance remains a separate external gate. CI tests native AMD64/ARM64 images before publication. [Release and update instructions](UPGRADE_0.4.6.md).
+
+## Earlier release verification
+
 # Implementation and verification, 4 October 2026
 
 ## Raw log generator, 6 October 2026 (0.4.4)
@@ -69,7 +79,7 @@ on the local ARM64 Docker host. Published multi-platform digest:
 ## Recovery baseline
 
 The authoritative application repository is now https://github.com/Kobii-git/venderintegrationsimmulator.
-Version 0.4.5 source, deployment configuration and verification scripts are maintained on `main`.
+Version 0.4.6 source, deployment configuration and verification scripts are maintained on `main`.
 Future updates increment the application version and publish versioned and commit-tagged images.
 
 ## Signed webhook URLs, 7 October 2026 (0.4.5)

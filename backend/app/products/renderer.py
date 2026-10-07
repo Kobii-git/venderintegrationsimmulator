@@ -49,6 +49,7 @@ class SafeTemplateRenderer:
             "correlation_id": correlation_id,
             "event_sequence": event_sequence,
             "generated_at_iso": effective_time.isoformat(),
+            "generated_at_epoch_ms": int(effective_time.timestamp() * 1000),
             "uuid4": lambda: str(uuid.uuid4()),
             "now_iso": lambda: effective_time.isoformat(),
             "random_int": rng.randint,

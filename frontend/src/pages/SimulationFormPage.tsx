@@ -838,6 +838,7 @@ export function SimulationFormPage() {
             </span>
           </div>
 
+          {productDetail && <p><Link to={`/guides?vendor=${productDetail.id}`}>Deployment guides for {productDetail.display_name}</Link>{productDetail.connection_profiles?.map(profile => <span key={profile.id} className="form-hint"> · {profile.display_name}</span>)}</p>}
           {!isPull ? (
             <DestinationSection
               destination={form.destination}

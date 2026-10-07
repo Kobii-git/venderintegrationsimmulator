@@ -1,0 +1,33 @@
+{
+  "content_type": "application/json",
+  "body": {
+    "_source_event": {
+      "vendor": "Cloudflare",
+      "product": "Cloudflare",
+      "version": "Logpush JSON",
+      "family": "gateway-dns-block",
+      "name": "Gateway Dns Block",
+      "signature": "1005",
+      "severity": 5,
+      "default_format": "json",
+      "time": "{{ generated_at_iso }}",
+      "hostname": "{{ hostname }}",
+      "device_ip": "{{ device_ip }}",
+      "src": "{{ src }}",
+      "dst": "{{ dst }}",
+      "user": "{{ user }}",
+      "spt": 49152,
+      "dpt": 443,
+      "action": "{{ action }}"
+    },
+    "record": {
+      "Datetime": "{{ generated_at_iso }}",
+      "QueryName": "{{ host }}",
+      "QueryType": 1,
+      "SourceIP": "{{ src }}",
+      "Action": "block",
+      "PolicyName": "Lab DNS policy",
+      "PolicyID": "11111111-2222-4333-8444-555555555555"
+    }
+  }
+}

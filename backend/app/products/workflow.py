@@ -20,6 +20,8 @@ class WorkflowResponse(BaseModel):
 
     status_code: int = 200
     body: Any = None
+    raw_content: bytes | None = None
+    media_type: str = "application/json"
     headers: dict[str, str] = Field(default_factory=dict)
 
 

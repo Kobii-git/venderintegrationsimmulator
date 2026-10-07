@@ -550,5 +550,53 @@
       "https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-event-reference-record-contents.html"
     ],
     "compatibility": "Synthetic ingestion; native service connector not reproduced"
+  },
+  {
+    "id": "cloudflare",
+    "name": "Cloudflare",
+    "formats": [
+      "json"
+    ],
+    "schema_version": "Logpush datasets (2026)",
+    "families": [
+      "http-request",
+      "waf-block",
+      "waf-challenge",
+      "dns-query",
+      "access-authentication",
+      "gateway-dns-block",
+      "gateway-http-block",
+      "gateway-network-block",
+      "audit-change"
+    ],
+    "references": [
+      "https://developers.cloudflare.com/logs/logpush/logpush-job/datasets/",
+      "https://developers.cloudflare.com/logs/logpush/logpush-job/enable-destinations/http/"
+    ],
+    "compatibility": "Synthetic wire workflows; live vendor/parser acceptance requires separate validation."
+  },
+  {
+    "id": "mimecast",
+    "name": "Mimecast",
+    "formats": [
+      "json"
+    ],
+    "schema_version": "API 2.0",
+    "families": [
+      "email-receipt",
+      "email-delivery",
+      "email-rejection",
+      "email-bounce",
+      "url-protection",
+      "attachment-protection",
+      "impersonation",
+      "dlp",
+      "audit"
+    ],
+    "references": [
+      "https://mimecastsupport.zendesk.com/hc/en-us/articles/36724433458451-API-Integrations-Microsoft-Sentinel-v3-1-0",
+      "https://github.com/Azure/Azure-Sentinel/tree/master/Solutions/Mimecast/Data%20Connectors"
+    ],
+    "compatibility": "Synthetic wire workflows; live vendor/parser acceptance requires separate validation."
   }
 ]

@@ -1,6 +1,6 @@
 # Docker log lab, release 0.4.0
 
-The Log Lab screen adds 30 synthetic source profiles to the existing simulator. FastAPI, React, SQLite, product plugins, polling mocks and the single application container remain in place. The source list is practical Sentinel coverage, not a market-share ranking. See [the catalog](../products/catalog.json) and each product's `SOURCE.md`, scenario templates and checked-in wire fixtures for versions, field references and event families.
+The Log Lab screen includes 32 synthetic catalog source profiles to the existing simulator. FastAPI, React, SQLite, product plugins, polling mocks and the single application container remain in place. The source list is practical Sentinel coverage, not a market-share ranking. See [the catalog](../products/catalog.json) and each product's `SOURCE.md`, scenario templates and checked-in wire fixtures for versions, field references and event families.
 
 ## Deploy and create a lab
 
@@ -45,7 +45,7 @@ Preview reports recognized and unknown ISO timestamp fields. Rewriting changes o
 
 Windows/DC and Sysmon can emit event XML or mapped JSON entirely inside Docker. Genuine WEF/AMA Windows event collection still requires a Windows lab. Linux and appliances emit native syslog; CEF sources use shared header/extension escaping and vendor mappings. PAN-OS and Umbrella emit CSV rows without headers. Zscaler NSS output is configurable at the vendor: the supplied CSV/CEF fixtures define this simulator's feed layout, rather than all possible NSS configurations.
 
-The 30 profiles have 120 synthetic event-family scenarios and 168 format fixtures; existing Fortinet scenarios add traffic allow/deny coverage, and existing UpGuard, demonstrations, Okta and Sophos workflows remain available. Local checks validate fixture stability, XML structure, CSV column counts, JSON fields and CEF escaping. Complete acceptance against every external firmware-specific parser has **not** run. Use fixtures to verify the actual Sentinel parser you deploy.
+The original 30 profiles have 120 synthetic event-family scenarios and 168 format fixtures; Cloudflare and Mimecast add 18 scenarios and 18 JSON fixtures. existing Fortinet scenarios add traffic allow/deny coverage, and existing UpGuard, demonstrations, Okta and Sophos workflows remain available. Local checks validate fixture stability, XML structure, CSV column counts, JSON fields and CEF escaping. Complete acceptance against every external firmware-specific parser has **not** run. Use fixtures to verify the actual Sentinel parser you deploy.
 
 Cloud JSON profiles test ingestion and analytics. They do not reproduce Microsoft's native Entra, Microsoft 365, Defender or Azure service connectors. Umbrella and AWS native S3 delivery is deferred. Okta and Sophos Central retain their existing polling APIs; other cloud profiles generate outbound records. See [Sentinel setup and smoke tests](SENTINEL_SMOKE_TEST.md).
 
@@ -97,3 +97,5 @@ uploads a record. Replay completion waits for the delivery queue; an accepted AP
 request is not a table-arrival check. Stop prevents generation while queued delivery
 may continue. See [relay deployment guide](../azure/function-relay/README.md) and
 [0.4.1 upgrade notes](UPGRADE_0.4.1.md).
+
+Deployment Guides at `/guides` cover every catalog profile plus UpGuard and utilities. Cloudflare native HTTP Logpush can be selected as a collector; Mimecast native API 2.0 pull is configured in the simulation form. See [0.4.6 notes](UPGRADE_0.4.6.md).

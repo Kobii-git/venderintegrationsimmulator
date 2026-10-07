@@ -384,6 +384,11 @@ def preview_target_wire(
         if isinstance(body, str)
         else json.dumps(body, ensure_ascii=False, separators=(",", ":")).encode("utf-8")
     )
+    if transport_id == "cloudflare_logpush":
+        from app.transports.cloudflare_logpush import encode_logpush
+
+        wire = encode_logpush(wire)
+        content_type = "application/gzip"
     if transport_id == "syslog":
         config = SyslogDeliveryEngine().parse_destination(
             {
@@ -400,7 +405,11 @@ def preview_target_wire(
         "scenario_id": scenario_id,
         "content_type": content_type,
         "bytes": len(wire),
-        "wire_text": wire.decode("utf-8"),
+        "wire_text": wire.decode("utf-8")
+        if transport_id != "cloudflare_logpush"
+        else "Gzip NDJSON; decode wire_base64 and gunzip to inspect records.",
+        "compression": "gzip" if transport_id == "cloudflare_logpush" else "none",
+        "record_count": 1,
         "wire_base64": base64.b64encode(wire).decode(),
         "note": (
             "Exact bytes at preview time. Generation and envelope timestamps advance "

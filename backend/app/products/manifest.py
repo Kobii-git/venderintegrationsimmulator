@@ -71,6 +71,7 @@ class ProductActionRef(BaseModel):
     content_type: str | None = "application/json"
     accepted_statuses: list[int] = Field(default_factory=lambda: [200])
     delivery_policy: DeliveryPolicy = Field(default_factory=DeliveryPolicy)
+    connection_transport: str | None = None
     assertion: ActionAssertion = Field(default_factory=ActionAssertion)
 
     @field_validator("id")
@@ -91,6 +92,7 @@ class MockRouteRef(BaseModel):
     methods: list[str] = Field(default_factory=lambda: ["GET"])
     scenario_id: str
     scenario_ids: list[str] = Field(default_factory=list)
+    signed_download: bool = False
     description: str | None = None
     response_type: str = "list"
     items_field: str = "items"
@@ -174,6 +176,7 @@ class ProductManifest(BaseModel):
     mock_routes: list[MockRouteRef] = Field(default_factory=list)
     actions: list[ProductActionRef] = Field(default_factory=list)
     inbound_options_schema: dict[str, Any] = Field(default_factory=dict)
+    connection_profiles: list[dict[str, Any]] = Field(default_factory=list)
     plugin: bool = False
     diagnostic_merge: str = "nested"
     formats: list[str] = Field(default_factory=list)
@@ -260,6 +263,11 @@ class ProductManifest(BaseModel):
             duplicates = {aid for aid in action_ids if action_ids.count(aid) > 1}
             raise ValueError(f"Duplicate product action ids in manifest: {sorted(duplicates)}")
         for action in self.actions:
+            if (
+                action.connection_transport
+                and action.connection_transport not in self.supported_transports
+            ):
+                raise ValueError(f"Action '{action.id}' has unsupported connection transport")
             unknown_action_modes = set(action.supported_modes) - set(self.supported_modes)
             if unknown_action_modes:
                 raise ValueError(

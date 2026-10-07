@@ -37,6 +37,7 @@ export function Layout() {
           <Link to="/raw-logs" className={isActive("/raw-logs") ? "active" : ""}>
             Generate raw log
           </Link>
+          <Link to="/guides" className={isActive("/guides") ? "active" : ""}>Deployment Guides</Link>
           <Link to="/lab" className={isActive("/lab") ? "active" : ""}>
             Log Lab
           </Link>

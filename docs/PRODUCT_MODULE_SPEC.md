@@ -413,3 +413,11 @@ Scenario detail includes `config_schema`, parsed `variables` (name, type, defaul
 ## Internal demo product
 
 `products/demo-http/` is shipped as an internal architecture verification product. It demonstrates manifest loading, template rendering, plugin hooks, and API responses. It is not a real vendor integration.
+
+## Optional native request/binary response extension (0.4.6)
+
+Existing ProductWorkflowPlugin methods remain unchanged. An advanced trusted plugin may optionally implement `handle_native_request(context: NativeRequest) -> WorkflowResponse`. The context includes route/method/URL/query, a bounded parsed JSON request object, simulation/dataset activation IDs, protected signing key, validated vendor options and a persistent page reader. The page reader applies cursor/time/type filtering to the existing materialized datasets. The plugin must validate its nested request contract and return safe vendor errors for malformed input. Ordinary inbound authentication and configured faults still apply.
+
+WorkflowResponse accepts optional `raw_content: bytes` and `media_type` for binary responses; the default remains JSON. Binary request-history evidence records size/type rather than decoding compressed bytes. Native download tokens are redacted. A trusted manifest may mark a route `signed_download: true`; only a plugin implementing native handling can use this path, and it must verify the signed URL's scope, activation and expiry itself. It may resolve an explicitly selected inactive simulation so valid downloads survive normal recreation; ordinary pull routes still require a running simulation.
+
+`connection_profiles` adds descriptive metadata for forms without changing existing supported modes/transports. Product actions may specify `connection_transport` from that product's supported transport list (Cloudflare destination validation uses native gzip). There is no database schema migration for these optional extensions. See the Cloudflare and Mimecast manifests/plugins for bounded implementations and regression tests.

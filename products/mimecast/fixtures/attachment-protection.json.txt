@@ -1,0 +1,16 @@
+{
+  "timestamp": 1791115200000,
+  "type": "attachment protect",
+  "action": "block",
+  "accountId": "CUSB4A274",
+  "messageId": "<11111111-2222-4333-8444-555555555555@example.test>",
+  "senderEnvelope": "sender@example.test",
+  "senderHeader": "sender@example.test",
+  "recipients": "recipient@example.test",
+  "subject": "Integration test message",
+  "senderIp": "198.51.100.20",
+  "direction": "Inbound",
+  "fileName": "sample-test.txt",
+  "result": "malicious",
+  "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+}

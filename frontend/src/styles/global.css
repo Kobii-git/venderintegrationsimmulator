@@ -537,3 +537,23 @@ textarea.raw-log-output {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.3; }
 }
+
+/* Offline deployment guide library */
+.guide-filters { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
+.guide-filters label { display: flex; flex-direction: column; gap: .5rem; }
+.guide-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 1rem; }
+.guide-grid article { padding: 1.25rem; background: white; border: 1px solid #d4dce7; border-radius: 8px; }
+.guide-grid h2 { font-size: 1.1rem; margin: .75rem 0; }
+.guide-status { font-size: .8rem; color: #345478; }
+.guide-toolbar { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; margin: 1rem 0; }
+.guide-reading { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 2rem; }
+.guide-contents { position: sticky; top: 1rem; align-self: start; display: flex; flex-direction: column; gap: .75rem; font-size: .9rem; }
+.guide-body { background: white; border: 1px solid #d4dce7; border-radius: 8px; padding: 2rem; line-height: 1.7; min-width: 0; }
+.guide-body h2 { scroll-margin-top: 1rem; margin-top: 2rem; }
+.guide-body table { display: block; overflow: auto; border-collapse: collapse; }
+.guide-body td, .guide-body th { border: 1px solid #d4dce7; padding: .6rem; }
+.guide-code { position: relative; background: #101d31; color: #edf4ff; border-radius: 6px; padding: 2.75rem 1rem 1rem; margin: 1rem 0; }
+.guide-code pre { overflow: auto; background: transparent; color: inherit; white-space: pre; margin: 0; }
+.guide-copy { position: absolute; right: .5rem; top: .5rem; }
+@media (max-width: 850px) { .guide-filters { grid-template-columns: 1fr 1fr; } .guide-reading { grid-template-columns: 1fr; } .guide-contents { position: static; } }
+@media print { .topbar, .guide-toolbar, .guide-contents, .guide-copy { display: none !important; } .guide-reading { display: block; } .guide-body { padding: 0; border: 0; } .guide-code { background: white; color: black; padding: .5rem; } .guide-code pre { white-space: pre-wrap; overflow-wrap: anywhere; } .main { max-width: none; padding: 0; } }

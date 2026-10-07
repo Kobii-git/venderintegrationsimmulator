@@ -1,3 +1,4 @@
+import { Link, useSearchParams } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 
 import { generateRawLog, getProduct, listProducts } from "../api/products";
@@ -12,6 +13,7 @@ import type {
 import { formatApiError } from "../utils/format";
 
 export function RawLogPage() {
+  const [searchParams] = useSearchParams();
   const [products, setProducts] = useState<ProductSummary[]>([]);
   const [productId, setProductId] = useState("");
   const [product, setProduct] = useState<ProductDetail | null>(null);
@@ -34,7 +36,7 @@ export function RawLogPage() {
         if (!active) return;
         setProducts(catalog);
         setProductId(
-          catalog.find((item) => item.id === "upguard")?.id ??
+          catalog.find((item) => item.id === searchParams.get("product"))?.id ?? catalog.find((item) => item.id === "upguard")?.id ??
             catalog[0]?.id ??
             "",
         );
@@ -46,7 +48,7 @@ export function RawLogPage() {
       active = false;
       generation.current += 1;
     };
-  }, []);
+  }, [searchParams]);
 
   useEffect(() => {
     if (!productId) return;
@@ -135,6 +137,7 @@ export function RawLogPage() {
     <div>
       <div className="page-header">
         <h1>Generate raw log</h1>
+      {productId && <Link to={`/guides?vendor=${productId}`}>Deployment guides for this integration</Link>}
       </div>
       <p className="form-hint">
         Generate one sample in the product’s default log format. No destination

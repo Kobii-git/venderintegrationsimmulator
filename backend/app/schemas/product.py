@@ -42,6 +42,7 @@ class ProductSummaryResponse(BaseModel):
 
 
 class ProductDetailResponse(ProductSummaryResponse):
+    connection_profiles: list[dict[str, Any]] = Field(default_factory=list)
     diagnostic_merge: str
     inbound_options_schema: dict[str, Any] = Field(default_factory=dict)
     scenarios: list["ScenarioSummaryResponse"]

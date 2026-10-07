@@ -156,7 +156,10 @@ class SimulationService:
             mode = updates.get("simulation_mode", simulation.simulation_mode)
             if mode != SimulationMode.PULL_API.value:
                 self._validate_destination_for_product(simulation.product_id, destination)
-                if destination.transport_id == "http_webhook" and destination.url:
+                if (
+                    destination.transport_id in {"http_webhook", "cloudflare_logpush"}
+                    and destination.url
+                ):
                     validate_destination_url(str(destination.url), self._settings)
             stored_destination, destination_secrets = store_destination(
                 destination,
@@ -396,7 +399,7 @@ class SimulationService:
             not destination.host or not destination.host.strip()
         ):
             raise ValidationAppError("destination.host is required for syslog transport")
-        if destination.transport_id == "http_webhook" and (
+        if destination.transport_id in {"http_webhook", "cloudflare_logpush"} and (
             not destination.url or not destination.url.strip()
         ):
             raise ValidationAppError("destination.url is required for http_webhook transport")

@@ -1,0 +1,258 @@
+id: cloudflare
+display_name: Cloudflare
+version: 1.0.0
+description: Representative synthetic security events and native connection workflows.
+supported_modes:
+- push_webhook
+supported_transports:
+- cloudflare_logpush
+- http_webhook
+- azure_logs_ingestion
+- azure_function_app
+supported_auth_methods:
+- none
+- basic
+- bearer
+- api_key_header
+supported_inbound_auth_methods: []
+formats:
+- json
+schema_version: Logpush datasets (2026)
+compatibility: Synthetic wire workflows; live vendor/parser acceptance requires separate
+  validation.
+field_references:
+- https://developers.cloudflare.com/logs/logpush/logpush-job/datasets/
+- https://developers.cloudflare.com/logs/logpush/logpush-job/enable-destinations/http/
+scenarios:
+- id: http-request
+  display_name: HTTP Request
+  default_transport: cloudflare_logpush
+  template: scenarios/http-request.json
+  config_schema:
+    type: object
+    additionalProperties: false
+    properties: &id001
+      hostname:
+        type: string
+        default: sim-device-01
+        maxLength: 1024
+      device_ip:
+        type: string
+        default: 192.0.2.10
+        maxLength: 1024
+      src:
+        type: string
+        default: 198.51.100.20
+        maxLength: 1024
+      dst:
+        type: string
+        default: 203.0.113.10
+        maxLength: 1024
+      user:
+        type: string
+        default: labuser
+        maxLength: 1024
+      host:
+        type: string
+        default: app.example.test
+        maxLength: 1024
+      uri:
+        type: string
+        default: /login
+        maxLength: 1024
+      sender:
+        type: string
+        default: sender@example.test
+        maxLength: 1024
+      recipient:
+        type: string
+        default: recipient@example.test
+        maxLength: 1024
+      subject:
+        type: string
+        default: Integration test message
+        maxLength: 1024
+      action:
+        type: string
+        default: allow
+        maxLength: 1024
+- id: waf-block
+  display_name: WAF Block
+  default_transport: cloudflare_logpush
+  template: scenarios/waf-block.json
+  config_schema:
+    type: object
+    additionalProperties: false
+    properties: *id001
+- id: waf-challenge
+  display_name: WAF Challenge
+  default_transport: cloudflare_logpush
+  template: scenarios/waf-challenge.json
+  config_schema:
+    type: object
+    additionalProperties: false
+    properties: *id001
+- id: dns-query
+  display_name: DNS Query
+  default_transport: cloudflare_logpush
+  template: scenarios/dns-query.json
+  config_schema:
+    type: object
+    additionalProperties: false
+    properties: *id001
+- id: access-authentication
+  display_name: Access Authentication
+  default_transport: cloudflare_logpush
+  template: scenarios/access-authentication.json
+  config_schema:
+    type: object
+    additionalProperties: false
+    properties: *id001
+- id: gateway-dns-block
+  display_name: Gateway DNS Block
+  default_transport: cloudflare_logpush
+  template: scenarios/gateway-dns-block.json
+  config_schema:
+    type: object
+    additionalProperties: false
+    properties: *id001
+- id: gateway-http-block
+  display_name: Gateway HTTP Block
+  default_transport: cloudflare_logpush
+  template: scenarios/gateway-http-block.json
+  config_schema:
+    type: object
+    additionalProperties: false
+    properties: *id001
+- id: gateway-network-block
+  display_name: Gateway Network Block
+  default_transport: cloudflare_logpush
+  template: scenarios/gateway-network-block.json
+  config_schema:
+    type: object
+    additionalProperties: false
+    properties: *id001
+- id: audit-change
+  display_name: Audit Change
+  default_transport: cloudflare_logpush
+  template: scenarios/audit-change.json
+  config_schema:
+    type: object
+    additionalProperties: false
+    properties: *id001
+connection_profiles:
+- id: logpush-http
+  display_name: HTTP Logpush (gzip NDJSON)
+  mode: push_webhook
+  transport_id: cloudflare_logpush
+actions:
+- id: validate-destination
+  display_name: Validate Logpush destination
+  description: POST the gzip-compressed test.txt.gz validation payload to the configured
+    receiver.
+  method: POST
+  body:
+    content: tests
+  accepted_statuses:
+  - 200
+  - 201
+  - 202
+  - 203
+  - 204
+  - 205
+  - 206
+  - 207
+  - 208
+  - 209
+  - 210
+  - 211
+  - 212
+  - 213
+  - 214
+  - 215
+  - 216
+  - 217
+  - 218
+  - 219
+  - 220
+  - 221
+  - 222
+  - 223
+  - 224
+  - 225
+  - 226
+  - 227
+  - 228
+  - 229
+  - 230
+  - 231
+  - 232
+  - 233
+  - 234
+  - 235
+  - 236
+  - 237
+  - 238
+  - 239
+  - 240
+  - 241
+  - 242
+  - 243
+  - 244
+  - 245
+  - 246
+  - 247
+  - 248
+  - 249
+  - 250
+  - 251
+  - 252
+  - 253
+  - 254
+  - 255
+  - 256
+  - 257
+  - 258
+  - 259
+  - 260
+  - 261
+  - 262
+  - 263
+  - 264
+  - 265
+  - 266
+  - 267
+  - 268
+  - 269
+  - 270
+  - 271
+  - 272
+  - 273
+  - 274
+  - 275
+  - 276
+  - 277
+  - 278
+  - 279
+  - 280
+  - 281
+  - 282
+  - 283
+  - 284
+  - 285
+  - 286
+  - 287
+  - 288
+  - 289
+  - 290
+  - 291
+  - 292
+  - 293
+  - 294
+  - 295
+  - 296
+  - 297
+  - 298
+  - 299
+  connection_transport: cloudflare_logpush
+plugin: true

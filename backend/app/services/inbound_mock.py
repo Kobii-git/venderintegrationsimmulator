@@ -17,7 +17,7 @@ from app.core.redaction import (
     redact_secret_values,
     truncate_body,
 )
-from app.core.security import SecretEncryptor
+from app.core.security import SecretEncryptor, resolve_secret_key
 from app.domain.enums import SimulationMode, SimulationStatus
 from app.domain.inbound import InboundConfig
 from app.inbound.auth import InboundAuthResult, inbound_sensitive_header_names, verify_inbound_auth
@@ -29,6 +29,7 @@ from app.inbound.response_builder import (
     parse_time_filter,
 )
 from app.models import InboundRequestLog, Simulation
+from app.products.native import NativeRequest
 from app.products.registry import ProductRegistry
 from app.products.workflow import VendorWorkflowError
 from app.repositories.inbound import InboundRequestRepository
@@ -74,7 +75,9 @@ class InboundMockService:
             self._persist_unmatched_log(product_id, "unmatched", request, response, started)
             return response
 
-        simulation = self._resolve_simulation(product_id, request)
+        simulation = self._resolve_simulation(
+            product_id, request, allow_inactive=route.signed_download
+        )
         if simulation is None:
             response = JSONResponse(
                 status_code=404,
@@ -131,6 +134,9 @@ class InboundMockService:
             auth_config,
             oauth_token_validator=oauth_validator,
         )
+
+        if route.signed_download and callable(getattr(workflow, "handle_native_request", None)):
+            auth_result = InboundAuthResult(success=True, method_id="signed_download")
 
         if not auth_result.success:
             status = 401
@@ -196,6 +202,134 @@ class InboundMockService:
             )
             self._persist_log(
                 simulation, route.id, request, response, auth_result, started, 0, route_path
+            )
+            return response
+
+        native_handler = getattr(workflow, "handle_native_request", None)
+        if callable(native_handler):
+            native_items_returned = 0
+            try:
+                request_body: dict[str, Any] = {}
+                if request.method == "POST":
+                    raw = await request.body()
+                    if len(raw) > 1_000_000:
+                        raise VendorWorkflowError(413, {"message": "Request body too large"})
+                    import json
+
+                    try:
+                        request_body = json.loads(raw)
+                    except (ValueError, UnicodeDecodeError) as exc:
+                        raise VendorWorkflowError(400, {"message": "Invalid JSON body"}) from exc
+                    if not isinstance(request_body, dict):
+                        raise VendorWorkflowError(400, {"message": "Expected JSON object"})
+
+                def page_reader(
+                    route_id: str,
+                    limit: int,
+                    cursor: str | None,
+                    since: datetime | None,
+                    until: datetime | None,
+                    types: set[str] | None,
+                ) -> tuple[list[dict[str, Any]], str | None, str, int]:
+                    nonlocal native_items_returned
+                    data_route = next(
+                        r
+                        for r in manifest.mock_routes
+                        if r.id == route_id and r.handler == "dataset_list"
+                    )
+
+                    def transform(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
+                        records = [item.get("record", item) for item in items]
+                        if types:
+                            records = [r for r in records if r.get("type") in types]
+                        if until:
+
+                            def in_range(record: dict[str, Any]) -> bool:
+                                value = record.get("timestamp", record.get("eventTime"))
+                                if isinstance(value, int):
+                                    return datetime.fromtimestamp(value / 1000, tz=UTC) <= until
+                                return (
+                                    datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+                                    <= until
+                                )
+
+                            records = [r for r in records if in_range(r)]
+                        return records
+
+                    page = self._datasets.custom_page(
+                        route=data_route,
+                        simulation=simulation,
+                        limit=limit,
+                        cursor=cursor,
+                        since=since,
+                        force_empty=fault.enabled and fault.force_empty,
+                        transform=transform,
+                    )
+                    native_items_returned = len(page[0])
+                    return page
+
+                shaped = native_handler(
+                    NativeRequest(
+                        route_id=route.id,
+                        method=method,
+                        url=str(request.url),
+                        query=dict(request.query_params),
+                        body=request_body,
+                        simulation_id=simulation.id,
+                        activation_id=str(
+                            (simulation.runtime_state or {}).get("pull_dataset_activation_id") or ""
+                        ),
+                        signing_key=resolve_secret_key(),
+                        options=dict(inbound_settings.vendor_options),
+                        page=page_reader,
+                    )
+                )
+                if shaped.raw_content is not None:
+                    response = Response(
+                        content=shaped.raw_content,
+                        status_code=shaped.status_code,
+                        headers=shaped.headers,
+                        media_type=shaped.media_type,
+                    )
+                elif fault.enabled and fault.malformed_json:
+                    response = Response(content="{ malformed", media_type="application/json")
+                else:
+                    if (
+                        fault.enabled
+                        and fault.pagination_inconsistent
+                        and isinstance(shaped.body, dict)
+                    ):
+                        if "@nextPage" in shaped.body:
+                            shaped.body["@nextPage"] = "invalid-cursor-token"
+                        elif isinstance(shaped.body.get("meta"), dict):
+                            shaped.body["meta"].get("pagination", {})["next"] = (
+                                "invalid-cursor-token"
+                            )
+                    response = JSONResponse(
+                        content=shaped.body, status_code=shaped.status_code, headers=shaped.headers
+                    )
+            except (VendorWorkflowError, ValidationAppError) as exc:
+                if isinstance(exc, VendorWorkflowError):
+                    if route.signed_download and exc.status_code == 403:
+                        auth_result = InboundAuthResult(
+                            success=False,
+                            method_id="signed_download",
+                            message="Invalid or expired download link",
+                        )
+                    response = JSONResponse(
+                        status_code=exc.status_code, content=exc.body, headers=exc.headers
+                    )
+                else:
+                    response = self._error_response(workflow, route.id, 400, str(exc))
+            self._persist_log(
+                simulation,
+                route.id,
+                request,
+                response,
+                auth_result,
+                started,
+                native_items_returned,
+                route_path,
             )
             return response
 
@@ -388,7 +522,9 @@ class InboundMockService:
         )
         return JSONResponse(status_code=status_code, content=body, headers=headers or {})
 
-    def _resolve_simulation(self, product_id: str, request: Request) -> Simulation | None:
+    def _resolve_simulation(
+        self, product_id: str, request: Request, *, allow_inactive: bool = False
+    ) -> Simulation | None:
         simulation_id = request.query_params.get("simulation_id") or request.headers.get(
             "X-Simulator-Simulation-Id"
         )
@@ -398,7 +534,7 @@ class InboundMockService:
                 simulation
                 and simulation.product_id == product_id
                 and simulation.simulation_mode == SimulationMode.PULL_API.value
-                and simulation.status == SimulationStatus.RUNNING.value
+                and (allow_inactive or simulation.status == SimulationStatus.RUNNING.value)
             ):
                 return simulation
             return None
@@ -463,6 +599,8 @@ class InboundMockService:
             extra_sensitive=sensitive,
         )
         query_params = dict(request.query_params)
+        if "token" in query_params:
+            query_params["token"] = REDACTED
         if (
             inbound_settings.api_key_query_param
             and inbound_settings.api_key_query_param in query_params
@@ -494,6 +632,12 @@ class InboundMockService:
                 else str(response.body)
             )
 
+        if response.headers.get("content-type", "").startswith("application/gzip"):
+            response_body = f"[binary gzip response: {len(response.body)} bytes]"
+        if response_body:
+            import re
+
+            response_body = re.sub(r'(token=)[^&"\s]+', r"\1***REDACTED***", response_body)
         response_body = redact_secret_values(response_body, secret_values)
         success = auth_result.success and response.status_code < 400
         log = InboundRequestLog(

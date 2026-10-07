@@ -1,0 +1,11 @@
+{
+  "RayID": "1111111122224333",
+  "ClientIP": "198.51.100.20",
+  "ClientRequestHost": "app.example.test",
+  "ClientRequestMethod": "GET",
+  "ClientRequestURI": "/login",
+  "EdgeResponseStatus": 200,
+  "EdgeStartTimestamp": "2026-10-04T12:00:00+00:00",
+  "EdgeEndTimestamp": "2026-10-04T12:00:00+00:00",
+  "CacheCacheStatus": "miss"
+}

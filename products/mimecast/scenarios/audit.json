@@ -1,0 +1,32 @@
+{
+  "content_type": "application/json",
+  "body": {
+    "_source_event": {
+      "vendor": "Mimecast",
+      "product": "Email Security MX",
+      "version": "API 2.0",
+      "family": "audit",
+      "name": "Audit",
+      "signature": "1008",
+      "severity": 5,
+      "default_format": "json",
+      "time": "{{ generated_at_iso }}",
+      "hostname": "{{ hostname }}",
+      "device_ip": "{{ device_ip }}",
+      "src": "{{ src }}",
+      "dst": "{{ dst }}",
+      "user": "{{ user }}",
+      "spt": 49152,
+      "dpt": 443,
+      "action": "{{ action }}"
+    },
+    "record": {
+      "id": "{{ correlation_id }}",
+      "eventTime": "{{ generated_at_iso }}",
+      "user": "{{ user }}@example.test",
+      "eventInfo": "Synthetic administrative login",
+      "category": "authentication",
+      "sourceIp": "{{ src }}"
+    }
+  }
+}

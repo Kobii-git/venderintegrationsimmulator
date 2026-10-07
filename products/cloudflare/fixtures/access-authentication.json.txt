@@ -1,0 +1,9 @@
+{
+  "CreatedAt": "2026-10-04T12:00:00+00:00",
+  "Email": "labuser@example.test",
+  "IPAddress": "198.51.100.20",
+  "AppDomain": "app.example.test",
+  "Action": "login",
+  "Allowed": true,
+  "Connection": "onetimepin"
+}

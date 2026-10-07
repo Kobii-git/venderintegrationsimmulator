@@ -1,7 +1,7 @@
 {
   "name": "integration-simulator-frontend",
   "private": true,
-  "version": "0.4.5",
+  "version": "0.4.6",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -16,7 +16,9 @@
   "dependencies": {
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^7.1.1"
+    "react-markdown": "10.1.0",
+    "react-router-dom": "^7.1.1",
+    "remark-gfm": "4.0.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",

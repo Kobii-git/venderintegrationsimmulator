@@ -33,6 +33,7 @@ class ProductCatalogService:
             **self._to_summary(summary).model_dump(),
             diagnostic_merge=manifest.diagnostic_merge,
             inbound_options_schema=manifest.inbound_options_schema,
+            connection_profiles=manifest.connection_profiles,
             scenarios=[self._to_scenario_summary(scenario) for scenario in manifest.scenarios],
             mock_routes=[
                 MockRouteSummaryResponse(

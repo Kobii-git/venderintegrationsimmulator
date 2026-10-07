@@ -187,7 +187,11 @@ class HttpDeliveryEngine:
                 # Preserve metadata that auth was applied without leaking value.
                 canonical = header_name.title() if header_name == "authorization" else header_name
                 redacted_request_headers[canonical] = "***REDACTED***"
-        request_body_text = redact_secret_values(self._body_to_text(request.body), secrets)
+        request_body_text = (
+            f"[gzip upload: {len(request.body or b"")} bytes]"
+            if request.content_type == "application/gzip"
+            else redact_secret_values(self._body_to_text(request.body), secrets)
+        )
 
         try:
             timeout = httpx.Timeout(request.timeout_seconds)

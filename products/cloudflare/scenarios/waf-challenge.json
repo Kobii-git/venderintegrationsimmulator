@@ -1,0 +1,34 @@
+{
+  "content_type": "application/json",
+  "body": {
+    "_source_event": {
+      "vendor": "Cloudflare",
+      "product": "Cloudflare",
+      "version": "Logpush JSON",
+      "family": "waf-challenge",
+      "name": "Waf Challenge",
+      "signature": "1002",
+      "severity": 5,
+      "default_format": "json",
+      "time": "{{ generated_at_iso }}",
+      "hostname": "{{ hostname }}",
+      "device_ip": "{{ device_ip }}",
+      "src": "{{ src }}",
+      "dst": "{{ dst }}",
+      "user": "{{ user }}",
+      "spt": 49152,
+      "dpt": 443,
+      "action": "{{ action }}"
+    },
+    "record": {
+      "RayID": "{{ correlation_id }}",
+      "ClientIP": "{{ src }}",
+      "ClientRequestHost": "{{ host }}",
+      "ClientRequestURI": "{{ uri }}",
+      "Action": "managed_challenge",
+      "Source": "waf",
+      "RuleID": "11111111222243338444555555555555",
+      "Datetime": "{{ generated_at_iso }}"
+    }
+  }
+}

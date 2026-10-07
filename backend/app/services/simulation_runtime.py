@@ -435,6 +435,8 @@ class SimulationRuntimeService:
             simulation.destination_secret_values or {},
             self._encryptor,
         )
+        if action.connection_transport:
+            destination["transport_id"] = action.connection_transport
         destination["method"] = action.method
         destination["headers"] = {**destination.get("headers", {}), **headers}
         if action.delivery_policy.timeout_seconds is not None:
@@ -1375,7 +1377,10 @@ class SimulationRuntimeService:
             dest = target["destination"]
             if dest.get("transport_id") == "syslog" and not dest.get("host"):
                 raise ValidationAppError("destination.host is required for syslog transport")
-            if dest.get("transport_id", "http_webhook") == "http_webhook" and not dest.get("url"):
+            if dest.get("transport_id", "http_webhook") in {
+                "http_webhook",
+                "cloudflare_logpush",
+            } and not dest.get("url"):
                 raise ValidationAppError("destination.url is required for http_webhook transport")
 
     def _validate_auth(self, simulation: Simulation) -> None:

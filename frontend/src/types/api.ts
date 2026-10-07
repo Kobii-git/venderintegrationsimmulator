@@ -9,7 +9,7 @@ export type SimulationMode = "push_webhook" | "pull_api";
 export type SyslogProtocol = "udp" | "tcp" | "tls";
 export type SyslogFormat = "rfc3164" | "rfc5424" | "raw";
 export type TcpFraming = "newline" | "octet_counting";
-export type TransportId = "http_webhook" | "syslog" | "azure_logs_ingestion" | "azure_function_app";
+export type TransportId = "http_webhook" | "syslog" | "azure_logs_ingestion" | "azure_function_app" | "cloudflare_logpush";
 export type HttpMethod = "GET" | "POST" | "PUT" | "HEAD";
 export type AuthMethodId = "none" | "basic" | "bearer" | "api_key_header";
 export type InboundAuthMethodId =
@@ -133,6 +133,7 @@ export interface ScenarioDetail extends ScenarioSummary {
 }
 
 export interface ProductDetail extends ProductSummary {
+  connection_profiles?: Array<{ id: string; display_name: string; mode: SimulationMode; transport_id?: string | null }>;
   diagnostic_merge: string;
   inbound_options_schema?: ObjectJsonSchema;
   scenarios: ScenarioSummary[];

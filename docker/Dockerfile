@@ -30,6 +30,7 @@ RUN pip install --no-cache-dir --require-hashes -r /app/backend/requirements.txt
 
 COPY backend/ /app/backend/
 COPY products/ /app/products/
+COPY guides/ /app/guides/
 COPY --from=frontend-build /build/frontend/dist /app/frontend/dist
 
 RUN mkdir -p /data && chown -R appuser:appuser /data /app

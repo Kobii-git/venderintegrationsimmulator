@@ -1,0 +1,10 @@
+{
+  "RayID": "1111111122224333",
+  "ClientIP": "198.51.100.20",
+  "ClientRequestHost": "app.example.test",
+  "ClientRequestURI": "/login",
+  "Action": "block",
+  "Source": "waf",
+  "RuleID": "11111111222243338444555555555555",
+  "Datetime": "2026-10-04T12:00:00+00:00"
+}

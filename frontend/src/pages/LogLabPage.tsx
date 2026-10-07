@@ -464,6 +464,7 @@ export function LogLabPage() {
                   >
                     <option value="syslog">Syslog UDP / TCP / TLS</option>
                     <option value="http_webhook">HTTP webhook</option>
+                    {productId === "cloudflare" && <option value="cloudflare_logpush">Cloudflare Logpush (gzip NDJSON)</option>}
                     <option value="azure_logs_ingestion">
                       Azure Logs Ingestion API
                     </option>
@@ -576,7 +577,7 @@ export function LogLabPage() {
                     </select>
                   </div>
                 </>
-              ) : t.destination.transport_id === "http_webhook" ? (
+              ) : ["http_webhook", "cloudflare_logpush"].includes(t.destination.transport_id ?? "http_webhook") ? (
                 <>
                   <div className="form-row">
                     <label>URL</label>

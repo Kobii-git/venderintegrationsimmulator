@@ -79,13 +79,22 @@ def build_curl_from_attempt(
         query_params = getattr(attempt, "request_query_params_redacted", None) or {}
         exact = False
         warnings.append("Legacy attempt does not contain an exact request URL")
+    compressed = str(attempt.request_body or "").startswith("[gzip upload:")
+    if compressed:
+        warnings.append(
+            "Compressed upload bytes are not stored in history. "
+            "Supply the gzip NDJSON file with --data-binary @logs.ndjson.gz."
+        )
+        exact = False
     command = build_curl_command(
         method=attempt.request_method or "POST",
         destination_url=base_url,
         query_params=query_params,
         headers=headers,
-        body=attempt.request_body,
+        body=None if compressed else attempt.request_body,
         auth_method_id=auth_method_id,
         auth_header_present=auth_header_present,
     )
+    if compressed:
+        command += " \\\n  --data-binary @logs.ndjson.gz"
     return command, exact, warnings

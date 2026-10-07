@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, expect, it, vi } from "vitest";
 
 import { generateRawLog, getProduct, listProducts } from "../api/products";
+import { MemoryRouter } from "react-router-dom";
 import { RawLogPage } from "../pages/RawLogPage";
 import type {
   ProductDetail,
@@ -53,7 +54,7 @@ beforeEach(() => {
 
 it("generates the raw body without a destination and copies exactly the displayed sample", async () => {
   const user = userEvent.setup();
-  render(<RawLogPage />);
+  render(<MemoryRouter><RawLogPage /></MemoryRouter>);
   const button = await screen.findByRole("button", {
     name: "Generate raw log",
   });
@@ -78,7 +79,7 @@ it("discards old responses when the scenario changes and uses customized values"
     }),
   );
   const user = userEvent.setup();
-  render(<RawLogPage />);
+  render(<MemoryRouter><RawLogPage /></MemoryRouter>);
   const button = screen.getByRole("button", { name: "Generate raw log" });
   await waitFor(() => expect(button).toBeEnabled());
   await user.click(button);
@@ -101,7 +102,7 @@ it("discards old responses when the scenario changes and uses customized values"
 
 it("shows errors and removes outdated output when configuration changes", async () => {
   const user = userEvent.setup();
-  render(<RawLogPage />);
+  render(<MemoryRouter><RawLogPage /></MemoryRouter>);
   const button = screen.getByRole("button", { name: "Generate raw log" });
   await waitFor(() => expect(button).toBeEnabled());
   await user.click(button);

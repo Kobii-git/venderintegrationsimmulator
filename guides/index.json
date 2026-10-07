@@ -1,0 +1,2796 @@
+[
+  {
+    "product_id": "fortinet",
+    "product_name": "Fortinet FortiGate",
+    "method_id": "native",
+    "title": "Fortinet FortiGate: native collection",
+    "summary": "FortiOS 7.4: UDP, TCP, TLS, production setup and a separate simulator walkthrough.",
+    "connection_methods": [
+      "UDP",
+      "TCP",
+      "TLS"
+    ],
+    "destinations": [
+      "Microsoft Sentinel",
+      "Generic receiver",
+      "Splunk",
+      "Elastic"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "fortinet/native.md",
+    "method_inventory": [
+      {
+        "method": "UDP",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "TCP",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "TLS",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "fortinet",
+    "product_name": "Fortinet FortiGate",
+    "method_id": "azure-ingestion",
+    "title": "Fortinet FortiGate: Azure ingestion and relays",
+    "summary": "Detailed DCR, managed identity Function and Logic App setup; raw vendor data and simulator envelope validation.",
+    "connection_methods": [
+      "Logs Ingestion API",
+      "Azure Function",
+      "Logic App"
+    ],
+    "destinations": [
+      "Microsoft Sentinel"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "fortinet/azure-ingestion.md",
+    "method_inventory": [
+      {
+        "method": "Logs Ingestion API",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Azure Function",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Logic App",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "palo-alto",
+    "product_name": "Palo Alto PAN-OS",
+    "method_id": "native",
+    "title": "Palo Alto PAN-OS: native collection",
+    "summary": "PAN-OS 11.1: UDP, TCP, TLS, production setup and a separate simulator walkthrough.",
+    "connection_methods": [
+      "UDP",
+      "TCP",
+      "TLS"
+    ],
+    "destinations": [
+      "Microsoft Sentinel",
+      "Generic receiver",
+      "Splunk",
+      "Elastic"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "palo-alto/native.md",
+    "method_inventory": [
+      {
+        "method": "UDP",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "TCP",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "TLS",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "palo-alto",
+    "product_name": "Palo Alto PAN-OS",
+    "method_id": "azure-ingestion",
+    "title": "Palo Alto PAN-OS: Azure ingestion and relays",
+    "summary": "Detailed DCR, managed identity Function and Logic App setup; raw vendor data and simulator envelope validation.",
+    "connection_methods": [
+      "Logs Ingestion API",
+      "Azure Function",
+      "Logic App"
+    ],
+    "destinations": [
+      "Microsoft Sentinel"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "palo-alto/azure-ingestion.md",
+    "method_inventory": [
+      {
+        "method": "Logs Ingestion API",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Azure Function",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Logic App",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "check-point",
+    "product_name": "Check Point Log Exporter",
+    "method_id": "native",
+    "title": "Check Point Log Exporter: native collection",
+    "summary": "Log Exporter R81 CEF: UDP, TCP, TLS, production setup and a separate simulator walkthrough.",
+    "connection_methods": [
+      "UDP",
+      "TCP",
+      "TLS"
+    ],
+    "destinations": [
+      "Microsoft Sentinel",
+      "Generic receiver",
+      "Splunk",
+      "Elastic"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "check-point/native.md",
+    "method_inventory": [
+      {
+        "method": "UDP",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "TCP",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "TLS",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "check-point",
+    "product_name": "Check Point Log Exporter",
+    "method_id": "azure-ingestion",
+    "title": "Check Point Log Exporter: Azure ingestion and relays",
+    "summary": "Detailed DCR, managed identity Function and Logic App setup; raw vendor data and simulator envelope validation.",
+    "connection_methods": [
+      "Logs Ingestion API",
+      "Azure Function",
+      "Logic App"
+    ],
+    "destinations": [
+      "Microsoft Sentinel"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "check-point/azure-ingestion.md",
+    "method_inventory": [
+      {
+        "method": "Logs Ingestion API",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Azure Function",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Logic App",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "cisco-asa",
+    "product_name": "Cisco ASA",
+    "method_id": "native",
+    "title": "Cisco ASA: native collection",
+    "summary": "ASA 9.20: UDP, TCP, TLS, production setup and a separate simulator walkthrough.",
+    "connection_methods": [
+      "UDP",
+      "TCP",
+      "TLS"
+    ],
+    "destinations": [
+      "Microsoft Sentinel",
+      "Generic receiver",
+      "Splunk",
+      "Elastic"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "cisco-asa/native.md",
+    "method_inventory": [
+      {
+        "method": "UDP",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "TCP",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "TLS",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "cisco-asa",
+    "product_name": "Cisco ASA",
+    "method_id": "azure-ingestion",
+    "title": "Cisco ASA: Azure ingestion and relays",
+    "summary": "Detailed DCR, managed identity Function and Logic App setup; raw vendor data and simulator envelope validation.",
+    "connection_methods": [
+      "Logs Ingestion API",
+      "Azure Function",
+      "Logic App"
+    ],
+    "destinations": [
+      "Microsoft Sentinel"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "cisco-asa/azure-ingestion.md",
+    "method_inventory": [
+      {
+        "method": "Logs Ingestion API",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Azure Function",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Logic App",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "cisco-ftd",
+    "product_name": "Cisco FTD",
+    "method_id": "native",
+    "title": "Cisco FTD: native collection",
+    "summary": "Secure Firewall 7.4: UDP, TCP, production setup and a separate simulator walkthrough.",
+    "connection_methods": [
+      "UDP",
+      "TCP"
+    ],
+    "destinations": [
+      "Microsoft Sentinel",
+      "Generic receiver",
+      "Splunk",
+      "Elastic"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "cisco-ftd/native.md",
+    "method_inventory": [
+      {
+        "method": "UDP",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "TCP",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "cisco-ftd",
+    "product_name": "Cisco FTD",
+    "method_id": "azure-ingestion",
+    "title": "Cisco FTD: Azure ingestion and relays",
+    "summary": "Detailed DCR, managed identity Function and Logic App setup; raw vendor data and simulator envelope validation.",
+    "connection_methods": [
+      "Logs Ingestion API",
+      "Azure Function",
+      "Logic App"
+    ],
+    "destinations": [
+      "Microsoft Sentinel"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "cisco-ftd/azure-ingestion.md",
+    "method_inventory": [
+      {
+        "method": "Logs Ingestion API",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Azure Function",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Logic App",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "cisco-ios",
+    "product_name": "Cisco IOS / IOS XE",
+    "method_id": "native",
+    "title": "Cisco IOS / IOS XE: native collection",
+    "summary": "IOS XE 17: UDP, TCP, production setup and a separate simulator walkthrough.",
+    "connection_methods": [
+      "UDP",
+      "TCP"
+    ],
+    "destinations": [
+      "Microsoft Sentinel",
+      "Generic receiver",
+      "Splunk",
+      "Elastic"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "cisco-ios/native.md",
+    "method_inventory": [
+      {
+        "method": "UDP",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "TCP",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "cisco-ios",
+    "product_name": "Cisco IOS / IOS XE",
+    "method_id": "azure-ingestion",
+    "title": "Cisco IOS / IOS XE: Azure ingestion and relays",
+    "summary": "Detailed DCR, managed identity Function and Logic App setup; raw vendor data and simulator envelope validation.",
+    "connection_methods": [
+      "Logs Ingestion API",
+      "Azure Function",
+      "Logic App"
+    ],
+    "destinations": [
+      "Microsoft Sentinel"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "cisco-ios/azure-ingestion.md",
+    "method_inventory": [
+      {
+        "method": "Logs Ingestion API",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Azure Function",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Logic App",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "juniper-srx",
+    "product_name": "Juniper SRX",
+    "method_id": "native",
+    "title": "Juniper SRX: native collection",
+    "summary": "Junos 23 structured syslog: UDP, TCP, TLS, production setup and a separate simulator walkthrough.",
+    "connection_methods": [
+      "UDP",
+      "TCP",
+      "TLS"
+    ],
+    "destinations": [
+      "Microsoft Sentinel",
+      "Generic receiver",
+      "Splunk",
+      "Elastic"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "juniper-srx/native.md",
+    "method_inventory": [
+      {
+        "method": "UDP",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "TCP",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "TLS",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "juniper-srx",
+    "product_name": "Juniper SRX",
+    "method_id": "azure-ingestion",
+    "title": "Juniper SRX: Azure ingestion and relays",
+    "summary": "Detailed DCR, managed identity Function and Logic App setup; raw vendor data and simulator envelope validation.",
+    "connection_methods": [
+      "Logs Ingestion API",
+      "Azure Function",
+      "Logic App"
+    ],
+    "destinations": [
+      "Microsoft Sentinel"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "juniper-srx/azure-ingestion.md",
+    "method_inventory": [
+      {
+        "method": "Logs Ingestion API",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Azure Function",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Logic App",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "sophos-firewall",
+    "product_name": "Sophos Firewall",
+    "method_id": "native",
+    "title": "Sophos Firewall: native collection",
+    "summary": "SFOS 19.5: UDP, TCP, TLS, production setup and a separate simulator walkthrough.",
+    "connection_methods": [
+      "UDP",
+      "TCP",
+      "TLS"
+    ],
+    "destinations": [
+      "Microsoft Sentinel",
+      "Generic receiver",
+      "Splunk",
+      "Elastic"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "sophos-firewall/native.md",
+    "method_inventory": [
+      {
+        "method": "UDP",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "TCP",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "TLS",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "sophos-firewall",
+    "product_name": "Sophos Firewall",
+    "method_id": "azure-ingestion",
+    "title": "Sophos Firewall: Azure ingestion and relays",
+    "summary": "Detailed DCR, managed identity Function and Logic App setup; raw vendor data and simulator envelope validation.",
+    "connection_methods": [
+      "Logs Ingestion API",
+      "Azure Function",
+      "Logic App"
+    ],
+    "destinations": [
+      "Microsoft Sentinel"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "sophos-firewall/azure-ingestion.md",
+    "method_inventory": [
+      {
+        "method": "Logs Ingestion API",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Azure Function",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Logic App",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "sonicwall",
+    "product_name": "SonicWall",
+    "method_id": "native",
+    "title": "SonicWall: native collection",
+    "summary": "SonicOS 7: UDP, production setup and a separate simulator walkthrough.",
+    "connection_methods": [
+      "UDP"
+    ],
+    "destinations": [
+      "Microsoft Sentinel",
+      "Generic receiver",
+      "Splunk",
+      "Elastic"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "sonicwall/native.md",
+    "method_inventory": [
+      {
+        "method": "UDP",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "sonicwall",
+    "product_name": "SonicWall",
+    "method_id": "azure-ingestion",
+    "title": "SonicWall: Azure ingestion and relays",
+    "summary": "Detailed DCR, managed identity Function and Logic App setup; raw vendor data and simulator envelope validation.",
+    "connection_methods": [
+      "Logs Ingestion API",
+      "Azure Function",
+      "Logic App"
+    ],
+    "destinations": [
+      "Microsoft Sentinel"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "sonicwall/azure-ingestion.md",
+    "method_inventory": [
+      {
+        "method": "Logs Ingestion API",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Azure Function",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Logic App",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "watchguard",
+    "product_name": "WatchGuard Firebox",
+    "method_id": "native",
+    "title": "WatchGuard Firebox: native collection",
+    "summary": "Fireware 12: UDP, production setup and a separate simulator walkthrough.",
+    "connection_methods": [
+      "UDP"
+    ],
+    "destinations": [
+      "Microsoft Sentinel",
+      "Generic receiver",
+      "Splunk",
+      "Elastic"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "watchguard/native.md",
+    "method_inventory": [
+      {
+        "method": "UDP",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "watchguard",
+    "product_name": "WatchGuard Firebox",
+    "method_id": "azure-ingestion",
+    "title": "WatchGuard Firebox: Azure ingestion and relays",
+    "summary": "Detailed DCR, managed identity Function and Logic App setup; raw vendor data and simulator envelope validation.",
+    "connection_methods": [
+      "Logs Ingestion API",
+      "Azure Function",
+      "Logic App"
+    ],
+    "destinations": [
+      "Microsoft Sentinel"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "watchguard/azure-ingestion.md",
+    "method_inventory": [
+      {
+        "method": "Logs Ingestion API",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Azure Function",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Logic App",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "f5-bigip",
+    "product_name": "F5 BIG-IP / Advanced WAF",
+    "method_id": "native",
+    "title": "F5 BIG-IP / Advanced WAF: native collection",
+    "summary": "BIG-IP 17 CEF: UDP, TCP, production setup and a separate simulator walkthrough.",
+    "connection_methods": [
+      "UDP",
+      "TCP"
+    ],
+    "destinations": [
+      "Microsoft Sentinel",
+      "Generic receiver",
+      "Splunk",
+      "Elastic"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "f5-bigip/native.md",
+    "method_inventory": [
+      {
+        "method": "UDP",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "TCP",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "f5-bigip",
+    "product_name": "F5 BIG-IP / Advanced WAF",
+    "method_id": "azure-ingestion",
+    "title": "F5 BIG-IP / Advanced WAF: Azure ingestion and relays",
+    "summary": "Detailed DCR, managed identity Function and Logic App setup; raw vendor data and simulator envelope validation.",
+    "connection_methods": [
+      "Logs Ingestion API",
+      "Azure Function",
+      "Logic App"
+    ],
+    "destinations": [
+      "Microsoft Sentinel"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "f5-bigip/azure-ingestion.md",
+    "method_inventory": [
+      {
+        "method": "Logs Ingestion API",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Azure Function",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Logic App",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "netscaler",
+    "product_name": "Citrix NetScaler ADC / WAF",
+    "method_id": "native",
+    "title": "Citrix NetScaler ADC / WAF: native collection",
+    "summary": "NetScaler 14.1: UDP, TCP, production setup and a separate simulator walkthrough.",
+    "connection_methods": [
+      "UDP",
+      "TCP"
+    ],
+    "destinations": [
+      "Microsoft Sentinel",
+      "Generic receiver",
+      "Splunk",
+      "Elastic"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "netscaler/native.md",
+    "method_inventory": [
+      {
+        "method": "UDP",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "TCP",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "netscaler",
+    "product_name": "Citrix NetScaler ADC / WAF",
+    "method_id": "azure-ingestion",
+    "title": "Citrix NetScaler ADC / WAF: Azure ingestion and relays",
+    "summary": "Detailed DCR, managed identity Function and Logic App setup; raw vendor data and simulator envelope validation.",
+    "connection_methods": [
+      "Logs Ingestion API",
+      "Azure Function",
+      "Logic App"
+    ],
+    "destinations": [
+      "Microsoft Sentinel"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "netscaler/azure-ingestion.md",
+    "method_inventory": [
+      {
+        "method": "Logs Ingestion API",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Azure Function",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Logic App",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "infoblox",
+    "product_name": "Infoblox NIOS / BloxOne",
+    "method_id": "native",
+    "title": "Infoblox NIOS / BloxOne: native collection",
+    "summary": "NIOS 9: UDP, TCP, TLS, production setup and a separate simulator walkthrough.",
+    "connection_methods": [
+      "UDP",
+      "TCP",
+      "TLS"
+    ],
+    "destinations": [
+      "Microsoft Sentinel",
+      "Generic receiver",
+      "Splunk",
+      "Elastic"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "infoblox/native.md",
+    "method_inventory": [
+      {
+        "method": "UDP",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "TCP",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "TLS",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "infoblox",
+    "product_name": "Infoblox NIOS / BloxOne",
+    "method_id": "azure-ingestion",
+    "title": "Infoblox NIOS / BloxOne: Azure ingestion and relays",
+    "summary": "Detailed DCR, managed identity Function and Logic App setup; raw vendor data and simulator envelope validation.",
+    "connection_methods": [
+      "Logs Ingestion API",
+      "Azure Function",
+      "Logic App"
+    ],
+    "destinations": [
+      "Microsoft Sentinel"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "infoblox/azure-ingestion.md",
+    "method_inventory": [
+      {
+        "method": "Logs Ingestion API",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Azure Function",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Logic App",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "vmware-esxi",
+    "product_name": "VMware ESXi",
+    "method_id": "native",
+    "title": "VMware ESXi: native collection",
+    "summary": "ESXi 8: UDP, TCP, TLS, production setup and a separate simulator walkthrough.",
+    "connection_methods": [
+      "UDP",
+      "TCP",
+      "TLS"
+    ],
+    "destinations": [
+      "Microsoft Sentinel",
+      "Generic receiver",
+      "Splunk",
+      "Elastic"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "vmware-esxi/native.md",
+    "method_inventory": [
+      {
+        "method": "UDP",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "TCP",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "TLS",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "vmware-esxi",
+    "product_name": "VMware ESXi",
+    "method_id": "azure-ingestion",
+    "title": "VMware ESXi: Azure ingestion and relays",
+    "summary": "Detailed DCR, managed identity Function and Logic App setup; raw vendor data and simulator envelope validation.",
+    "connection_methods": [
+      "Logs Ingestion API",
+      "Azure Function",
+      "Logic App"
+    ],
+    "destinations": [
+      "Microsoft Sentinel"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "vmware-esxi/azure-ingestion.md",
+    "method_inventory": [
+      {
+        "method": "Logs Ingestion API",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Azure Function",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Logic App",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "aruba-clearpass",
+    "product_name": "Aruba ClearPass",
+    "method_id": "native",
+    "title": "Aruba ClearPass: native collection",
+    "summary": "ClearPass 6.11: UDP, TCP, TLS, production setup and a separate simulator walkthrough.",
+    "connection_methods": [
+      "UDP",
+      "TCP",
+      "TLS"
+    ],
+    "destinations": [
+      "Microsoft Sentinel",
+      "Generic receiver",
+      "Splunk",
+      "Elastic"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "aruba-clearpass/native.md",
+    "method_inventory": [
+      {
+        "method": "UDP",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "TCP",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "TLS",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "aruba-clearpass",
+    "product_name": "Aruba ClearPass",
+    "method_id": "azure-ingestion",
+    "title": "Aruba ClearPass: Azure ingestion and relays",
+    "summary": "Detailed DCR, managed identity Function and Logic App setup; raw vendor data and simulator envelope validation.",
+    "connection_methods": [
+      "Logs Ingestion API",
+      "Azure Function",
+      "Logic App"
+    ],
+    "destinations": [
+      "Microsoft Sentinel"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "aruba-clearpass/azure-ingestion.md",
+    "method_inventory": [
+      {
+        "method": "Logs Ingestion API",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Azure Function",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Logic App",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "linux",
+    "product_name": "Linux authentication and system",
+    "method_id": "native",
+    "title": "Linux authentication and system: native collection",
+    "summary": "OpenSSH 9 / sudo 1.9: UDP, TCP, TLS, production setup and a separate simulator walkthrough.",
+    "connection_methods": [
+      "UDP",
+      "TCP",
+      "TLS"
+    ],
+    "destinations": [
+      "Microsoft Sentinel",
+      "Generic receiver",
+      "Splunk",
+      "Elastic"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "linux/native.md",
+    "method_inventory": [
+      {
+        "method": "UDP",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "TCP",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "TLS",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "linux",
+    "product_name": "Linux authentication and system",
+    "method_id": "azure-ingestion",
+    "title": "Linux authentication and system: Azure ingestion and relays",
+    "summary": "Detailed DCR, managed identity Function and Logic App setup; raw vendor data and simulator envelope validation.",
+    "connection_methods": [
+      "Logs Ingestion API",
+      "Azure Function",
+      "Logic App"
+    ],
+    "destinations": [
+      "Microsoft Sentinel"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "linux/azure-ingestion.md",
+    "method_inventory": [
+      {
+        "method": "Logs Ingestion API",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Azure Function",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Logic App",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "zscaler",
+    "product_name": "Zscaler ZIA NSS",
+    "method_id": "native",
+    "title": "Zscaler ZIA NSS: native collection",
+    "summary": "NSS feed schema: TCP, production setup and a separate simulator walkthrough.",
+    "connection_methods": [
+      "TCP",
+      "Cloud NSS HTTPS"
+    ],
+    "destinations": [
+      "Microsoft Sentinel",
+      "Generic receiver",
+      "Splunk",
+      "Elastic"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "zscaler/native.md",
+    "method_inventory": [
+      {
+        "method": "TCP",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Cloud NSS HTTPS",
+        "support": "production only"
+      }
+    ]
+  },
+  {
+    "product_id": "zscaler",
+    "product_name": "Zscaler ZIA NSS",
+    "method_id": "azure-ingestion",
+    "title": "Zscaler ZIA NSS: Azure ingestion and relays",
+    "summary": "Detailed DCR, managed identity Function and Logic App setup; raw vendor data and simulator envelope validation.",
+    "connection_methods": [
+      "Logs Ingestion API",
+      "Azure Function",
+      "Logic App"
+    ],
+    "destinations": [
+      "Microsoft Sentinel"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "zscaler/azure-ingestion.md",
+    "method_inventory": [
+      {
+        "method": "Logs Ingestion API",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Azure Function",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Logic App",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "windows-dc",
+    "product_name": "Windows Server / AD Domain Controller",
+    "method_id": "native",
+    "title": "Windows Server / AD Domain Controller: native collection",
+    "summary": "Windows Server 2022 event schema: AMA, WEF, production setup and a separate simulator walkthrough.",
+    "connection_methods": [
+      "AMA",
+      "WEF"
+    ],
+    "destinations": [
+      "Microsoft Sentinel",
+      "Generic receiver"
+    ],
+    "support": "production only",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "windows-dc/native.md",
+    "method_inventory": [
+      {
+        "method": "AMA",
+        "support": "production only"
+      },
+      {
+        "method": "WEF",
+        "support": "production only"
+      }
+    ]
+  },
+  {
+    "product_id": "windows-dc",
+    "product_name": "Windows Server / AD Domain Controller",
+    "method_id": "azure-ingestion",
+    "title": "Windows Server / AD Domain Controller: Azure ingestion and relays",
+    "summary": "Detailed DCR, managed identity Function and Logic App setup; raw vendor data and simulator envelope validation.",
+    "connection_methods": [
+      "Logs Ingestion API",
+      "Azure Function",
+      "Logic App"
+    ],
+    "destinations": [
+      "Microsoft Sentinel"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "windows-dc/azure-ingestion.md",
+    "method_inventory": [
+      {
+        "method": "Logs Ingestion API",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Azure Function",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Logic App",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "windows-sysmon",
+    "product_name": "Windows Sysmon",
+    "method_id": "native",
+    "title": "Windows Sysmon: native collection",
+    "summary": "Sysmon 15 event schema: AMA, WEF, production setup and a separate simulator walkthrough.",
+    "connection_methods": [
+      "AMA",
+      "WEF"
+    ],
+    "destinations": [
+      "Microsoft Sentinel",
+      "Generic receiver"
+    ],
+    "support": "production only",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "windows-sysmon/native.md",
+    "method_inventory": [
+      {
+        "method": "AMA",
+        "support": "production only"
+      },
+      {
+        "method": "WEF",
+        "support": "production only"
+      }
+    ]
+  },
+  {
+    "product_id": "windows-sysmon",
+    "product_name": "Windows Sysmon",
+    "method_id": "azure-ingestion",
+    "title": "Windows Sysmon: Azure ingestion and relays",
+    "summary": "Detailed DCR, managed identity Function and Logic App setup; raw vendor data and simulator envelope validation.",
+    "connection_methods": [
+      "Logs Ingestion API",
+      "Azure Function",
+      "Logic App"
+    ],
+    "destinations": [
+      "Microsoft Sentinel"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "windows-sysmon/azure-ingestion.md",
+    "method_inventory": [
+      {
+        "method": "Logs Ingestion API",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Azure Function",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Logic App",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "okta",
+    "product_name": "Okta",
+    "method_id": "native",
+    "title": "Okta: native collection",
+    "summary": "System Log API v1: REST API, Webhook, production setup and a separate simulator walkthrough.",
+    "connection_methods": [
+      "REST API",
+      "Webhook"
+    ],
+    "destinations": [
+      "Microsoft Sentinel",
+      "Generic receiver"
+    ],
+    "support": "native simulation",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "okta/native.md",
+    "method_inventory": [
+      {
+        "method": "REST API",
+        "support": "native simulation"
+      },
+      {
+        "method": "Webhook",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "okta",
+    "product_name": "Okta",
+    "method_id": "azure-ingestion",
+    "title": "Okta: Azure ingestion and relays",
+    "summary": "Detailed DCR, managed identity Function and Logic App setup; raw vendor data and simulator envelope validation.",
+    "connection_methods": [
+      "Logs Ingestion API",
+      "Azure Function",
+      "Logic App"
+    ],
+    "destinations": [
+      "Microsoft Sentinel"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "okta/azure-ingestion.md",
+    "method_inventory": [
+      {
+        "method": "Logs Ingestion API",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Azure Function",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Logic App",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "sophos-central",
+    "product_name": "Sophos Central",
+    "method_id": "native",
+    "title": "Sophos Central: native collection",
+    "summary": "SIEM API v1: REST API, Vendor collector, production setup and a separate simulator walkthrough.",
+    "connection_methods": [
+      "REST API",
+      "Vendor collector"
+    ],
+    "destinations": [
+      "Microsoft Sentinel",
+      "Generic receiver"
+    ],
+    "support": "native simulation",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "sophos-central/native.md",
+    "method_inventory": [
+      {
+        "method": "REST API",
+        "support": "native simulation"
+      },
+      {
+        "method": "Vendor collector",
+        "support": "production only"
+      }
+    ]
+  },
+  {
+    "product_id": "sophos-central",
+    "product_name": "Sophos Central",
+    "method_id": "azure-ingestion",
+    "title": "Sophos Central: Azure ingestion and relays",
+    "summary": "Detailed DCR, managed identity Function and Logic App setup; raw vendor data and simulator envelope validation.",
+    "connection_methods": [
+      "Logs Ingestion API",
+      "Azure Function",
+      "Logic App"
+    ],
+    "destinations": [
+      "Microsoft Sentinel"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "sophos-central/azure-ingestion.md",
+    "method_inventory": [
+      {
+        "method": "Logs Ingestion API",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Azure Function",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Logic App",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "crowdstrike",
+    "product_name": "CrowdStrike Falcon",
+    "method_id": "native",
+    "title": "CrowdStrike Falcon: native collection",
+    "summary": "SIEM connector 2: Event Streams, Vendor collector, S3, production setup and a separate simulator walkthrough.",
+    "connection_methods": [
+      "Event Streams",
+      "Vendor collector",
+      "S3"
+    ],
+    "destinations": [
+      "Microsoft Sentinel",
+      "Generic receiver"
+    ],
+    "support": "production only",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "crowdstrike/native.md",
+    "method_inventory": [
+      {
+        "method": "Event Streams",
+        "support": "production only"
+      },
+      {
+        "method": "Vendor collector",
+        "support": "production only"
+      },
+      {
+        "method": "S3",
+        "support": "production only"
+      }
+    ]
+  },
+  {
+    "product_id": "crowdstrike",
+    "product_name": "CrowdStrike Falcon",
+    "method_id": "azure-ingestion",
+    "title": "CrowdStrike Falcon: Azure ingestion and relays",
+    "summary": "Detailed DCR, managed identity Function and Logic App setup; raw vendor data and simulator envelope validation.",
+    "connection_methods": [
+      "Logs Ingestion API",
+      "Azure Function",
+      "Logic App"
+    ],
+    "destinations": [
+      "Microsoft Sentinel"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "crowdstrike/azure-ingestion.md",
+    "method_inventory": [
+      {
+        "method": "Logs Ingestion API",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Azure Function",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Logic App",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "sentinelone",
+    "product_name": "SentinelOne",
+    "method_id": "native",
+    "title": "SentinelOne: native collection",
+    "summary": "Management API v2.1: REST API, Syslog, production setup and a separate simulator walkthrough.",
+    "connection_methods": [
+      "REST API",
+      "Syslog"
+    ],
+    "destinations": [
+      "Microsoft Sentinel",
+      "Generic receiver"
+    ],
+    "support": "production only",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "sentinelone/native.md",
+    "method_inventory": [
+      {
+        "method": "REST API",
+        "support": "production only"
+      },
+      {
+        "method": "Syslog",
+        "support": "production only"
+      }
+    ]
+  },
+  {
+    "product_id": "sentinelone",
+    "product_name": "SentinelOne",
+    "method_id": "azure-ingestion",
+    "title": "SentinelOne: Azure ingestion and relays",
+    "summary": "Detailed DCR, managed identity Function and Logic App setup; raw vendor data and simulator envelope validation.",
+    "connection_methods": [
+      "Logs Ingestion API",
+      "Azure Function",
+      "Logic App"
+    ],
+    "destinations": [
+      "Microsoft Sentinel"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "sentinelone/azure-ingestion.md",
+    "method_inventory": [
+      {
+        "method": "Logs Ingestion API",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Azure Function",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Logic App",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "cisco-umbrella",
+    "product_name": "Cisco Umbrella",
+    "method_id": "native",
+    "title": "Cisco Umbrella: native collection",
+    "summary": "Umbrella S3 log schema: S3, REST API, production setup and a separate simulator walkthrough.",
+    "connection_methods": [
+      "S3",
+      "REST API"
+    ],
+    "destinations": [
+      "Microsoft Sentinel",
+      "Generic receiver"
+    ],
+    "support": "production only",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "cisco-umbrella/native.md",
+    "method_inventory": [
+      {
+        "method": "S3",
+        "support": "production only"
+      },
+      {
+        "method": "REST API",
+        "support": "production only"
+      }
+    ]
+  },
+  {
+    "product_id": "cisco-umbrella",
+    "product_name": "Cisco Umbrella",
+    "method_id": "azure-ingestion",
+    "title": "Cisco Umbrella: Azure ingestion and relays",
+    "summary": "Detailed DCR, managed identity Function and Logic App setup; raw vendor data and simulator envelope validation.",
+    "connection_methods": [
+      "Logs Ingestion API",
+      "Azure Function",
+      "Logic App"
+    ],
+    "destinations": [
+      "Microsoft Sentinel"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "cisco-umbrella/azure-ingestion.md",
+    "method_inventory": [
+      {
+        "method": "Logs Ingestion API",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Azure Function",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Logic App",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "entra-id",
+    "product_name": "Microsoft Entra ID",
+    "method_id": "native",
+    "title": "Microsoft Entra ID: native collection",
+    "summary": "SigninLogs / AuditLogs schema: Native connector, Event Hubs, Azure Storage, REST API, production setup and a separate simulator walkthrough.",
+    "connection_methods": [
+      "Native connector",
+      "Event Hubs",
+      "Azure Storage",
+      "REST API"
+    ],
+    "destinations": [
+      "Microsoft Sentinel",
+      "Generic receiver"
+    ],
+    "support": "production only",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "entra-id/native.md",
+    "method_inventory": [
+      {
+        "method": "Native connector",
+        "support": "production only"
+      },
+      {
+        "method": "Event Hubs",
+        "support": "production only"
+      },
+      {
+        "method": "Azure Storage",
+        "support": "production only"
+      },
+      {
+        "method": "REST API",
+        "support": "production only"
+      }
+    ]
+  },
+  {
+    "product_id": "entra-id",
+    "product_name": "Microsoft Entra ID",
+    "method_id": "azure-ingestion",
+    "title": "Microsoft Entra ID: Azure ingestion and relays",
+    "summary": "Detailed DCR, managed identity Function and Logic App setup; raw vendor data and simulator envelope validation.",
+    "connection_methods": [
+      "Logs Ingestion API",
+      "Azure Function",
+      "Logic App"
+    ],
+    "destinations": [
+      "Microsoft Sentinel"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "entra-id/azure-ingestion.md",
+    "method_inventory": [
+      {
+        "method": "Logs Ingestion API",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Azure Function",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Logic App",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "microsoft-365",
+    "product_name": "Microsoft 365",
+    "method_id": "native",
+    "title": "Microsoft 365: native collection",
+    "summary": "Management Activity API common schema: Native connector, REST API, production setup and a separate simulator walkthrough.",
+    "connection_methods": [
+      "Native connector",
+      "REST API"
+    ],
+    "destinations": [
+      "Microsoft Sentinel",
+      "Generic receiver"
+    ],
+    "support": "production only",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "microsoft-365/native.md",
+    "method_inventory": [
+      {
+        "method": "Native connector",
+        "support": "production only"
+      },
+      {
+        "method": "REST API",
+        "support": "production only"
+      }
+    ]
+  },
+  {
+    "product_id": "microsoft-365",
+    "product_name": "Microsoft 365",
+    "method_id": "azure-ingestion",
+    "title": "Microsoft 365: Azure ingestion and relays",
+    "summary": "Detailed DCR, managed identity Function and Logic App setup; raw vendor data and simulator envelope validation.",
+    "connection_methods": [
+      "Logs Ingestion API",
+      "Azure Function",
+      "Logic App"
+    ],
+    "destinations": [
+      "Microsoft Sentinel"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "microsoft-365/azure-ingestion.md",
+    "method_inventory": [
+      {
+        "method": "Logs Ingestion API",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Azure Function",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Logic App",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "defender-xdr",
+    "product_name": "Microsoft Defender XDR",
+    "method_id": "native",
+    "title": "Microsoft Defender XDR: native collection",
+    "summary": "Advanced Hunting schema: Native connector, Event Hubs, Azure Storage, REST API, production setup and a separate simulator walkthrough.",
+    "connection_methods": [
+      "Native connector",
+      "Event Hubs",
+      "Azure Storage",
+      "REST API"
+    ],
+    "destinations": [
+      "Microsoft Sentinel",
+      "Generic receiver"
+    ],
+    "support": "production only",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "defender-xdr/native.md",
+    "method_inventory": [
+      {
+        "method": "Native connector",
+        "support": "production only"
+      },
+      {
+        "method": "Event Hubs",
+        "support": "production only"
+      },
+      {
+        "method": "Azure Storage",
+        "support": "production only"
+      },
+      {
+        "method": "REST API",
+        "support": "production only"
+      }
+    ]
+  },
+  {
+    "product_id": "defender-xdr",
+    "product_name": "Microsoft Defender XDR",
+    "method_id": "azure-ingestion",
+    "title": "Microsoft Defender XDR: Azure ingestion and relays",
+    "summary": "Detailed DCR, managed identity Function and Logic App setup; raw vendor data and simulator envelope validation.",
+    "connection_methods": [
+      "Logs Ingestion API",
+      "Azure Function",
+      "Logic App"
+    ],
+    "destinations": [
+      "Microsoft Sentinel"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "defender-xdr/azure-ingestion.md",
+    "method_inventory": [
+      {
+        "method": "Logs Ingestion API",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Azure Function",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Logic App",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "azure-activity",
+    "product_name": "Azure Activity",
+    "method_id": "native",
+    "title": "Azure Activity: native collection",
+    "summary": "Activity Log 2015-04-01 schema: Native connector, Event Hubs, Azure Storage, production setup and a separate simulator walkthrough.",
+    "connection_methods": [
+      "Native connector",
+      "Event Hubs",
+      "Azure Storage"
+    ],
+    "destinations": [
+      "Microsoft Sentinel",
+      "Generic receiver"
+    ],
+    "support": "production only",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "azure-activity/native.md",
+    "method_inventory": [
+      {
+        "method": "Native connector",
+        "support": "production only"
+      },
+      {
+        "method": "Event Hubs",
+        "support": "production only"
+      },
+      {
+        "method": "Azure Storage",
+        "support": "production only"
+      }
+    ]
+  },
+  {
+    "product_id": "azure-activity",
+    "product_name": "Azure Activity",
+    "method_id": "azure-ingestion",
+    "title": "Azure Activity: Azure ingestion and relays",
+    "summary": "Detailed DCR, managed identity Function and Logic App setup; raw vendor data and simulator envelope validation.",
+    "connection_methods": [
+      "Logs Ingestion API",
+      "Azure Function",
+      "Logic App"
+    ],
+    "destinations": [
+      "Microsoft Sentinel"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "azure-activity/azure-ingestion.md",
+    "method_inventory": [
+      {
+        "method": "Logs Ingestion API",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Azure Function",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Logic App",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "aws-cloudtrail",
+    "product_name": "AWS CloudTrail",
+    "method_id": "native",
+    "title": "AWS CloudTrail: native collection",
+    "summary": "CloudTrail eventVersion 1.09: S3/SQS, CloudWatch Logs, REST API, production setup and a separate simulator walkthrough.",
+    "connection_methods": [
+      "S3/SQS",
+      "CloudWatch Logs",
+      "REST API"
+    ],
+    "destinations": [
+      "Microsoft Sentinel",
+      "Generic receiver"
+    ],
+    "support": "production only",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "aws-cloudtrail/native.md",
+    "method_inventory": [
+      {
+        "method": "S3/SQS",
+        "support": "production only"
+      },
+      {
+        "method": "CloudWatch Logs",
+        "support": "production only"
+      },
+      {
+        "method": "REST API",
+        "support": "production only"
+      }
+    ]
+  },
+  {
+    "product_id": "aws-cloudtrail",
+    "product_name": "AWS CloudTrail",
+    "method_id": "azure-ingestion",
+    "title": "AWS CloudTrail: Azure ingestion and relays",
+    "summary": "Detailed DCR, managed identity Function and Logic App setup; raw vendor data and simulator envelope validation.",
+    "connection_methods": [
+      "Logs Ingestion API",
+      "Azure Function",
+      "Logic App"
+    ],
+    "destinations": [
+      "Microsoft Sentinel"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "aws-cloudtrail/azure-ingestion.md",
+    "method_inventory": [
+      {
+        "method": "Logs Ingestion API",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Azure Function",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Logic App",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "upguard",
+    "product_name": "UpGuard",
+    "method_id": "native",
+    "title": "UpGuard: native collection",
+    "summary": "current supported product: Webhook, REST API, production setup and a separate simulator walkthrough.",
+    "connection_methods": [
+      "Webhook",
+      "REST API"
+    ],
+    "destinations": [
+      "Microsoft Sentinel",
+      "Generic receiver"
+    ],
+    "support": "native simulation",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "upguard/native.md",
+    "method_inventory": [
+      {
+        "method": "Webhook",
+        "support": "native simulation"
+      },
+      {
+        "method": "REST API",
+        "support": "production only"
+      }
+    ]
+  },
+  {
+    "product_id": "upguard",
+    "product_name": "UpGuard",
+    "method_id": "azure-ingestion",
+    "title": "UpGuard: Azure ingestion and relays",
+    "summary": "Detailed DCR, managed identity Function and Logic App setup; raw vendor data and simulator envelope validation.",
+    "connection_methods": [
+      "Logs Ingestion API",
+      "Azure Function",
+      "Logic App"
+    ],
+    "destinations": [
+      "Microsoft Sentinel"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "upguard/azure-ingestion.md",
+    "method_inventory": [
+      {
+        "method": "Logs Ingestion API",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Azure Function",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Logic App",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "cloudflare",
+    "product_name": "Cloudflare",
+    "method_id": "native",
+    "title": "Cloudflare: native collection",
+    "summary": "Logpush datasets (2026): HTTP Logpush, production setup and a separate simulator walkthrough.",
+    "connection_methods": [
+      "HTTP Logpush"
+    ],
+    "destinations": [
+      "Microsoft Sentinel",
+      "Generic receiver"
+    ],
+    "support": "native simulation",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "cloudflare/native.md",
+    "method_inventory": [
+      {
+        "method": "HTTP Logpush",
+        "support": "native simulation"
+      }
+    ]
+  },
+  {
+    "product_id": "cloudflare",
+    "product_name": "Cloudflare",
+    "method_id": "azure-ingestion",
+    "title": "Cloudflare: Azure ingestion and relays",
+    "summary": "Detailed DCR, managed identity Function and Logic App setup; raw vendor data and simulator envelope validation.",
+    "connection_methods": [
+      "Logs Ingestion API",
+      "Azure Function",
+      "Logic App"
+    ],
+    "destinations": [
+      "Microsoft Sentinel"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "cloudflare/azure-ingestion.md",
+    "method_inventory": [
+      {
+        "method": "Logs Ingestion API",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Azure Function",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Logic App",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "mimecast",
+    "product_name": "Mimecast",
+    "method_id": "native",
+    "title": "Mimecast: native collection",
+    "summary": "API 2.0: API 2.0, OAuth, Batch downloads, production setup and a separate simulator walkthrough.",
+    "connection_methods": [
+      "API 2.0",
+      "OAuth",
+      "Batch downloads"
+    ],
+    "destinations": [
+      "Microsoft Sentinel",
+      "Generic receiver"
+    ],
+    "support": "native simulation",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "mimecast/native.md",
+    "method_inventory": [
+      {
+        "method": "API 2.0",
+        "support": "native simulation"
+      },
+      {
+        "method": "OAuth",
+        "support": "native simulation"
+      },
+      {
+        "method": "Batch downloads",
+        "support": "native simulation"
+      }
+    ]
+  },
+  {
+    "product_id": "mimecast",
+    "product_name": "Mimecast",
+    "method_id": "azure-ingestion",
+    "title": "Mimecast: Azure ingestion and relays",
+    "summary": "Detailed DCR, managed identity Function and Logic App setup; raw vendor data and simulator envelope validation.",
+    "connection_methods": [
+      "Logs Ingestion API",
+      "Azure Function",
+      "Logic App"
+    ],
+    "destinations": [
+      "Microsoft Sentinel"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "mimecast/azure-ingestion.md",
+    "method_inventory": [
+      {
+        "method": "Logs Ingestion API",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Azure Function",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Logic App",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "demo-http",
+    "product_name": "Demo HTTP Product",
+    "method_id": "usage",
+    "title": "Demo HTTP Product: usage",
+    "summary": "Use this demo profile to test a receiver with synthetic events. Choose a scenario, generate its raw sample and match the receiver to its documented format.",
+    "connection_methods": [
+      "Webhook"
+    ],
+    "destinations": [
+      "Microsoft Sentinel",
+      "Generic receiver"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "demo-http/usage.md",
+    "method_inventory": [
+      {
+        "method": "Webhook",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "uploaded-logs",
+    "product_name": "Uploaded logs",
+    "method_id": "usage",
+    "title": "Uploaded logs: usage",
+    "summary": "Upload a sanitized text, JSON, JSONL, CEF, LEEF or Syslog file in Log Lab. Select the detected format and review each preview before saving. Keep event time/source identity deliberately; replay does not repair invalid vendor fields. Uploaded content is a dataset rather than an emulated vendor API.",
+    "connection_methods": [
+      "Uploaded file",
+      "UDP",
+      "TCP",
+      "TLS",
+      "Webhook"
+    ],
+    "destinations": [
+      "Microsoft Sentinel",
+      "Generic receiver"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "uploaded-logs/usage.md",
+    "method_inventory": [
+      {
+        "method": "Uploaded file",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "UDP",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "TCP",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "TLS",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Webhook",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "demo-syslog",
+    "product_name": "Demo Syslog Product",
+    "method_id": "usage",
+    "title": "Demo Syslog Product: usage",
+    "summary": "Use this demo profile to test a receiver with synthetic events. Choose a scenario, generate its raw sample and match the receiver to its documented format.",
+    "connection_methods": [
+      "UDP",
+      "TCP",
+      "TLS"
+    ],
+    "destinations": [
+      "Microsoft Sentinel",
+      "Generic receiver"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "demo-syslog/usage.md",
+    "method_inventory": [
+      {
+        "method": "UDP",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "TCP",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "TLS",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "demo-pull",
+    "product_name": "Demo Pull API Product",
+    "method_id": "usage",
+    "title": "Demo Pull API Product: usage",
+    "summary": "Use this demo profile to test a receiver with synthetic events. Choose a scenario, generate its raw sample and match the receiver to its documented format.",
+    "connection_methods": [
+      "REST API",
+      "OAuth"
+    ],
+    "destinations": [
+      "Microsoft Sentinel",
+      "Generic receiver"
+    ],
+    "support": "native simulation",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "demo-pull/usage.md",
+    "method_inventory": [
+      {
+        "method": "REST API",
+        "support": "native simulation"
+      },
+      {
+        "method": "OAuth",
+        "support": "native simulation"
+      }
+    ]
+  },
+  {
+    "product_id": "cloudflare",
+    "product_name": "Cloudflare",
+    "method_id": "azure-blob",
+    "title": "Cloudflare: Azure Blob and Sentinel CCF",
+    "summary": "Current recommended CCF storage connector, SAS, Event Grid, Queue, roles, network and CloudflareV2_CL.",
+    "connection_methods": [
+      "Azure Blob Storage",
+      "Native connector"
+    ],
+    "destinations": [
+      "Microsoft Sentinel",
+      "Azure Storage"
+    ],
+    "support": "production only",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "cloudflare/azure-blob.md",
+    "method_inventory": [
+      {
+        "method": "Azure Blob Storage",
+        "support": "production only"
+      },
+      {
+        "method": "Native connector",
+        "support": "production only"
+      }
+    ]
+  },
+  {
+    "product_id": "cloudflare",
+    "product_name": "Cloudflare",
+    "method_id": "logpull-legacy",
+    "title": "Cloudflare: legacy Logpull",
+    "summary": "Existing polling setup, retained windows and migration to Logpush; no Logpull emulation.",
+    "connection_methods": [
+      "Logpull"
+    ],
+    "destinations": [
+      "Microsoft Sentinel",
+      "Generic receiver"
+    ],
+    "support": "legacy",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "cloudflare/logpull-legacy.md",
+    "method_inventory": [
+      {
+        "method": "Logpull",
+        "support": "legacy"
+      }
+    ]
+  },
+  {
+    "product_id": "mimecast",
+    "product_name": "Mimecast",
+    "method_id": "api1-legacy",
+    "title": "Mimecast: API 1.0 migration",
+    "summary": "Four-key signing, legacy collector state and migration to current OAuth API 2.0.",
+    "connection_methods": [
+      "API 1.0"
+    ],
+    "destinations": [
+      "Microsoft Sentinel",
+      "Generic receiver"
+    ],
+    "support": "legacy",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "mimecast/api1-legacy.md",
+    "method_inventory": [
+      {
+        "method": "API 1.0",
+        "support": "legacy"
+      }
+    ]
+  },
+  {
+    "product_id": "cloudflare",
+    "product_name": "Cloudflare",
+    "method_id": "r2",
+    "title": "Cloudflare: R2 Object Storage",
+    "summary": "R2 Object Storage settings, provider verification and a separate simulator alternative.",
+    "connection_methods": [
+      "R2"
+    ],
+    "destinations": [
+      "R2 Object Storage",
+      "Microsoft Sentinel"
+    ],
+    "support": "production only",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "cloudflare/r2.md",
+    "method_inventory": [
+      {
+        "method": "R2",
+        "support": "production only"
+      }
+    ]
+  },
+  {
+    "product_id": "cloudflare",
+    "product_name": "Cloudflare",
+    "method_id": "pipelines",
+    "title": "Cloudflare: Basin Pipelines",
+    "summary": "Basin Pipelines settings, provider verification and a separate simulator alternative.",
+    "connection_methods": [
+      "Basin Pipelines",
+      "R2"
+    ],
+    "destinations": [
+      "Basin Pipelines",
+      "Microsoft Sentinel"
+    ],
+    "support": "production only",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "cloudflare/pipelines.md",
+    "method_inventory": [
+      {
+        "method": "Basin Pipelines",
+        "support": "production only"
+      },
+      {
+        "method": "R2",
+        "support": "production only"
+      }
+    ]
+  },
+  {
+    "product_id": "cloudflare",
+    "product_name": "Cloudflare",
+    "method_id": "aws-s3",
+    "title": "Cloudflare: Amazon S3",
+    "summary": "Amazon S3 settings, provider verification and a separate simulator alternative.",
+    "connection_methods": [
+      "S3"
+    ],
+    "destinations": [
+      "Amazon S3",
+      "Microsoft Sentinel"
+    ],
+    "support": "production only",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "cloudflare/aws-s3.md",
+    "method_inventory": [
+      {
+        "method": "S3",
+        "support": "production only"
+      }
+    ]
+  },
+  {
+    "product_id": "cloudflare",
+    "product_name": "Cloudflare",
+    "method_id": "s3-compatible-endpoints",
+    "title": "Cloudflare: S3-compatible storage",
+    "summary": "S3-compatible storage settings, provider verification and a separate simulator alternative.",
+    "connection_methods": [
+      "S3-compatible"
+    ],
+    "destinations": [
+      "S3-compatible storage",
+      "Microsoft Sentinel"
+    ],
+    "support": "production only",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "cloudflare/s3-compatible-endpoints.md",
+    "method_inventory": [
+      {
+        "method": "S3-compatible",
+        "support": "production only"
+      }
+    ]
+  },
+  {
+    "product_id": "cloudflare",
+    "product_name": "Cloudflare",
+    "method_id": "google-cloud-storage",
+    "title": "Cloudflare: Google Cloud Storage",
+    "summary": "Google Cloud Storage settings, provider verification and a separate simulator alternative.",
+    "connection_methods": [
+      "Google Cloud Storage"
+    ],
+    "destinations": [
+      "Google Cloud Storage",
+      "Microsoft Sentinel"
+    ],
+    "support": "production only",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "cloudflare/google-cloud-storage.md",
+    "method_inventory": [
+      {
+        "method": "Google Cloud Storage",
+        "support": "production only"
+      }
+    ]
+  },
+  {
+    "product_id": "cloudflare",
+    "product_name": "Cloudflare",
+    "method_id": "bigquery",
+    "title": "Cloudflare: Google BigQuery",
+    "summary": "Google BigQuery settings, provider verification and a separate simulator alternative.",
+    "connection_methods": [
+      "BigQuery"
+    ],
+    "destinations": [
+      "Google BigQuery",
+      "Microsoft Sentinel"
+    ],
+    "support": "production only",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "cloudflare/bigquery.md",
+    "method_inventory": [
+      {
+        "method": "BigQuery",
+        "support": "production only"
+      }
+    ]
+  },
+  {
+    "product_id": "cloudflare",
+    "product_name": "Cloudflare",
+    "method_id": "datadog",
+    "title": "Cloudflare: Datadog",
+    "summary": "Datadog settings, provider verification and a separate simulator alternative.",
+    "connection_methods": [
+      "Datadog HTTP"
+    ],
+    "destinations": [
+      "Datadog",
+      "Microsoft Sentinel"
+    ],
+    "support": "production only",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "cloudflare/datadog.md",
+    "method_inventory": [
+      {
+        "method": "Datadog HTTP",
+        "support": "production only"
+      }
+    ]
+  },
+  {
+    "product_id": "cloudflare",
+    "product_name": "Cloudflare",
+    "method_id": "elastic",
+    "title": "Cloudflare: Elastic",
+    "summary": "Elastic settings, provider verification and a separate simulator alternative.",
+    "connection_methods": [
+      "HTTP Logpush",
+      "S3 polling",
+      "S3/SQS"
+    ],
+    "destinations": [
+      "Elastic",
+      "Microsoft Sentinel"
+    ],
+    "support": "production only",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "cloudflare/elastic.md",
+    "method_inventory": [
+      {
+        "method": "HTTP Logpush",
+        "support": "production only"
+      },
+      {
+        "method": "S3 polling",
+        "support": "production only"
+      },
+      {
+        "method": "S3/SQS",
+        "support": "production only"
+      }
+    ]
+  },
+  {
+    "product_id": "cloudflare",
+    "product_name": "Cloudflare",
+    "method_id": "new-relic",
+    "title": "Cloudflare: New Relic",
+    "summary": "New Relic settings, provider verification and a separate simulator alternative.",
+    "connection_methods": [
+      "New Relic HTTP"
+    ],
+    "destinations": [
+      "New Relic",
+      "Microsoft Sentinel"
+    ],
+    "support": "production only",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "cloudflare/new-relic.md",
+    "method_inventory": [
+      {
+        "method": "New Relic HTTP",
+        "support": "production only"
+      }
+    ]
+  },
+  {
+    "product_id": "cloudflare",
+    "product_name": "Cloudflare",
+    "method_id": "sentinelone",
+    "title": "Cloudflare: SentinelOne receiver",
+    "summary": "SentinelOne receiver settings, provider verification and a separate simulator alternative.",
+    "connection_methods": [
+      "SentinelOne HTTP"
+    ],
+    "destinations": [
+      "SentinelOne receiver",
+      "Microsoft Sentinel"
+    ],
+    "support": "production only",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "cloudflare/sentinelone.md",
+    "method_inventory": [
+      {
+        "method": "SentinelOne HTTP",
+        "support": "production only"
+      }
+    ]
+  },
+  {
+    "product_id": "cloudflare",
+    "product_name": "Cloudflare",
+    "method_id": "splunk",
+    "title": "Cloudflare: Splunk HEC",
+    "summary": "Splunk HEC settings, provider verification and a separate simulator alternative.",
+    "connection_methods": [
+      "Splunk HEC"
+    ],
+    "destinations": [
+      "Splunk HEC",
+      "Microsoft Sentinel"
+    ],
+    "support": "production only",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "cloudflare/splunk.md",
+    "method_inventory": [
+      {
+        "method": "Splunk HEC",
+        "support": "production only"
+      }
+    ]
+  },
+  {
+    "product_id": "cloudflare",
+    "product_name": "Cloudflare",
+    "method_id": "sumo-logic",
+    "title": "Cloudflare: Sumo Logic",
+    "summary": "Sumo Logic settings, provider verification and a separate simulator alternative.",
+    "connection_methods": [
+      "Sumo HTTP"
+    ],
+    "destinations": [
+      "Sumo Logic",
+      "Microsoft Sentinel"
+    ],
+    "support": "production only",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "cloudflare/sumo-logic.md",
+    "method_inventory": [
+      {
+        "method": "Sumo HTTP",
+        "support": "production only"
+      }
+    ]
+  },
+  {
+    "product_id": "cloudflare",
+    "product_name": "Cloudflare",
+    "method_id": "kinesis",
+    "title": "Cloudflare: Amazon Kinesis",
+    "summary": "Amazon Kinesis settings, provider verification and a separate simulator alternative.",
+    "connection_methods": [
+      "Kinesis"
+    ],
+    "destinations": [
+      "Amazon Kinesis",
+      "Microsoft Sentinel"
+    ],
+    "support": "production only",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "cloudflare/kinesis.md",
+    "method_inventory": [
+      {
+        "method": "Kinesis",
+        "support": "production only"
+      }
+    ]
+  },
+  {
+    "product_id": "cloudflare",
+    "product_name": "Cloudflare",
+    "method_id": "ibm-qradar",
+    "title": "Cloudflare: IBM QRadar",
+    "summary": "IBM QRadar settings, provider verification and a separate simulator alternative.",
+    "connection_methods": [
+      "HTTP Logpush",
+      "S3 polling"
+    ],
+    "destinations": [
+      "IBM QRadar",
+      "Microsoft Sentinel"
+    ],
+    "support": "production only",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "cloudflare/ibm-qradar.md",
+    "method_inventory": [
+      {
+        "method": "HTTP Logpush",
+        "support": "production only"
+      },
+      {
+        "method": "S3 polling",
+        "support": "production only"
+      }
+    ]
+  },
+  {
+    "product_id": "cloudflare",
+    "product_name": "Cloudflare",
+    "method_id": "ibm-cloud-logs",
+    "title": "Cloudflare: IBM Cloud Logs",
+    "summary": "IBM Cloud Logs settings, provider verification and a separate simulator alternative.",
+    "connection_methods": [
+      "IBM Cloud Logs"
+    ],
+    "destinations": [
+      "IBM Cloud Logs",
+      "Microsoft Sentinel"
+    ],
+    "support": "production only",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "cloudflare/ibm-cloud-logs.md",
+    "method_inventory": [
+      {
+        "method": "IBM Cloud Logs",
+        "support": "production only"
+      }
+    ]
+  },
+  {
+    "product_id": "cloudflare",
+    "product_name": "Cloudflare",
+    "method_id": "other-providers",
+    "title": "Cloudflare: Other HTTPS providers",
+    "summary": "Other HTTPS providers settings, provider verification and a separate simulator alternative.",
+    "connection_methods": [
+      "HTTP Logpush"
+    ],
+    "destinations": [
+      "Other HTTPS providers",
+      "Microsoft Sentinel"
+    ],
+    "support": "production only",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "cloudflare/other-providers.md",
+    "method_inventory": [
+      {
+        "method": "HTTP Logpush",
+        "support": "production only"
+      }
+    ]
+  },
+  {
+    "product_id": "cloudflare",
+    "product_name": "Cloudflare",
+    "method_id": "third-party",
+    "title": "Cloudflare: Partner integrations",
+    "summary": "Partner integrations settings, provider verification and a separate simulator alternative.",
+    "connection_methods": [
+      "Partner connector"
+    ],
+    "destinations": [
+      "Partner integrations",
+      "Microsoft Sentinel"
+    ],
+    "support": "production only",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "cloudflare/third-party.md",
+    "method_inventory": [
+      {
+        "method": "Partner connector",
+        "support": "production only"
+      }
+    ]
+  },
+  {
+    "product_id": "trend-micro",
+    "product_name": "Trend Micro Deep Security",
+    "method_id": "native",
+    "title": "Trend Micro Deep Security: native CEF collection",
+    "summary": "Deep Security 20 module forwarding, CEF fields and production/simulator setup.",
+    "connection_methods": [
+      "UDP",
+      "TLS"
+    ],
+    "destinations": [
+      "Microsoft Sentinel",
+      "Generic receiver",
+      "Splunk",
+      "Elastic"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "trend-micro/native.md",
+    "method_inventory": [
+      {
+        "method": "UDP",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "TLS",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  },
+  {
+    "product_id": "trend-micro",
+    "product_name": "Trend Micro Deep Security",
+    "method_id": "azure-ingestion",
+    "title": "Trend Micro Deep Security: custom Azure ingestion",
+    "summary": "Deep Security 20 module forwarding, CEF fields and production/simulator setup.",
+    "connection_methods": [
+      "Logs Ingestion API",
+      "Azure Function",
+      "Logic App"
+    ],
+    "destinations": [
+      "Microsoft Sentinel",
+      "Generic receiver"
+    ],
+    "support": "generic synthetic delivery",
+    "reviewed_at": "2026-10-07",
+    "guide_version": "1.0.0",
+    "file": "trend-micro/azure-ingestion.md",
+    "method_inventory": [
+      {
+        "method": "Logs Ingestion API",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Azure Function",
+        "support": "generic synthetic delivery"
+      },
+      {
+        "method": "Logic App",
+        "support": "generic synthetic delivery"
+      }
+    ]
+  }
+]

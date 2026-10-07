@@ -160,6 +160,10 @@ class DeliveryQueue:
         event_ids: dict[str, str],
         configs: dict[str, dict[str, Any]],
     ) -> list[DeliveryResult]:
+        if configs[ids[0]]["destination"].get("transport_id") == "cloudflare_logpush" and not (
+            simulation.fault_config or {}
+        ).get("enabled"):
+            return await self._logpush_batch(db, runtime, simulation, ids, event_ids, configs)
         if configs[ids[0]]["destination"].get("transport_id") in AZURE_TRANSPORTS and not (
             simulation.fault_config or {}
         ).get("enabled"):
@@ -253,4 +257,65 @@ class DeliveryQueue:
                     event, result, "azure_logs_ingestion", target_id=target["id"]
                 )
                 outcomes[job_id] = result
+        return [outcomes[job_id] for job_id in ids]
+
+    async def _logpush_batch(
+        self,
+        db: Session,
+        runtime: SimulationRuntimeService,
+        simulation: Simulation,
+        ids: list[str],
+        event_ids: dict[str, str],
+        configs: dict[str, dict[str, Any]],
+    ) -> list[DeliveryResult]:
+        from app.formats.source import render_source
+
+        target = configs[ids[0]]
+        destination = destination_for_delivery(
+            target["destination"], target.get("destination_secret_values", {}), self.encryptor
+        )
+        auth = self.encryptor.decrypt_auth_config(target.get("auth_config", {}))
+        outcomes: dict[str, DeliveryResult] = {}
+        group: list[str] = []
+        records: list[dict[str, Any]] = []
+        size = 0
+
+        async def flush() -> None:
+            if not group:
+                return
+            try:
+                result = await self.transport.deliver(
+                    destination, records, "application/json", auth
+                )
+            except Exception:
+                result = runtime._failure(
+                    "Logpush batch failed; verify JSON records and receiver configuration"
+                )
+            for job_id in group:
+                event = db.get(EventInstance, event_ids[job_id])
+                assert event is not None
+                runtime._persist_attempt(
+                    event, result, "cloudflare_logpush", target_id=target["id"]
+                )
+                outcomes[job_id] = result
+
+        for job_id in ids:
+            event = db.get(EventInstance, event_ids[job_id])
+            assert event is not None
+            record, _ = render_source(event.payload, target.get("payload_format", "default"))
+            if not isinstance(record, dict):
+                result = runtime._failure("Logpush requires JSON object records")
+                runtime._persist_attempt(
+                    event, result, "cloudflare_logpush", target_id=target["id"]
+                )
+                outcomes[job_id] = result
+                continue
+            length = len(json.dumps(record, ensure_ascii=False, separators=(",", ":")).encode()) + 1
+            if records and size + length > 950_000:
+                await flush()
+                group, records, size = [], [], 0
+            group.append(job_id)
+            records.append(record)
+            size += length
+        await flush()
         return [outcomes[job_id] for job_id in ids]

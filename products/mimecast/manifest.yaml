@@ -1,0 +1,217 @@
+id: mimecast
+display_name: Mimecast
+version: 1.0.0
+description: Representative synthetic security events and native connection workflows.
+supported_modes:
+- push_webhook
+- pull_api
+supported_transports:
+- http_webhook
+- azure_logs_ingestion
+- azure_function_app
+supported_auth_methods:
+- none
+- basic
+- bearer
+- api_key_header
+supported_inbound_auth_methods:
+- oauth2_client_credentials
+formats:
+- json
+schema_version: API 2.0
+compatibility: Synthetic wire workflows; live vendor/parser acceptance requires separate
+  validation.
+field_references:
+- https://mimecastsupport.zendesk.com/hc/en-us/articles/36724433458451-API-Integrations-Microsoft-Sentinel-v3-1-0
+- https://github.com/Azure/Azure-Sentinel/tree/master/Solutions/Mimecast/Data%20Connectors
+scenarios:
+- id: email-receipt
+  display_name: Email Receipt
+  default_transport: http_webhook
+  template: scenarios/email-receipt.json
+  config_schema:
+    type: object
+    additionalProperties: false
+    properties: &id001
+      hostname:
+        type: string
+        default: sim-device-01
+        maxLength: 1024
+      device_ip:
+        type: string
+        default: 192.0.2.10
+        maxLength: 1024
+      src:
+        type: string
+        default: 198.51.100.20
+        maxLength: 1024
+      dst:
+        type: string
+        default: 203.0.113.10
+        maxLength: 1024
+      user:
+        type: string
+        default: labuser
+        maxLength: 1024
+      host:
+        type: string
+        default: app.example.test
+        maxLength: 1024
+      uri:
+        type: string
+        default: /login
+        maxLength: 1024
+      sender:
+        type: string
+        default: sender@example.test
+        maxLength: 1024
+      recipient:
+        type: string
+        default: recipient@example.test
+        maxLength: 1024
+      subject:
+        type: string
+        default: Integration test message
+        maxLength: 1024
+      action:
+        type: string
+        default: allow
+        maxLength: 1024
+- id: email-delivery
+  display_name: Email Delivery
+  default_transport: http_webhook
+  template: scenarios/email-delivery.json
+  config_schema:
+    type: object
+    additionalProperties: false
+    properties: *id001
+- id: email-rejection
+  display_name: Email Rejection
+  default_transport: http_webhook
+  template: scenarios/email-rejection.json
+  config_schema:
+    type: object
+    additionalProperties: false
+    properties: *id001
+- id: email-bounce
+  display_name: Email Bounce
+  default_transport: http_webhook
+  template: scenarios/email-bounce.json
+  config_schema:
+    type: object
+    additionalProperties: false
+    properties: *id001
+- id: url-protection
+  display_name: URL Protection
+  default_transport: http_webhook
+  template: scenarios/url-protection.json
+  config_schema:
+    type: object
+    additionalProperties: false
+    properties: *id001
+- id: attachment-protection
+  display_name: Attachment Protection
+  default_transport: http_webhook
+  template: scenarios/attachment-protection.json
+  config_schema:
+    type: object
+    additionalProperties: false
+    properties: *id001
+- id: impersonation
+  display_name: Impersonation
+  default_transport: http_webhook
+  template: scenarios/impersonation.json
+  config_schema:
+    type: object
+    additionalProperties: false
+    properties: *id001
+- id: dlp
+  display_name: DLP
+  default_transport: http_webhook
+  template: scenarios/dlp.json
+  config_schema:
+    type: object
+    additionalProperties: false
+    properties: *id001
+- id: audit
+  display_name: Audit
+  default_transport: http_webhook
+  template: scenarios/audit.json
+  config_schema:
+    type: object
+    additionalProperties: false
+    properties: *id001
+connection_profiles:
+- id: api-2
+  display_name: API 2.0 OAuth and SIEM batch downloads
+  mode: pull_api
+  transport_id: null
+plugin: true
+inbound_options_schema:
+  type: object
+  additionalProperties: false
+  properties:
+    download_ttl_seconds:
+      type: integer
+      minimum: 60
+      maximum: 3600
+      default: 900
+mock_routes:
+- id: oauth-token
+  path: oauth/token
+  scenario_id: email-receipt
+  handler: oauth_token
+  methods:
+  - POST
+- id: siem-batch
+  path: siem/v1/batch/events/cg
+  scenario_id: email-receipt
+  handler: dataset_list
+  methods:
+  - GET
+  scenario_ids:
+  - email-receipt
+  - email-delivery
+  - email-rejection
+  - email-bounce
+  - url-protection
+  - attachment-protection
+  - impersonation
+  - dlp
+- id: download
+  path: downloads
+  scenario_id: email-receipt
+  handler: static
+  methods:
+  - GET
+  signed_download: true
+- id: audit
+  path: api/audit/get-audit-events
+  scenario_id: audit
+  handler: dataset_list
+  methods:
+  - POST
+- id: url
+  path: api/ttp/url/get-logs
+  scenario_id: url-protection
+  handler: dataset_list
+  methods:
+  - POST
+- id: attachment
+  path: api/ttp/attachment/get-logs
+  scenario_id: attachment-protection
+  handler: dataset_list
+  methods:
+  - POST
+- id: impersonation
+  path: api/ttp/impersonation/get-logs
+  scenario_id: impersonation
+  handler: dataset_list
+  methods:
+  - POST
+- id: dlp
+  path: api/dlp/get-logs
+  scenario_id: dlp
+  handler: dataset_list
+  methods:
+  - POST

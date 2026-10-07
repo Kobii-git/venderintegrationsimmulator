@@ -111,3 +111,7 @@ Vendor-specific formatting belongs in **product modules**, not in the transport 
 Use an HTTPS endpoint, DCR immutable ID, stream, tenant ID and encrypted OAuth client credentials. Tokens are acquired/refreshed with the Azure Monitor scope; UTF-8 JSON arrays are byte-batched and HTTP 204 marks API acceptance. Default payload format wraps data in the supplied custom-table schema; `json` and explicit built-in mappings require matching DCR declarations. Bounded throttling/5xx retries respect `Retry-After`. See [setup, DCR examples and KQL verification](SENTINEL_SMOKE_TEST.md).
 
 TCP/TLS and HTTP clients reuse connections. Syslog pacing is isolated by collector. Delivery jobs for rate schedules are persisted per target, and complete event outcomes use each selected target's final result. HTTP-status history filters match final responses per target. Transport acceptance never substitutes for checking Sentinel table arrival.
+
+## Cloudflare HTTP Logpush
+
+`cloudflare_logpush` is the vendor-native Cloudflare HTTP workflow, distinct from generic webhook JSON. It sends POST gzip NDJSON with configurable headers and bounded batches. The destination-validation action sends gzip test.txt.gz. Raw samples stay uncompressed and wire previews expose base64 compressed bytes. Production receiver requirements and other destinations are bundled in Deployment Guides; storage transports and Logpull emulation are not included. See [0.4.6](UPGRADE_0.4.6.md).
