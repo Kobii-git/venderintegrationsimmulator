@@ -1,8 +1,59 @@
 # Integration Simulator
 
-Self-hosted `0.4.7` tool for security engineers to **simulate**, **test**, and **troubleshoot** push, Syslog, and pull-based vendor integrations.
+Self-hosted `0.4.8` tool for security engineers to **simulate**, **test**, and **troubleshoot** push, Syslog, and pull-based vendor integrations.
 
 Generate realistic vendor payloads, deliver them to your webhook endpoint, inspect request/response details, replay events, inject faults, and validate ingestion pipelines — without needing the real UpGuard product.
+
+## Install
+
+With Docker installed and running, run this command:
+
+```bash
+docker run -d --name integration-simulator \
+  --pull always --restart unless-stopped \
+  -p 127.0.0.1:8080:8080 \
+  -v integration-simulator-data:/data \
+  ghcr.io/kobii-git/venderintegrationsimmulator:latest
+```
+
+Open **http://localhost:8080** on the Docker host. No registry login, source clone,
+environment variables, environment file or separate database is required. Docker
+pulls the complete application and creates the data volume automatically. The
+application initializes its database and encryption key. AMD64 and ARM64 are supported.
+
+## Update
+
+For an installation started with the command above, pull the latest image and
+replace the container using the same data volume:
+
+```bash
+docker pull ghcr.io/kobii-git/venderintegrationsimmulator:latest &&
+docker stop integration-simulator &&
+docker rm integration-simulator &&
+docker run -d --name integration-simulator --restart unless-stopped \
+  -p 127.0.0.1:8080:8080 \
+  -v integration-simulator-data:/data \
+  ghcr.io/kobii-git/venderintegrationsimmulator:latest
+```
+
+The volume preserves saved configuration, history, uploaded datasets and the
+original encryption key. Keep a backup of the complete volume before upgrading.
+Pulling alone does not update an existing container.
+
+Prefer the same command for installation and updates? Save the standalone
+[docker-compose.image.yml](docker-compose.image.yml) file in a folder, then run
+this command from that folder each time:
+
+```bash
+docker compose -f docker-compose.image.yml up -d --pull always
+```
+
+No source checkout or file edits are required. Use the same installation method
+for future updates; see [installation and updates](docs/INSTALLATION.md) for details.
+`latest` follows tested `main` builds; version and commit tags are also published.
+
+Release 0.4.8 simplifies installation and update instructions.
+[Release notes](docs/UPGRADE_0.4.8.md).
 
 ## What it does
 
@@ -39,53 +90,11 @@ Release 0.4.2 fixes Log Lab and Upload logs on HTTP LAN addresses by supporting 
 
 Release 0.4.1 adds **Upload logs** for one-off Azure ingestion and a **Function App → DCE** relay destination for one-off uploads and Log Lab replay. Validate every record, preview unchanged JSON or a custom-table envelope, and track acceptance/failures until delivery drains. [Relay code and deployment guide](azure/function-relay/README.md) · [Upgrade notes](docs/UPGRADE_0.4.1.md).
 
-## Published Docker image
-
-The application lives at [Kobii-git/venderintegrationsimmulator](https://github.com/Kobii-git/venderintegrationsimmulator).
-Successful `main` builds publish AMD64 and ARM64 images to GitHub Container Registry.
-Each build has a version tag, a full `sha-<commit>` tag and `latest`.
-
-Run the complete frontend and backend directly, without cloning the source:
-
-For a private registry package, authorize GitHub package access and authenticate Docker
-once before running it (use your GitHub username):
-
-```bash
-gh auth refresh --hostname github.com --scopes read:packages
-gh auth token --hostname github.com | docker login ghcr.io --username Kobii-git --password-stdin
-```
-
-Public packages can be pulled without this login step.
-
-```bash
-docker run -d --name integration-simulator --restart unless-stopped \
-  -p 127.0.0.1:8080:8080 \
-  -v integration-simulator-data:/data \
-  ghcr.io/kobii-git/venderintegrationsimmulator:0.4.7
-```
-
-Docker pulls the image automatically when needed. Open **http://localhost:8080**.
-No environment file or separate database is required. The volume retains the database,
-uploaded datasets and generated encryption key across container replacement.
-Running without the volume also works, but data is lost when the container is removed.
-
-For Compose without a source build:
-
-```bash
-docker compose -f docker-compose.image.yml up -d
-```
-
-Set `SIMULATOR_VERSION=0.4.7` to pin a version; the image-only file defaults to `latest`.
-See [installation and updates](docs/INSTALLATION.md) for pulling and replacing containers.
-
 ## Build from GitHub source
 
 ```bash
 git clone https://github.com/Kobii-git/venderintegrationsimmulator.git
 cd venderintegrationsimmulator
-cp .env.example .env
-# Optionally set SECRET_KEY; otherwise the volume retains /data/.secret_key
-
 docker compose up -d --build
 ```
 

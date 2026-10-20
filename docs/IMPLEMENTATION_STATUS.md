@@ -1,4 +1,22 @@
-# Current release: 0.4.7
+# Current release: 0.4.8
+
+Release 0.4.8 simplifies first installation and updates: the public `latest` image
+is the default, no environment file or registry login is required, and the
+image-only Compose option uses one command for installation and updates. Runtime
+behavior, dependencies, database schema and encryption-key handling are unchanged.
+See [installation and updates](INSTALLATION.md) and [release notes](UPGRADE_0.4.8.md).
+
+Local checks passed: six backend version/configuration tests, Ruff checks for the
+changed Python files, the 90-article documentation gate, frontend lint/build and
+all 20 frontend tests. Compose defaults, release version consistency, shell
+examples and local documentation links were checked. Local volume-backed image
+verification is limited by the Docker disk being full; no existing Docker data
+was removed. Full release checks and native AMD64/ARM64 publication are run by
+[the verification workflow](https://github.com/Kobii-git/venderintegrationsimmulator/actions/workflows/verify.yml).
+Publication must be confirmed along with a pull and run of the published image;
+these source checks alone do not establish image availability.
+
+## Release 0.4.7 verification
 
 All nine review findings have source fixes and regression coverage: bounded HTTP/OAuth traffic, redacted request evidence, credential-safe redirects, stored queue snapshots, effective scenario controls, Mimecast ordering/context and strict cursors. All 90 offline articles cover 220 production/simulator method pairs with synthetic fixtures and method-level documentation/acceptance metadata. The Upload logs list race found during verification is also fixed.
 
@@ -81,7 +99,7 @@ on the local ARM64 Docker host. Published multi-platform digest:
 ## Recovery baseline
 
 The authoritative application repository is now https://github.com/Kobii-git/venderintegrationsimmulator.
-Version 0.4.7 source, deployment configuration and verification scripts are maintained on `main`.
+Version 0.4.8 source, deployment configuration and verification scripts are maintained on `main`.
 Future updates increment the application version and publish versioned and commit-tagged images.
 
 ## Signed webhook URLs, 7 October 2026 (0.4.5)

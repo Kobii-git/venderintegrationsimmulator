@@ -1,76 +1,109 @@
-# Installation and Upgrade
+# Installation and Update
 
-## Requirements
+## Install with Docker
 
-- Docker 24 or later with Docker Compose v2.
-- For local development: Python 3.12 and Node.js 22.
-
-## Pull and run the published image
-
-If the registry package is private, authenticate Docker once using an account with access.
-For the repository owner, the GitHub CLI flow is:
+Install and start Docker (Docker 24 or later). Then run:
 
 ```bash
-gh auth refresh --hostname github.com --scopes read:packages
-gh auth token --hostname github.com | docker login ghcr.io --username Kobii-git --password-stdin
-```
-
-This uses the token through standard input. For another authorized account, replace the
-username. Public packages need no registry login.
-
-```bash
-docker pull ghcr.io/kobii-git/venderintegrationsimmulator:0.4.0
-docker run -d --name integration-simulator --restart unless-stopped \
-  -p 127.0.0.1:8080:8080 -v integration-simulator-data:/data \
-  ghcr.io/kobii-git/venderintegrationsimmulator:0.4.0
-```
-
-The image contains the frontend, backend, vendor catalog and database migrations.
-It works with its defaults and automatically initializes its database and encryption key.
-Open <http://localhost:8080>. No clone, source mounts, environment file or database service
-is required. Linux AMD64 and ARM64 are supported. A Docker-compatible container runtime
-is required to run the image.
-
-Use `docker compose -f docker-compose.image.yml up -d` for the image-only Compose file.
-It defaults to `latest`; prefix the command with `SIMULATOR_VERSION=0.4.0` to pin a version.
-After choosing a new version, update with `docker compose -f docker-compose.image.yml pull`
-then `docker compose -f docker-compose.image.yml up -d` (use the same version for both).
-
-To update a container started directly, back up its data and key, pull the chosen tag,
-then recreate it with the same volume and settings:
-
-```bash
-docker pull ghcr.io/kobii-git/venderintegrationsimmulator:latest
-docker stop integration-simulator
-docker rm integration-simulator
-docker run -d --name integration-simulator --restart unless-stopped \
-  -p 127.0.0.1:8080:8080 -v integration-simulator-data:/data \
+docker run -d --name integration-simulator \
+  --pull always --restart unless-stopped \
+  -p 127.0.0.1:8080:8080 \
+  -v integration-simulator-data:/data \
   ghcr.io/kobii-git/venderintegrationsimmulator:latest
 ```
 
-Releases use `vX.Y.Z` source tags and `X.Y.Z` image tags. Each successful push to `main`
-also publishes an immutable `sha-<full commit>` image reference for reproducible runs.
+Open **http://localhost:8080** on the Docker host.
 
-## One-command Docker start
+That is the complete setup. The public image needs no registry login, source
+clone, environment variables, environment file or separate database. It includes
+the frontend, backend, vendor catalog and database migrations. Docker selects
+Linux AMD64 or ARM64 automatically and creates the named data volume; the
+application initializes its database and generates a persistent encryption key.
+The container restarts automatically with Docker unless you stop it explicitly.
+
+The default port is available on the Docker host only. For access from another
+machine or remote collectors, see [protected remote exposure](#protected-remote-exposure).
+
+## Update a Docker installation
+
+For an installation started with the command above, keep a backup of the complete
+`integration-simulator-data` volume, then run:
 
 ```bash
-cp .env.example .env
+docker pull ghcr.io/kobii-git/venderintegrationsimmulator:latest &&
+docker stop integration-simulator &&
+docker rm integration-simulator &&
+docker run -d --name integration-simulator --restart unless-stopped \
+  -p 127.0.0.1:8080:8080 \
+  -v integration-simulator-data:/data \
+  ghcr.io/kobii-git/venderintegrationsimmulator:latest
+```
+
+This downloads the image before stopping the application, then replaces the
+container. The same volume retains saved configuration, history, uploaded datasets
+and the original encryption key. Database migrations run automatically at startup.
+Pulling alone does not update a running container. If you previously customized
+the port, volume or other settings, retain those settings when replacing it.
+
+Confirm the application is ready and inspect the installed version:
+
+```bash
+curl --fail http://localhost:8080/api/v1/ready
+```
+
+## Compose: one command for installation and updates
+
+Docker Compose v2 is required for this alternative. Save
+[docker-compose.image.yml](../docker-compose.image.yml) in a dedicated folder.
+You can download just that file without cloning the repository:
+
+```bash
+curl -fLO https://raw.githubusercontent.com/Kobii-git/venderintegrationsimmulator/main/docker-compose.image.yml
+```
+
+Run this from that folder for both the first installation and every update:
+
+```bash
+docker compose -f docker-compose.image.yml up -d --pull always
+```
+
+It pulls `latest` and creates or replaces the container as needed, retaining the
+data volume. Open **http://localhost:8080**. No file edits or environment variables
+are required. Keep a backup of the complete volume before upgrading.
+
+Continue using the same folder and installation method. Compose prefixes its
+volume name with the project name; it does not automatically reuse a volume from
+`docker run`. Switching methods or folders requires explicitly reusing the original
+volume to keep existing data.
+
+## Image versions
+
+`latest` is the default and follows successful, tested `main` builds. Each release
+also publishes a version tag such as `0.4.8` and a `sha-<full commit>` tag. Source
+release tags use `vX.Y.Z`; image version tags use `X.Y.Z`.
+
+Version pinning is optional: replace `:latest` in the Docker commands with a
+published version tag. For Compose, replace the image tag in your saved file with
+that version. Retain that choice for both installation and updates.
+
+## Optional: build from source
+
+Published-image installation above does not require a build. To build your own:
+
+```bash
+git clone https://github.com/Kobii-git/venderintegrationsimmulator.git
+cd venderintegrationsimmulator
 docker compose up -d --build
 ```
 
-Open <http://localhost:8080>. The default mapping is `127.0.0.1:8080:8080`; it is not reachable from other hosts.
-
-`SECRET_KEY` may be set in `.env` using a stable random value:
-
-```bash
-python3 -c "import secrets; print(secrets.token_urlsafe(32))"
-```
-
-If it is omitted, the application generates `/data/.secret_key` once. This is also stable across container recreation because `/data` is a named volume. Back up and restore that file with the database. Supplying `SECRET_KEY` is preferable when deployment tooling already manages secrets; changing either key source makes existing encrypted values unreadable.
+No `.env` file or manually supplied secret is needed. The generated
+`/data/.secret_key` stays in the data volume. If an existing deployment supplies
+its own `SECRET_KEY`, retain that same value when updating.
 
 ## Persistent data and ownership
 
-The `integration-simulator-data` volume is mounted at `/data`. The image runs as UID/GID `1000` and needs write access to that directory.
+The named data volume is mounted at `/data` (`integration-simulator-data` for
+`docker run`, or a project-prefixed name for Compose). The image runs as UID/GID `1000` and needs write access to that directory.
 
 | Path | Purpose |
 |---|---|
@@ -78,7 +111,8 @@ The `integration-simulator-data` volume is mounted at `/data`. The image runs as
 | `/data/.secret_key` | Generated encryption key when no environment key is supplied |
 | `/data/backups/pre-config-v2-*.db` | Automatic pre-conversion database backups (name retained for compatibility) |
 
-For a host bind mount, create the exact directory and set ownership before changing Compose:
+The default named volume needs no ownership setup. Only if you choose a host bind
+mount instead, create the exact directory and set ownership before changing Compose:
 
 ```bash
 mkdir -p ./data
@@ -135,6 +169,8 @@ The default service must stay localhost-bound. For a remote collector, follow [P
 
 ## Local development
 
+Local development requires Python 3.12+ and Node.js 22.
+
 Backend production dependencies are separated from development tools and both lock files require hashes:
 
 ```bash
@@ -158,8 +194,11 @@ Run all provider-neutral release checks from the repository root with `scripts/v
 ## Health and shutdown
 
 ```bash
-curl -fsS http://localhost:8080/api/v1/health
-docker compose down
+curl -fsS http://localhost:8080/api/v1/ready
+# Stop a Docker installation:
+docker stop integration-simulator
+# Or stop a Compose installation from its original folder:
+docker compose -f docker-compose.image.yml down
 ```
 
-`docker compose down` retains the data volume.
+Stopping the container or running Compose `down` retains the data volume.
