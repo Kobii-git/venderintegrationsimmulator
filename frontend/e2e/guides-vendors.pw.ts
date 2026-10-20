@@ -16,7 +16,7 @@ test("offline guides filter, navigate, download, contents and vendor raw logs", 
  await page.getByRole("link", { name:"Cloudflare: Azure Blob and Sentinel CCF" }).click();
  await expect(page.getByRole("heading", { name:"Cloudflare: Azure Blob Storage and Sentinel CCF", exact:true })).toBeVisible();
  await page.getByText("Documentation: complete — deployment verification", {exact:true}).click();
- await expect(page.getByRole("table").first()).toContainText("not_run");
+ await expect(page.getByRole("table").first()).toContainText("Not run");
  await page.getByRole("button", {name:"Copy command", exact:true}).first().click();
  await expect(page.getByRole("button", {name:"Copied", exact:true}).first()).toBeVisible();
  expect(await page.locator("html").getAttribute("data-copied")).toBeTruthy();

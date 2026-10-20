@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import { copyToClipboard } from "../utils/format";
 
 interface JsonViewerProps {
@@ -35,19 +35,27 @@ interface JsonEditorProps {
   value: string;
   onChange: (value: string) => void;
   error?: string | null;
+  label?: string;
+  disabled?: boolean;
 }
 
-export function JsonEditor({ value, onChange, error }: JsonEditorProps) {
+export function JsonEditor({ value, onChange, error, label = "JSON", disabled }: JsonEditorProps) {
+  const id = useId();
   return (
     <div className="form-row">
+      <label htmlFor={id}>{label}</label>
       <textarea
+        id={id}
+        className="json-editor"
+        disabled={disabled}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         spellCheck={false}
         rows={16}
         aria-invalid={!!error}
+        aria-describedby={error ? `${id}-error` : undefined}
       />
-      {error ? <span className="form-hint" style={{ color: "var(--danger)" }}>{error}</span> : null}
+      {error ? <span id={`${id}-error`} className="form-hint" role="alert" style={{ color: "var(--danger)" }}>{error}</span> : null}
     </div>
   );
 }

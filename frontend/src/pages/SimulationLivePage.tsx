@@ -568,6 +568,7 @@ export function SimulationLivePage() {
               </div>
             </>
           ) : null}
+          <div className="monitor-history-toolbar"><span className="form-hint">Latest 50 requests for this simulation.</span><Link className="btn btn-sm" to={`/inbound-requests?simulation=${id}`}>Open request explorer</Link></div>
           {inboundRequests.length === 0 ? (
             <p style={{ color: "var(--text-muted)" }}>
               No inbound requests yet. Start the simulation and poll the mock

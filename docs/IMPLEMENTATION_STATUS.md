@@ -1,23 +1,23 @@
-# Current release: 0.6.0
+# Current release: 0.7.0
 
-Release 0.6.0 extends the Modern console to Log Lab, guided uploads, raw log
-generation and delivery monitoring. Uploads require validation and destination
-review before sending; failed starts retain the saved run for retry. Log Lab
-has numbered sections and a live summary. Monitoring separates overview,
-activity and connection settings, with pausable updates and tabbed evidence.
+Release 0.7.0 modernizes deployment guides, event preview and inbound request
+inspection. Guide filters survive article navigation; commands, verification
+status and mobile section jumps are easier to use. Preview sends match the
+visible payload, validate edits and retain outcomes for comparison. The request
+explorer uses named simulations, explicit filters and focused evidence tabs.
 No database schema or API contract change is required.
-See [release and upgrade notes](UPGRADE_0.6.0.md).
+See [release and upgrade notes](UPGRADE_0.7.0.md).
 
-Release verification covers frontend lint/types/build, 32 component tests,
-21 real-backend Chromium workflows without retries, 414 backend tests,
-Ruff/mypy, migrations, the documentation gate and locked dependency audits.
-Browser checks cover populated tools and monitoring at 320px, 390px, 768px
-and 1280px widths, keyboard tabs, stale responses and paused monitoring.
-Local Docker rebuilds are limited by the Docker VM's full disk; native local
-receiver/browser tests run independently, and clean CI provides container gates.
+Release verification covers frontend lint/types/build, 48 component tests,
+24 real-backend Chromium workflows without retries, 414 backend tests,
+24 relay tests, 10 migration/rollback tests, the documentation gate and locked
+dependency audits. Browser checks include populated screens at 320px, 390px,
+768px and 1280px, keyboard navigation, exact sends, failures and redaction.
+Local Docker rebuilds remain limited by the Docker VM's full disk; disposable
+native receivers support local browser testing and clean CI provides container gates.
 
-Publication is gated on source, migration, browser, production-image and native
-AMD64/ARM64 checks, including pull/startup/UI/API/persistence verification.
+Publication requires production-image and native AMD64/ARM64 checks, including
+pull/startup/UI/API/persistence verification and matching public manifests.
 External Sentinel/table and vendor parser acceptance remain separate checks.
 
 ## Release 0.4.8 verification
@@ -121,7 +121,7 @@ on the local ARM64 Docker host. Published multi-platform digest:
 ## Recovery baseline
 
 The authoritative application repository is now https://github.com/Kobii-git/venderintegrationsimmulator.
-Version 0.6.0 source, deployment configuration and verification scripts are maintained on `main`.
+Version 0.7.0 source, deployment configuration and verification scripts are maintained on `main`.
 Future updates increment the application version and publish versioned and commit-tagged images.
 
 ## Signed webhook URLs, 7 October 2026 (0.4.5)

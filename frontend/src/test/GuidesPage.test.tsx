@@ -5,7 +5,7 @@ import { beforeEach, expect, it, vi } from "vitest";
 import { get } from "../api/client";
 import { GuidesPage } from "../pages/GuidesPage";
 
-vi.mock("../api/client", () => ({ get: vi.fn() }));
+vi.mock("../api/client", async (importOriginal) => ({ ...await importOriginal<typeof import("../api/client")>(), get: vi.fn() }));
 const guide = { product_id: "cloudflare", product_name: "Cloudflare", method_id: "native", title: "Cloudflare HTTP Logpush", summary: "Compression and delivery", connection_methods: ["HTTP Logpush"], destinations: ["Microsoft Sentinel"], support: "native simulation", reviewed_at: "2026-10-07", content: "# Cloudflare\n\n## Production deployment\n\n```bash\ncurl --fail https://example.test\n```\n\n<script>window.bad=true</script>\n\n[Unsafe](javascript:alert(1))\n\n## Simulator testing\n\nGenerate a raw log." };
 beforeEach(() => { vi.resetAllMocks(); vi.mocked(get).mockImplementation(async path => path === "/guides" ? [guide] : guide); });
 function show(path: string) { return render(<MemoryRouter initialEntries={[path]}><Routes><Route path="/guides" element={<GuidesPage />} /><Route path="/guides/:productId/:methodId" element={<GuidesPage />} /></Routes></MemoryRouter>); }
@@ -31,4 +31,28 @@ it("renders safe Markdown, contents and copyable commands with raw generation li
  expect(screen.getByRole("link", { name: "Generate raw log" })).toHaveAttribute("href", "/raw-logs?product=cloudflare");
  expect(screen.getByRole("button", { name: "Download Markdown" })).toBeEnabled();
  expect(screen.getByRole("button", { name: "Print guide" })).toBeEnabled();
+});
+it("retains guide filters when opening an article and returning to results", async () => {
+ const user = userEvent.setup(); show("/guides?vendor=cloudflare&q=Compression");
+ await user.click(await screen.findByRole("link", { name: guide.title }));
+ expect(await screen.findByRole("link", { name: "Back to guide results" })).toHaveAttribute("href", "/guides?vendor=cloudflare&q=Compression");
+ await user.click(screen.getByRole("link", { name: "Back to guide results" }));
+ expect(screen.getByLabelText("Search guides")).toHaveValue("Compression");
+ expect(screen.getByLabelText("Vendor")).toHaveValue("cloudflare");
+});
+it("makes repeated and formatted section links unique and excludes fenced examples", async () => {
+ vi.mocked(get).mockResolvedValue({ ...guide, content: "# Example\n\n## **Setup**\n\n```text\n## Not a heading\n```\n\n## Setup\n" });
+ show("/guides/cloudflare/native");
+ const headings = await screen.findAllByRole("heading", { name: "Setup" });
+ expect(headings.map((heading) => heading.id)).toEqual(["setup", "setup-2"]);
+ expect(screen.getAllByRole("link", { name: "Setup" }).map((link) => link.getAttribute("href"))).toEqual(["#setup", "#setup-2"]);
+ expect(screen.queryByRole("link", { name: "Not a heading" })).not.toBeInTheDocument();
+});
+it("shows a recoverable catalog error instead of an empty library", async () => {
+ vi.mocked(get).mockRejectedValueOnce(new Error("Guide service unavailable"));
+ const user = userEvent.setup(); show("/guides");
+ expect(await screen.findByRole("alert")).toHaveTextContent("Guide service unavailable");
+ expect(screen.queryByText("No guides match these filters.")).not.toBeInTheDocument();
+ await user.click(screen.getByRole("button", { name: "Try again" }));
+ expect(await screen.findByRole("link", { name: guide.title })).toBeInTheDocument();
 });

@@ -1,3 +1,5 @@
 azure-functions
 azure-identity
 httpx==0.28.1
+# Remove affected roots from the bundled TLS trust store.
+certifi>=2026.10.19

@@ -278,6 +278,7 @@ test("pull dataset pagination and global inbound audit are visible", async ({ pa
   await page.goto("/inbound-requests");
   await expect(page.getByRole("heading", { name: "Inbound Requests" })).toBeVisible();
   await expect(page.getByText(`${pullId}`).first()).toBeVisible();
+  await expect(page.getByText("Not required", { exact: true }).first()).toBeVisible();
 });
 
 test("OAuth token metadata is visible without token prefixes", async ({ page, request }) => {

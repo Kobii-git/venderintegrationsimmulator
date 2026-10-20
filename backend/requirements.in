@@ -12,3 +12,5 @@ apscheduler>=3.10.4,<4.0.0
 jsonschema>=4.23.0,<5.0.0
 # Required by SQLAlchemy on Linux; keep cross-platform locks complete.
 greenlet>=3.5.5,<4.0.0
+# Remove affected roots from the bundled TLS trust store.
+certifi>=2026.10.19

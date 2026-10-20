@@ -1,3 +1,20 @@
+# 0.7.0 release gates
+
+- [x] Modern deployment guides, event preview and inbound request exploration.
+- [x] Frontend lint/types/build and 48 component tests.
+- [x] 24 real-backend Chromium workflows without retries, including populated
+      mobile layouts, keyboard evidence navigation, exact sends and redaction.
+- [x] Backend Ruff/mypy, 414 tests, documentation gate and locked dependency audits.
+- [x] Migration/rollback and Function App relay regression checks.
+
+Required publishing gates: production Docker protocols/persistence and native
+AMD64/ARM64 builds, followed by matching version/commit/latest public manifests
+and pulled-image checks. Tag and publish v0.7.0 only after these gates pass.
+The [verification workflow](https://github.com/Kobii-git/venderintegrationsimmulator/actions/workflows/verify.yml)
+and [release](https://github.com/Kobii-git/venderintegrationsimmulator/releases/tag/v0.7.0)
+record completion evidence. See [upgrade notes](UPGRADE_0.7.0.md).
+External Sentinel/table/parser acceptance remains a separate environment check.
+
 # 0.6.0 release gates
 
 - [x] Modern console Log Lab, guided uploads, raw generation and monitoring.

@@ -1,7 +1,7 @@
 {
   "name": "integration-simulator-frontend",
   "private": true,
-  "version": "0.6.0",
+  "version": "0.7.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -36,7 +36,7 @@
     "jsdom": "^25.0.1",
     "typescript": "~5.7.2",
     "typescript-eslint": "^8.18.2",
-    "vite": "^8.2.2",
+    "vite": "8.2.4",
     "vitest": "^4.1.11"
   }
 }

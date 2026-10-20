@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     )
 
     app_name: str = "Integration Simulator"
-    app_version: str = "0.6.0"
+    app_version: str = "0.7.0"
     app_environment: AppEnvironment = AppEnvironment.DEVELOPMENT
     debug: bool = False
     log_level: str = "INFO"
