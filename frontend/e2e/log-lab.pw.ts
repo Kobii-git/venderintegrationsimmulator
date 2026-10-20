@@ -12,6 +12,7 @@ test("build and edit a multi-collector lab with devices and uploaded replay", as
   await page.getByLabel("Find a source").fill("domain");
   await page.getByLabel("Source", { exact: true }).selectOption("windows-dc");
   await page.getByLabel("Logon Failure", { exact: true }).check();
+  await page.getByText("Event identities, incidents & weights", { exact: true }).click();
   await page.getByLabel("User pool (one name per line)").fill("alice\nbob");
   await page.getByLabel("Correlated incident preset").selectOption("password_spray");
   await page.getByRole("button", { name: "Add device" }).click();
@@ -29,6 +30,22 @@ test("build and edit a multi-collector lab with devices and uploaded replay", as
   await page.getByRole("button", { name: "Preview dataset" }).click();
   await expect(page.locator("pre")).toContainText('"unknown_timestamp_fields"');
   await expect(page.locator("pre")).toContainText('"customDate"');
+  await expect(page.getByRole("complementary", { name: "Lab summary" })).toContainText("2 enabled / 2 configured");
+  await page.getByLabel("Rewrite recognized timestamps to current time").uncheck();
+  await expect(page.getByLabel("Lab preview")).toHaveCount(0);
+  await page.getByLabel("Rewrite recognized timestamps to current time").check();
+  await page.getByRole("button", { name: "Preview dataset" }).click();
+  await expect(page.getByLabel("Lab preview")).toBeVisible();
+  await page.getByRole("button", { name: "Delete dataset", exact: true }).click();
+  const deleteDialog = page.getByRole("dialog", { name: "Delete dataset?" });
+  await expect(deleteDialog.getByRole("button", { name: "Cancel" })).toBeFocused();
+  await page.keyboard.press("Escape");
+  await expect(deleteDialog).toHaveCount(0);
+  await expect(page.getByRole("option", { name: `${datasetName} (1 records)` })).toBeAttached();
+  for (const width of [320, 390, 768, 1280]) {
+    await page.setViewportSize({ width, height: 900 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  }
   await expect(page.locator("input:invalid")).toHaveCount(0);
   await page.getByRole("button", { name: "Create lab", exact: true }).click();
   await expect(page).toHaveURL(/\/simulations\/[a-f0-9-]+$/);
@@ -40,6 +57,7 @@ test("build and edit a multi-collector lab with devices and uploaded replay", as
   expect(simulation.devices[0].hostname).toBe("dc01.browser.test");
   expect(simulation.replay_config.loop).toBe(true);
   await expect(page.getByRole("heading", { name: "Collector delivery" })).toBeVisible();
+  await page.getByText("Tools & configuration", { exact: true }).click();
   await page.getByRole("link", { name: "Collectors & replay" }).click();
   await expect(page.getByLabel("Collector 2 transport")).toHaveValue("http_webhook");
   await page.getByRole("button", { name: "Preview saved wire bytes" }).first().click();
@@ -108,12 +126,15 @@ test("Upload logs creates a target without randomUUID", async ({ page }) => {
   releaseList();
   await expect(page.getByLabel("Dataset")).not.toHaveValue("");
   await page.getByRole("combobox", { name: "Payload mode", exact: true }).selectOption("json");
+  await page.getByRole("button", { name: "Validate and preview", exact: true }).click();
+  await page.getByRole("button", { name: "Continue", exact: true }).click();
   await page.getByLabel("DCE endpoint").fill("https://example.ingest.monitor.azure.com");
   await page.getByLabel("Tenant ID", { exact: true }).fill("tenant");
   await page.getByLabel("DCR immutable ID").fill("dcr-test");
   await page.getByLabel("Stream name").fill("Custom-Test");
   await page.getByLabel("Client ID", { exact: true }).fill("client");
   await page.getByLabel("Client secret", { exact: true }).fill("local-test-secret");
+  await page.getByRole("button", { name: "Continue", exact: true }).click();
   await page.getByRole("button", { name: "Upload to Azure" }).click();
   await expect(page.getByText("Target creation verified")).toBeVisible();
   const datasetId = await page.getByLabel("Dataset").inputValue();

@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 
 import { listAllInboundRequests } from "../api/simulations";
 import { ErrorAlert } from "../components/ErrorAlert";
@@ -9,7 +9,7 @@ import type { InboundRequestSummary } from "../types/api";
 import { formatApiError, formatTime } from "../utils/format";
 
 export function InboundRequestsPage() {
-  const navigate = useNavigate();
+  const loadVersion = useRef(0);
   const [requests, setRequests] = useState<InboundRequestSummary[]>([]);
   const [simulationId, setSimulationId] = useState("");
   const [requestKind, setRequestKind] = useState("");
@@ -18,24 +18,25 @@ export function InboundRequestsPage() {
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
+    const version = ++loadVersion.current;
     try {
-      setRequests(
-        await listAllInboundRequests({
+      const result = await listAllInboundRequests({
           simulation_id: simulationId || undefined,
           request_kind: requestKind || undefined,
           response_status: responseStatus ? Number(responseStatus) : undefined,
-        }),
-      );
-      setError(null);
+        });
+      if (version !== loadVersion.current) return;
+      setRequests(result); setError(null);
     } catch (loadError) {
-      setError(formatApiError(loadError));
+      if (version === loadVersion.current) setError(formatApiError(loadError));
     } finally {
-      setLoading(false);
+      if (version === loadVersion.current) setLoading(false);
     }
   }, [requestKind, responseStatus, simulationId]);
 
   useEffect(() => {
     void load();
+    return () => { loadVersion.current += 1; };
   }, [load]);
 
   if (loading) return <LoadingState label="Loading inbound requests…" />;
@@ -44,11 +45,12 @@ export function InboundRequestsPage() {
     <div>
       <div className="page-header">
         <div>
-          <h1>Inbound Requests</h1>
+          <p className="eyebrow">Request monitoring</p><h1>Inbound Requests</h1>
           <p style={{ margin: 0, color: "var(--text-muted)" }}>
             Global pull API, authentication, fault, and unmatched request audit.
           </p>
         </div>
+        <button type="button" className="btn" onClick={() => void load()}>Refresh requests</button>
       </div>
       {error ? <ErrorAlert message={error} /> : null}
       <div className="card">
@@ -86,6 +88,8 @@ export function InboundRequestsPage() {
             />
           </div>
         </div>
+        <div className="monitor-history-toolbar"><span className="form-hint">{requests.length} recent matching requests. Select a time to inspect authentication and response details.</span>
+          <button type="button" className="btn btn-sm" onClick={() => { setSimulationId(""); setRequestKind(""); setResponseStatus(""); }}>Clear filters</button></div>
         {requests.length ? (
           <div className="table-wrap">
             <table className="data-table">
@@ -101,12 +105,8 @@ export function InboundRequestsPage() {
               </thead>
               <tbody>
                 {requests.map((request) => (
-                  <tr
-                    key={request.id}
-                    className="clickable"
-                    onClick={() => navigate(`/inbound-requests/${request.id}`)}
-                  >
-                    <td>{formatTime(request.received_at)}</td>
+                  <tr key={request.id}>
+                    <td><Link to={`/inbound-requests/${request.id}`}>{formatTime(request.received_at)}</Link></td>
                     <td>{request.simulation_id ?? <strong>Unmatched</strong>}</td>
                     <td>{request.product_id} / {request.route_id}</td>
                     <td><HttpStatusCode code={request.response_status_code} /></td>

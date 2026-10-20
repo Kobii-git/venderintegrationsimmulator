@@ -41,13 +41,13 @@ export function InboundRequestDetailPage() {
     <div>
       <div className="page-header">
         <div>
-          <h1>Inbound Request</h1>
+          <p className="eyebrow">Request inspection</p><h1>Inbound Request</h1>
           <p style={{ margin: 0, color: "var(--text-muted)" }}>
             {formatDateTime(request.received_at)} ·{" "}
             <HttpStatusCode code={request.response_status_code} /> · {request.latency_ms} ms
           </p>
         </div>
-        <Link to={id ? `/simulations/${id}` : "/inbound-requests"} className="btn">
+        <Link to={id ? `/simulations/${id}?view=activity` : "/inbound-requests"} className="btn">
           {id ? "Back to simulation" : "Back to all requests"}
         </Link>
       </div>

@@ -2,6 +2,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 
 import { generateRawLog, getProduct, listProducts } from "../api/products";
+import { Icon } from "../components/Icon";
 import { ErrorAlert, InfoAlert } from "../components/ErrorAlert";
 import { ScenarioOverridesSection } from "../components/ScenarioOverridesSection";
 import type {
@@ -15,6 +16,7 @@ import { formatApiError } from "../utils/format";
 export function RawLogPage() {
   const [searchParams] = useSearchParams();
   const [products, setProducts] = useState<ProductSummary[]>([]);
+  const [productSearch, setProductSearch] = useState("");
   const [productId, setProductId] = useState("");
   const [product, setProduct] = useState<ProductDetail | null>(null);
   const [scenarioId, setScenarioId] = useState("");
@@ -28,6 +30,12 @@ export function RawLogPage() {
   const [generating, setGenerating] = useState(false);
   const generation = useRef(0);
   const output = useRef<HTMLTextAreaElement>(null);
+  const resultHeading = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    if (!result) return;
+    resultHeading.current?.focus({ preventScroll: true });
+    resultHeading.current?.scrollIntoView?.({ block: "start", behavior: "instant" });
+  }, [result]);
 
   useEffect(() => {
     let active = true;
@@ -136,23 +144,29 @@ export function RawLogPage() {
   return (
     <div>
       <div className="page-header">
-        <h1>Generate raw log</h1>
+        <div><p className="eyebrow">Log tools</p><h1>Generate raw log</h1>
+          <p className="page-description">Build a vendor sample, inspect the output, and copy or download it.</p></div>
       {productId && <Link to={`/guides?vendor=${productId}`}>Deployment guides for this integration</Link>}
       </div>
-      <p className="form-hint">
-        Generate one sample in the product’s default log format. No destination
-        or saved simulation is needed; nothing is sent.
-      </p>
+      <div className="tool-notice"><Icon name="code" /><span>Preview only. No destination or saved simulation is needed; nothing is sent.</span></div>
       {error && <ErrorAlert message={error} />}
       {notice && <InfoAlert message={notice} />}
+      <div className="raw-workspace">
       <form
-        className="card"
+        className="card tool-controls"
+        onInvalidCapture={(event) => {
+          const details = (event.target as HTMLElement).closest("details");
+          if (details) details.open = true;
+        }}
         onSubmit={(event) => {
           event.preventDefault();
           void generate();
         }}
       >
-        <div className="grid-2">
+        <div className="section-heading"><span className="section-number">1</span><div><h2>Choose your sample</h2><p>Product, event, and optional sample values.</p></div></div>
+        <div className="form-row"><label htmlFor="raw-search">Find a product</label><input id="raw-search" type="search" value={productSearch}
+          placeholder="Search vendors or products…" onChange={(event) => setProductSearch(event.target.value)} /></div>
+        <div className="form-grid">
           <div className="form-row">
             <label htmlFor="raw-product">Product</label>
             <select
@@ -168,7 +182,7 @@ export function RawLogPage() {
               }}
             >
               {!products.length && <option value="">Loading products…</option>}
-              {products.map((item) => (
+              {products.filter((item) => item.id === productId || `${item.display_name} ${item.id}`.toLowerCase().includes(productSearch.toLowerCase())).map((item) => (
                 <option key={item.id} value={item.id}>
                   {item.display_name}
                 </option>
@@ -221,7 +235,7 @@ export function RawLogPage() {
             validate them against real UpGuard samples.
           </p>
         )}
-        <details key={`${productId}-${scenarioId}`}>
+        <details className="advanced-options" key={`${productId}-${scenarioId}`}>
           <summary>Customize sample values</summary>
           <ScenarioOverridesSection
             scenarios={product?.scenarios ?? []}
@@ -239,14 +253,15 @@ export function RawLogPage() {
             type="submit"
             disabled={!ready || generating}
           >
-            {generating ? "Generating…" : "Generate raw log"}
+            <Icon name="code" />{generating ? "Generating…" : "Generate raw log"}
           </button>
         </div>
       </form>
-      {result && (
-        <section className="card" aria-label="Generated raw log">
+      <div className="raw-result">
+      {result ? (
+        <section className="card output-panel" aria-label="Generated raw log">
           <div className="json-toolbar">
-            <strong>Raw log · {result.content_type}</strong>
+            <div><p className="eyebrow">Generated sample</p><h2 ref={resultHeading} tabIndex={-1}>Raw log</h2><span className="form-hint">{result.content_type} · {result.raw_log.split("\n").length} lines · {new Blob([result.raw_log]).size.toLocaleString()} bytes</span></div>
             <div className="inline-actions">
               <button
                 className="btn btn-sm"
@@ -274,7 +289,12 @@ export function RawLogPage() {
             transport headers and framing are added during delivery.
           </p>
         </section>
-      )}
+      ) : <section className="card output-placeholder" aria-label="Raw log preview">
+        <span className="empty-mark"><Icon name="code" /></span><h2>{generating ? "Generating your sample…" : "Your sample appears here"}</h2>
+        <p>Choose a product and scenario, then generate a raw log. Changes clear outdated output.</p>
+      </section>}
+      </div>
+      </div>
     </div>
   );
 }

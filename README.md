@@ -1,6 +1,6 @@
 # Integration Simulator
 
-Self-hosted `0.5.0` tool for security engineers to **simulate**, **test**, and **troubleshoot** push, Syslog, and pull-based vendor integrations.
+Self-hosted `0.6.0` tool for security engineers to **simulate**, **test**, and **troubleshoot** push, Syslog, and pull-based vendor integrations.
 
 Generate realistic vendor payloads, deliver them to your webhook endpoint, inspect request/response details, replay events, inject faults, and validate ingestion pipelines — without needing the real UpGuard product.
 
@@ -52,9 +52,10 @@ No source checkout or file edits are required. Use the same installation method
 for future updates; see [installation and updates](docs/INSTALLATION.md) for details.
 `latest` follows tested `main` builds; version and commit tags are also published.
 
-Release 0.5.0 introduces the Modern console: responsive grouped navigation,
-a searchable simulation dashboard and guided simulation creation/editing with
-validation and a configuration review before saving. [Release notes](docs/UPGRADE_0.5.0.md).
+Release 0.6.0 extends the Modern console to Log Lab, guided uploads, raw log
+generation and delivery monitoring. Validate and review uploads before sending,
+keep lab configuration in view, and inspect delivery evidence in focused tabs.
+[Release notes](docs/UPGRADE_0.6.0.md).
 
 ## What it does
 

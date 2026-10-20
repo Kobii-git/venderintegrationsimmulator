@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { post } from "../api/client";
 import type { AuthConfigInput, DestinationConfig } from "../types/api";
 import { formatApiError } from "../utils/format";
@@ -17,8 +17,12 @@ export function AzureDestinationEditor({
   const relay = destination.transport_id === "azure_function_app";
   const [result, setResult] = useState("");
   const [busy, setBusy] = useState(false);
+  const version = useRef(0);
+  useEffect(() => { version.current += 1; setResult(""); setBusy(false); }, [destination, auth, testRecord]);
+  useEffect(() => () => { version.current += 1; }, []);
   const check = async (send: boolean) => {
-    setBusy(true);
+    const requestId = ++version.current;
+    setBusy(true); setResult("");
     try {
       const response = await post(
         `/transport/azure/${send ? "send" : "test"}`,
@@ -37,15 +41,15 @@ export function AzureDestinationEditor({
             : {}),
         },
       );
-      setResult(JSON.stringify(response, null, 2));
+      if (requestId === version.current) setResult(JSON.stringify(response, null, 2));
     } catch (e) {
-      setResult(formatApiError(e));
+      if (requestId === version.current) setResult(formatApiError(e));
     } finally {
-      setBusy(false);
+      if (requestId === version.current) setBusy(false);
     }
   };
   return (
-    <div>
+    <div className="azure-editor">
       <p className="form-hint">
         {relay
           ? "Function App forwards to its configured DCE, DCR and stream using managed identity. Enter the /api/ingest URL."
@@ -67,6 +71,7 @@ export function AzureDestinationEditor({
             {label}
             <input
               aria-label={label}
+              type={key === "url" || key === "endpoint" ? "url" : "text"}
               required
               value={String(destination[key as keyof DestinationConfig] ?? "")}
               onChange={(e) =>
@@ -136,7 +141,7 @@ export function AzureDestinationEditor({
         validated record, or a custom-table test envelope when no preview is
         available.
       </p>
-      {result && <pre aria-label="Connection result">{result}</pre>}
+      {result && <pre className="json-viewer" aria-label="Connection result">{result}</pre>}
     </div>
   );
 }

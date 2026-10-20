@@ -28,6 +28,7 @@ test("validate Azure uploads, configure relay, and track accepted records", asyn
   await expect(page.getByLabel("Ingestion preview")).not.toContainText(
     '"RawData"',
   );
+  await page.getByRole("button", { name: "Continue", exact: true }).click();
   await page.getByLabel("DCE endpoint").fill("https://dce.example.test");
   await page.getByLabel("Tenant ID").fill("tenant");
   await page.getByLabel("DCR immutable ID").fill("dcr-browser");
@@ -88,15 +89,22 @@ test("validate Azure uploads, configure relay, and track accepted records", asyn
       },
     });
   });
+  await page.getByRole("button", { name: "Continue", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Review & send", exact: true })).toBeFocused();
+  expect(await page.locator("body").innerText()).not.toContain("browser-function-canary");
+  for (const width of [320, 390, 768, 1280]) {
+    await page.setViewportSize({ width, height: 900 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  }
   await page
     .getByRole("button", { name: "Upload to Azure", exact: true })
     .click();
   await expect(page.getByLabel("Upload progress")).toContainText(
     "Status: completed",
   );
-  await expect(page.getByLabel("Upload progress")).toContainText(
-    "Azure-accepted: 1",
-  );
+  await expect(page.getByLabel("Upload progress").getByText("Azure-accepted", { exact: true }).locator("..")).toContainText("1");
+  await page.setViewportSize({ width: 320, height: 900 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   const stored = saved! as SimulationResponse;
   expect(stored.product_id).toBe("uploaded-logs");
   expect(stored.targets![0].auth_config.has_token).toBe(true);

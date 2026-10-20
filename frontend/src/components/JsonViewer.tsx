@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { copyToClipboard } from "../utils/format";
 
 interface JsonViewerProps {
@@ -6,7 +7,8 @@ interface JsonViewerProps {
 }
 
 export function JsonViewer({ data, label }: JsonViewerProps) {
-  const text = JSON.stringify(data, null, 2);
+  const text = JSON.stringify(data, null, 2) ?? "null";
+  const [message, setMessage] = useState("");
 
   return (
     <div>
@@ -15,12 +17,16 @@ export function JsonViewer({ data, label }: JsonViewerProps) {
         <button
           type="button"
           className="btn btn-sm"
-          onClick={() => void copyToClipboard(text)}
+          onClick={() => {
+            setMessage("");
+            void copyToClipboard(text).then(() => setMessage("Copied JSON.")).catch(() => setMessage("Clipboard unavailable. Select the text below to copy it."));
+          }}
         >
           Copy JSON
         </button>
       </div>
-      <pre className="json-viewer">{text}</pre>
+      {message && <p className="form-hint" role="status">{message}</p>}
+      <pre className="json-viewer" aria-label={label}>{text}</pre>
     </div>
   );
 }

@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 
 import { getProduct } from "../api/products";
 import {
@@ -15,10 +15,12 @@ import {
   startSimulation,
   stopSimulation,
 } from "../api/simulations";
+import { InfoAlert } from "../components/ErrorAlert";
 import { ErrorAlert } from "../components/ErrorAlert";
 import { WarningAlert } from "../components/ErrorAlert";
 import { LoadingState } from "../components/LoadingState";
-import { HttpStatusCode, StatusBadge } from "../components/StatusBadge";
+import { ConsoleTabs } from "../components/ConsoleTabs";
+import { DeliveryBadge, HttpStatusCode, StatusBadge } from "../components/StatusBadge";
 import { usePolling } from "../hooks/usePolling";
 import type {
   EventInstanceSummary,
@@ -38,7 +40,12 @@ import {
 
 export function SimulationLivePage() {
   const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
+  const [params, setParams] = useSearchParams();
+  const view = ["overview", "activity", "connection"].includes(params.get("view") ?? "") ? params.get("view")! : "overview";
+  const setView = (value: string) => setParams((previous) => { const next = new URLSearchParams(previous); next.set("view", value); return next; }, { replace: true });
+  const [autoRefresh, setAutoRefresh] = useState(true);
+  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
+  const refreshVersion = useRef(0);
   const [simulation, setSimulation] = useState<SimulationResponse | null>(null);
   const [events, setEvents] = useState<EventInstanceSummary[]>([]);
   const [inboundRequests, setInboundRequests] = useState<
@@ -55,6 +62,12 @@ export function SimulationLivePage() {
   const [error, setError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [copyMessage, setCopyMessage] = useState<string | null>(null);
+  const copyValue = async (value: string) => {
+    setCopyMessage(null);
+    try { await copyToClipboard(value); setCopyMessage("Copied to clipboard."); }
+    catch { setActionError("Clipboard unavailable. Select the value and copy it manually."); }
+  };
   const [filterSuccess, setFilterSuccess] = useState<"" | "true" | "false">("");
   const [filterScenario, setFilterScenario] = useState("");
   const [filterHttpStatus, setFilterHttpStatus] = useState("");
@@ -65,6 +78,7 @@ export function SimulationLivePage() {
 
   const refresh = useCallback(async () => {
     if (!id) return;
+    const version = ++refreshVersion.current;
     try {
       const filters = {
         limit: 50,
@@ -77,46 +91,42 @@ export function SimulationLivePage() {
         getSimulation(id),
         listSimulationEvents(id, filters),
       ]);
-      setSimulation(sim);
-      setEvents(evts);
+      let requests: InboundRequestSummary[] = [];
+      let endpoint: InboundEndpointInfo | null = null;
+      let tokens: IssuedOAuthToken[] = [];
       if (sim.simulation_mode === "pull_api") {
-        const [requests, endpoint, tokens] = await Promise.all([
+        [requests, endpoint, tokens] = await Promise.all([
           listInboundRequests(id, 50),
           getInboundEndpointInfo(id),
           sim.inbound_config?.auth_method_id === "oauth2_client_credentials"
             ? listOAuthTokens(id, 50)
             : Promise.resolve([]),
         ]);
-        setInboundRequests(requests);
-        setEndpointInfo(endpoint);
-        setOauthTokens(tokens);
-      } else {
-        setInboundRequests([]);
-        setOauthTokens([]);
-        setEndpointInfo(null);
       }
-      setError(null);
-    } catch (err) {
-      setError(formatApiError(err));
-    } finally {
-      setLoading(false);
-    }
+      if (version !== refreshVersion.current) return;
+      setSimulation(sim); setEvents(evts); setInboundRequests(requests);
+      setEndpointInfo(endpoint); setOauthTokens(tokens); setLastUpdated(new Date().toISOString()); setError(null);
+    } catch (err) { if (version === refreshVersion.current) setError(formatApiError(err)); }
+    finally { if (version === refreshVersion.current) setLoading(false); }
   }, [id, filterSuccess, filterScenario, filterHttpStatus, filterCorrelation]);
 
   useEffect(() => {
     void refresh();
+    return () => { refreshVersion.current += 1; };
   }, [refresh]);
 
   useEffect(() => {
     if (!simulation?.product_id) return;
+    let active = true;
     void getProduct(simulation.product_id)
-      .then(setProduct)
-      .catch((err) => setError(formatApiError(err)));
+      .then((value) => { if (active) setProduct(value); })
+      .catch((err) => { if (active) setError(formatApiError(err)); });
+    return () => { active = false; };
   }, [simulation?.product_id]);
 
   const isLive = simulation?.status === "running";
-  usePolling(refresh, 2000, isLive);
-  usePolling(refresh, 5000, !isLive && !loading);
+  usePolling(refresh, 2000, isLive && autoRefresh);
+  usePolling(refresh, 5000, !isLive && !loading && autoRefresh);
 
   const runAction = async (action: () => Promise<unknown>) => {
     setBusy(true);
@@ -147,7 +157,7 @@ export function SimulationLivePage() {
   };
 
   if (loading) return <LoadingState label="Loading simulation…" />;
-  if (!simulation || !id) return <ErrorAlert message="Simulation not found" />;
+  if (!simulation || !id) return <div><ErrorAlert message={error ?? "Simulation not found"} /><button type="button" className="btn" onClick={() => { setLoading(true); void refresh(); }}>Try again</button></div>;
 
   const stats = simulation.runtime_stats;
   const faultsEnabled = simulation.fault_config?.enabled === true;
@@ -164,52 +174,19 @@ export function SimulationLivePage() {
 
   return (
     <div>
-      {!isPull && simulation.targets?.length ? (
-        <div className="card">
-          <h2>Collector delivery</h2>
-          <table>
-            <thead>
-              <tr>
-                <th>Collector</th>
-                <th>Format</th>
-                <th>Accepted</th>
-                <th>Failed</th>
-                <th>Queued</th>
-                <th>Confirmation</th>
-                <th>Last error</th>
-              </tr>
-            </thead>
-            <tbody>
-              {simulation.targets.map((t) => (
-                <tr key={t.id}>
-                  <td>
-                    {t.name} {t.enabled ? "" : "(disabled)"}
-                  </td>
-                  <td>{t.payload_format}</td>
-                  <td>{t.stats.successful ?? 0}</td>
-                  <td>{t.stats.failed ?? 0}</td>
-                  <td>{t.stats.queued ?? 0}</td>
-                  <td>{t.stats.confirmation ?? "—"}</td>
-                  <td>{t.stats.last_error ?? "—"}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ) : null}
       <div className="page-header">
         <div>
-          <h1>{simulation.name}</h1>
+          <p className="eyebrow">Delivery monitoring</p><h1>{simulation.name}</h1>
           <p style={{ margin: 0, color: "var(--text-muted)" }}>
             {simulation.product_id} · {isPull ? "pull API" : "push webhook"} ·{" "}
             <StatusBadge status={simulation.status} />{" "}
             <span className={`polling-indicator ${isLive ? "live" : ""}`}>
-              {isLive ? "Live polling" : "Polling every 5s"}
+              {autoRefresh ? isLive ? "Live polling" : "Polling every 5s" : "Updates paused"}
             </span>
           </p>
         </div>
         <div className="page-actions">
-          {simulation.status !== "running" ? (
+          {simulation.status !== "running" ? isPull || simulation.schedule?.type !== "manual" ? (
             <button
               type="button"
               className="btn btn-primary"
@@ -222,7 +199,7 @@ export function SimulationLivePage() {
             >
               Start
             </button>
-          ) : (
+          ) : null : (
             <button
               type="button"
               className="btn"
@@ -242,14 +219,17 @@ export function SimulationLivePage() {
               >
                 Send one now
               </button>
+            </>
+          ) : null}
+          <details className="action-menu monitor-tools"><summary>Tools & configuration</summary><div className="action-menu-panel">
+          {!isPull && <>
               <Link to={`/lab/${id}`} className="btn">
                 Collectors &amp; replay
               </Link>
               <Link to={`/simulations/${id}/preview`} className="btn">
                 Preview event
               </Link>
-            </>
-          ) : null}
+            </>}
           {workflowActions.map((action) => (
             <button
               key={action.id}
@@ -286,11 +266,13 @@ export function SimulationLivePage() {
           >
             Export config
           </button>
+          </div></details>
         </div>
       </div>
 
       {error ? <ErrorAlert message={error} /> : null}
       {actionError ? <ErrorAlert message={actionError} /> : null}
+      {copyMessage && <InfoAlert message={copyMessage} />}
       {workflowResult ? (
         <div
           className={
@@ -322,7 +304,10 @@ export function SimulationLivePage() {
         <WarningAlert message="Inbound fault injection is ENABLED — mock API responses are intentionally modified." />
       ) : null}
 
-      <div className="stat-grid" style={{ marginBottom: "1rem" }}>
+      <div className="monitor-update-bar"><span className="form-hint">Last updated: {lastUpdated ? formatTime(lastUpdated) : "—"}</span><div className="page-actions">
+        <button type="button" className="btn btn-sm" onClick={() => { refreshVersion.current += 1; setAutoRefresh(!autoRefresh); }}>{autoRefresh ? "Pause live updates" : "Resume live updates"}</button>
+        <button type="button" className="btn btn-sm" onClick={() => void refresh()}>Refresh now</button></div></div>
+      <div className="stat-grid monitor-metrics" style={{ marginBottom: "1rem" }}>
         {isPull ? (
           <>
             <div className="stat-card">
@@ -396,6 +381,53 @@ export function SimulationLivePage() {
         )}
       </div>
 
+      <ConsoleTabs id="monitor" label="Monitoring views" value={view} onChange={setView} tabs={[
+        { id: "overview", label: "Overview" }, { id: "activity", label: isPull ? "Requests" : "Deliveries" }, { id: "connection", label: "Connection" },
+      ]} />
+      <section role="tabpanel" id="monitor-panel-overview" aria-labelledby="monitor-tab-overview" hidden={view !== "overview"}>
+        <div className="card monitor-overview"><h2>{isPull ? "Collector polling" : "Delivery overview"}</h2>
+          <p>{isPull ? "Start the simulation, then poll its mock API from your collector. Connection contains the URLs and authentication settings; Requests contains the audit history." : simulation.schedule?.type === "manual" ? "This is a manual simulation. Use Send one now to deliver one event, then open Deliveries to inspect its outcome." : "Start the simulation to deliver on its configured schedule. Open Deliveries to inspect requests, responses, and individual attempts."}</p>
+          <p className="form-hint">Delivery acceptance does not confirm downstream table arrival or vendor parser compatibility.</p>
+          {stats.last_error_message && <div className="alert alert-error"><strong>Most recent recorded error</strong><p>{stats.last_error_message}</p>
+            <button type="button" className="btn btn-sm" onClick={() => { setFilterSuccess("false"); setView("activity"); }}>Inspect failed deliveries</button></div>}
+          <div className="page-actions"><button type="button" className="btn" onClick={() => setView("activity")}>{isPull ? "View request history" : "View delivery history"}</button>
+            <button type="button" className="btn" onClick={() => setView("connection")}>View connection</button></div>
+        </div>
+      {!isPull && simulation.targets?.length ? (
+        <div className="card">
+          <h2>Collector delivery</h2>
+          <div className="table-wrap"><table className="data-table">
+            <thead>
+              <tr>
+                <th>Collector</th>
+                <th>Format</th>
+                <th>Accepted</th>
+                <th>Failed</th>
+                <th>Queued</th>
+                <th>Confirmation</th>
+                <th>Last error</th>
+              </tr>
+            </thead>
+            <tbody>
+              {simulation.targets.map((t) => (
+                <tr key={t.id}>
+                  <td>
+                    {t.name} {t.enabled ? "" : "(disabled)"}
+                  </td>
+                  <td>{t.payload_format}</td>
+                  <td>{t.stats.successful ?? 0}</td>
+                  <td>{t.stats.failed ?? 0}</td>
+                  <td>{t.stats.queued ?? 0}</td>
+                  <td>{t.stats.confirmation ?? "—"}</td>
+                  <td>{t.stats.last_error ?? "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table></div>
+        </div>
+      ) : null}
+      </section>
+      <section role="tabpanel" id="monitor-panel-connection" aria-labelledby="monitor-tab-connection" hidden={view !== "connection"}>
       <div className="card" style={{ marginBottom: "1rem" }}>
         <dl className="detail-grid">
           {isPull ? (
@@ -413,7 +445,7 @@ export function SimulationLivePage() {
                       type="button"
                       className="btn btn-sm"
                       onClick={() =>
-                        void copyToClipboard(endpointInfo.oauth_token_url ?? "")
+                        void copyValue(endpointInfo.oauth_token_url ?? "")
                       }
                     >
                       Copy
@@ -433,7 +465,7 @@ export function SimulationLivePage() {
                     <button
                       type="button"
                       className="btn btn-sm"
-                      onClick={() => void copyToClipboard(route.url)}
+                      onClick={() => void copyValue(route.url)}
                     >
                       Copy
                     </button>
@@ -490,6 +522,8 @@ export function SimulationLivePage() {
         </dl>
       </div>
 
+      </section>
+      <section role="tabpanel" id="monitor-panel-activity" aria-labelledby="monitor-tab-activity" hidden={view !== "activity"}>
       {isPull ? (
         <div className="card" style={{ marginBottom: "1rem" }}>
           <h2 style={{ fontSize: "1rem" }}>Inbound request history</h2>
@@ -555,16 +589,8 @@ export function SimulationLivePage() {
                 </thead>
                 <tbody>
                   {inboundRequests.map((request) => (
-                    <tr
-                      key={request.id}
-                      className="clickable"
-                      onClick={() =>
-                        navigate(
-                          `/simulations/${id}/inbound-requests/${request.id}`,
-                        )
-                      }
-                    >
-                      <td>{formatTime(request.received_at)}</td>
+                    <tr key={request.id}>
+                      <td><Link to={`/simulations/${id}/inbound-requests/${request.id}`}>{formatTime(request.received_at)}</Link></td>
                       <td>
                         <HttpStatusCode code={request.response_status_code} />
                       </td>
@@ -584,68 +610,6 @@ export function SimulationLivePage() {
         </div>
       ) : (
         <>
-          <div className="card" style={{ marginBottom: "1rem" }}>
-            <h2 style={{ fontSize: "1rem" }}>Burst send</h2>
-            <p className="form-hint" style={{ marginBottom: "0.75rem" }}>
-              Send multiple events with safety limits (max 50, confirmation
-              required above 20).
-            </p>
-            <div className="grid-2">
-              <div className="form-row">
-                <label htmlFor="burst-count">Event count</label>
-                <input
-                  id="burst-count"
-                  type="number"
-                  min={1}
-                  max={50}
-                  value={burstCount}
-                  onChange={(e) => setBurstCount(Number(e.target.value))}
-                />
-              </div>
-              <div className="form-row">
-                <label htmlFor="burst-interval">
-                  Interval between events (ms)
-                </label>
-                <input
-                  id="burst-interval"
-                  type="number"
-                  min={0}
-                  value={burstIntervalMs}
-                  onChange={(e) => setBurstIntervalMs(Number(e.target.value))}
-                />
-              </div>
-            </div>
-            {burstCount > 20 ? (
-              <label className="checkbox-item" style={{ marginTop: "0.5rem" }}>
-                <input
-                  type="checkbox"
-                  checked={confirmLargeBurst}
-                  onChange={(e) => setConfirmLargeBurst(e.target.checked)}
-                />
-                Confirm large burst ({burstCount} events)
-              </label>
-            ) : null}
-            <div className="page-actions" style={{ marginTop: "0.75rem" }}>
-              <button
-                type="button"
-                className="btn"
-                disabled={busy || (burstCount > 20 && !confirmLargeBurst)}
-                onClick={() =>
-                  void runAction(() =>
-                    burstSimulationEvents(id, {
-                      count: burstCount,
-                      interval_ms: burstIntervalMs,
-                      confirm_large_run:
-                        burstCount > 20 ? confirmLargeBurst : false,
-                    }),
-                  )
-                }
-              >
-                Send burst
-              </button>
-            </div>
-          </div>
-
           <div className="card">
             <h2 style={{ fontSize: "1rem" }}>Delivery history</h2>
             <div className="grid-2" style={{ marginBottom: "1rem" }}>
@@ -700,9 +664,11 @@ export function SimulationLivePage() {
               </div>
             </div>
 
+            <div className="monitor-history-toolbar"><span className="form-hint">Latest 50 matching events. Select a delivery time to inspect its attempts.</span>
+              <button type="button" className="btn btn-sm" onClick={() => { setFilterSuccess(""); setFilterScenario(""); setFilterHttpStatus(""); setFilterCorrelation(""); }}>Clear filters</button></div>
             {events.length === 0 ? (
               <p style={{ color: "var(--text-muted)" }}>
-                No events match the current filters.
+                {filterSuccess || filterScenario || filterHttpStatus || filterCorrelation ? "No events match the current filters. Clear filters to see recent activity." : "No deliveries yet. Send one event or start the schedule to see its outcome here."}
               </p>
             ) : (
               <div className="table-wrap">
@@ -720,16 +686,10 @@ export function SimulationLivePage() {
                   </thead>
                   <tbody>
                     {events.map((event) => (
-                      <tr
-                        key={event.id}
-                        className={`clickable ${event.delivery_success === false ? "delivery-row-failed" : ""}`}
-                        onClick={() =>
-                          navigate(`/simulations/${id}/events/${event.id}`)
-                        }
-                      >
-                        <td>{formatTime(event.generated_at)}</td>
+                      <tr key={event.id} className={event.delivery_success === false ? "delivery-row-failed" : ""}>
+                        <td><Link to={`/simulations/${id}/events/${event.id}`}>{formatTime(event.generated_at)}</Link></td>
                         <td>
-                          <HttpStatusCode code={event.response_status_code} />
+                          <DeliveryBadge success={event.delivery_success} /> {event.response_status_code != null && <HttpStatusCode code={event.response_status_code} />}
                         </td>
                         <td>
                           {event.latency_ms != null
@@ -750,7 +710,7 @@ export function SimulationLivePage() {
                             className="btn btn-sm"
                             onClick={(e) => {
                               e.stopPropagation();
-                              void copyToClipboard(event.correlation_id);
+                              void copyValue(event.correlation_id);
                             }}
                           >
                             Copy
@@ -764,8 +724,71 @@ export function SimulationLivePage() {
               </div>
             )}
           </div>
+          <details className="card burst-panel"><summary>Burst send</summary><div className="form-grid">
+            <h2 style={{ fontSize: "1rem" }}>Burst send</h2>
+            <p className="form-hint" style={{ marginBottom: "0.75rem" }}>
+              Send multiple events with safety limits (max 50, confirmation
+              required above 20).
+            </p>
+            <div className="grid-2">
+              <div className="form-row">
+                <label htmlFor="burst-count">Event count</label>
+                <input
+                  id="burst-count"
+                  type="number"
+                  min={1}
+                  max={50}
+                  value={burstCount}
+                  onChange={(e) => setBurstCount(Number(e.target.value))}
+                />
+              </div>
+              <div className="form-row">
+                <label htmlFor="burst-interval">
+                  Interval between events (ms)
+                </label>
+                <input
+                  id="burst-interval"
+                  type="number"
+                  min={0}
+                  value={burstIntervalMs}
+                  onChange={(e) => setBurstIntervalMs(Number(e.target.value))}
+                />
+              </div>
+            </div>
+            {burstCount > 20 ? (
+              <label className="checkbox-item" style={{ marginTop: "0.5rem" }}>
+                <input
+                  type="checkbox"
+                  checked={confirmLargeBurst}
+                  onChange={(e) => setConfirmLargeBurst(e.target.checked)}
+                />
+                Confirm large burst ({burstCount} events)
+              </label>
+            ) : null}
+            <div className="page-actions" style={{ marginTop: "0.75rem" }}>
+              <button
+                type="button"
+                className="btn"
+                disabled={busy || simulation.missing_secrets.length > 0 || !Number.isInteger(burstCount) || burstCount < 1 || burstCount > 50 || !Number.isFinite(burstIntervalMs) || burstIntervalMs < 0 || (burstCount > 20 && !confirmLargeBurst)}
+                onClick={() =>
+                  void runAction(() =>
+                    burstSimulationEvents(id, {
+                      count: burstCount,
+                      interval_ms: burstIntervalMs,
+                      confirm_large_run:
+                        burstCount > 20 ? confirmLargeBurst : false,
+                    }),
+                  )
+                }
+              >
+                Send burst
+              </button>
+            </div>
+          </div></details>
+
         </>
       )}
+      </section>
     </div>
   );
 }

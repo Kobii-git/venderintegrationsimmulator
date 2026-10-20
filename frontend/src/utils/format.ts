@@ -13,19 +13,25 @@ export function formatApiError(error: unknown): string {
   return "An unexpected error occurred";
 }
 
+function apiDate(iso: string): Date | null {
+  // SQLite serializes UTC database timestamps without an offset; runtime timestamps include one.
+  const utc = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?$/.test(iso) ? `${iso}Z` : iso;
+  const date = new Date(utc);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
 export function formatTime(iso: string | null | undefined): string {
   if (!iso) return "—";
-  const date = new Date(iso);
-  return date.toLocaleTimeString(undefined, {
+  return apiDate(iso)?.toLocaleTimeString(undefined, {
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",
-  });
+  }) ?? "—";
 }
 
 export function formatDateTime(iso: string | null | undefined): string {
   if (!iso) return "—";
-  return new Date(iso).toLocaleString();
+  return apiDate(iso)?.toLocaleString() ?? "—";
 }
 
 export function scenarioSummary(ids: string[]): string {

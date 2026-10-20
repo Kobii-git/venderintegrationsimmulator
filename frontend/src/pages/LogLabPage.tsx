@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { del, get, post, request } from "../api/client";
 import { getProduct, listProducts } from "../api/products";
@@ -8,6 +8,8 @@ import {
   updateSimulation,
 } from "../api/simulations";
 import { AzureDestinationEditor } from "../components/AzureDestinationEditor";
+import { ConfirmDialog } from "../components/ConfirmDialog";
+import { Icon } from "../components/Icon";
 import { ErrorAlert } from "../components/ErrorAlert";
 import { StructuredValueEditor } from "../components/StructuredValueEditor";
 import { ScenarioOverridesSection } from "../components/ScenarioOverridesSection";
@@ -112,17 +114,26 @@ export function LogLabPage() {
   const [busy, setBusy] = useState(false);
   const [preview, setPreview] = useState("");
   const [locked, setLocked] = useState(false);
+  const [loading, setLoading] = useState(Boolean(id));
+  const [deleteDataset, setDeleteDataset] = useState<string | null>(null);
+  const previewVersion = useRef(0);
+
+  useEffect(() => { previewVersion.current += 1; setPreview(""); }, [replay.dataset_id, replay.rewrite_timestamps]);
 
   useEffect(() => {
+    let active = true;
+    setLoading(Boolean(id));
     void Promise.all([listProducts(), get<Dataset[]>("/datasets")])
       .then(([p, d]) => {
+        if (!active) return;
         setProducts(p);
         setDatasets(d);
       })
-      .catch((e) => setError(formatApiError(e)));
+      .catch((e) => { if (active) setError(formatApiError(e)); });
     if (id)
       void getSimulation(id)
         .then((s) => {
+          if (!active) return;
           setName(s.name);
           setProductId(s.product_id);
           setScenarios(s.scenario_ids);
@@ -139,13 +150,16 @@ export function LogLabPage() {
             setReplay(s.replay_config as ReplayConfig);
           setLocked(s.status === "running" || s.simulation_mode === "pull_api");
         })
-        .catch((e) => setError(formatApiError(e)));
+        .catch((e) => { if (active) setError(formatApiError(e)); })
+        .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
   }, [id]);
   useEffect(() => {
-    if (productId)
-      void getProduct(productId)
-        .then(setProduct)
-        .catch((e) => setError(formatApiError(e)));
+    let active = true;
+    setProduct(null);
+    if (productId) void getProduct(productId).then((value) => { if (active) setProduct(value); })
+      .catch((err) => { if (active) setError(formatApiError(err)); });
+    return () => { active = false; };
   }, [productId]);
   const changeTarget = (index: number, update: Partial<TargetInput>) =>
     setTargets((ts) =>
@@ -170,6 +184,7 @@ export function LogLabPage() {
   ];
   const save = async (event: React.FormEvent) => {
     event.preventDefault();
+    if (busy || locked || loading || product?.id !== productId) return;
     setBusy(true);
     setError(null);
     try {
@@ -242,34 +257,26 @@ export function LogLabPage() {
     }
   };
   const inspectDataset = async () => {
+    const version = ++previewVersion.current;
     try {
-      setPreview(
-        JSON.stringify(
-          await get(
-            `/datasets/${replay.dataset_id}/preview?rewrite=${replay.rewrite_timestamps}`,
-          ),
-          null,
-          2,
-        ),
-      );
-    } catch (e) {
-      setError(formatApiError(e));
-    }
+      const result = await get(`/datasets/${replay.dataset_id}/preview?rewrite=${replay.rewrite_timestamps}`);
+      if (version === previewVersion.current) setPreview(JSON.stringify(result, null, 2));
+    } catch (err) { if (version === previewVersion.current) setError(formatApiError(err)); }
   };
 
   return (
     <div>
       <div className="page-header">
-        <h1>{id ? "Edit log lab" : "Build a log lab"}</h1>
+        <div><p className="eyebrow">Lab builder</p><h1>{id ? "Edit log lab" : "Build a log lab"}</h1>
+          <p className="page-description">Connect sources, simulated devices, and collectors in one test workspace.</p></div>
         <Link className="btn" to={id ? `/simulations/${id}` : "/"}>
           Back
         </Link>
       </div>
-      <p>
-        Generate synthetic events for Sentinel collectors or ingestion APIs.
-        Device addresses appear in payloads; collector addresses control
-        delivery.
-      </p>
+      <div className="tool-notice"><Icon name="lab" /><span>Device addresses identify events. Collector addresses control delivery. Saving the lab sends nothing.</span></div>
+      <nav className="section-nav" aria-label="Lab sections">
+        <a href="#lab-source">1. Source</a><a href="#lab-devices">2. Devices</a><a href="#lab-collectors">3. Collectors</a><a href="#lab-traffic">4. Traffic</a><a href="#lab-replay">5. Replay</a>
+      </nav>
       {error && <ErrorAlert message={error} />}
       {locked && (
         <p>
@@ -277,9 +284,14 @@ export function LogLabPage() {
           available in the original simulation editor.
         </p>
       )}
-      <form onSubmit={(e) => void save(e)}>
-        <fieldset disabled={busy || locked} style={{ border: 0, padding: 0 }}>
-          <div className="card">
+      <div className="lab-workspace">
+      <form className="lab-editor" onSubmit={(e) => void save(e)} onInvalidCapture={(event) => {
+        const details = (event.target as HTMLElement).closest("details"); if (details) details.open = true;
+      }}>
+        <fieldset disabled={busy || locked || loading} className="setup-fields">
+          <legend className="sr-only">Log lab configuration</legend>
+          <section className="card workflow-section" id="lab-source">
+            <div className="section-heading"><span className="section-number">1</span><div><h2>Source & event families</h2><p>Choose a product and the events to generate.</p></div></div>
             <div className="grid-2">
               <div className="form-row">
                 <label htmlFor="lab-name">Name</label>
@@ -351,7 +363,7 @@ export function LogLabPage() {
                       s.supported_modes.includes("push_webhook"),
                   )
                   .map((s) => (
-                    <label key={s.id} style={{ display: "block" }}>
+                    <label key={s.id} className="scenario-choice">
                       <input
                         type="checkbox"
                         checked={scenarios.includes(s.id)}
@@ -366,17 +378,20 @@ export function LogLabPage() {
                       {s.display_name}
                     </label>
                   ))}
+                <details className="advanced-options"><summary>Customize event values</summary>
                 <ScenarioOverridesSection
                   scenarios={product.scenarios}
                   selectedIds={scenarios}
                   value={overrides}
                   onChange={setOverrides}
                 />
+                </details>
               </>
             )}
-          </div>
-          <div className="card">
-            <div className="section-title">Simulated devices</div>
+          </section>
+          <section className="card workflow-section" id="lab-devices">
+            <div className="section-heading"><span className="section-number">2</span><div><h2>Simulated devices</h2><p>Optional hostnames and IP addresses written into event payloads.</p></div></div>
+            {!devices.length && <p className="inline-empty">No devices added. Use the source's sample identity, or add devices to model your environment.</p>}
             {devices.map((d, i) => (
               <div className="grid-2" key={d.id}>
                 <div className="form-row">
@@ -437,10 +452,12 @@ export function LogLabPage() {
             >
               Add device
             </button>
-          </div>
-          <div className="section-title">Collectors and APIs</div>
+          </section>
+          <section className="workflow-section" id="lab-collectors">
+          <div className="section-heading"><span className="section-number">3</span><div><h2>Collectors and APIs</h2><p>Each collector has its own format, destination, and delivery queue.</p></div></div>
           {targets.map((t, i) => (
-            <div className="card" key={t.id}>
+            <div className="card collector-editor" key={t.id} role="group" aria-label={`Collector ${i + 1}`}>
+              <div className="collector-heading"><h3>Collector {i + 1}</h3><span className={`badge ${t.enabled ? "badge-completed" : "badge-stopped"}`}>{t.enabled ? "Enabled" : "Disabled"}</span></div>
               <div className="grid-2">
                 <div className="form-row">
                   <label>Collector name</label>
@@ -452,8 +469,7 @@ export function LogLabPage() {
                   />
                 </div>
                 <div className="form-row">
-                  <label>Transport</label>
-                  <select
+                  <label>Transport<select
                     aria-label={`Collector ${i + 1} transport`}
                     value={t.destination.transport_id}
                     onChange={(e) =>
@@ -471,7 +487,7 @@ export function LogLabPage() {
                     <option value="azure_function_app">
                       Azure Function App relay
                     </option>
-                  </select>
+                  </select></label>
                 </div>
               </div>
               <label>
@@ -485,8 +501,7 @@ export function LogLabPage() {
                 Enabled
               </label>
               <div className="form-row">
-                <label>Payload format</label>
-                <select
+                <label>Payload format<select
                   aria-label={`Collector ${i + 1} payload format`}
                   value={t.payload_format}
                   onChange={(e) =>
@@ -496,7 +511,7 @@ export function LogLabPage() {
                   {formats.map((f) => (
                     <option key={f}>{f}</option>
                   ))}
-                </select>
+                </select></label>
               </div>
               {t.destination.transport_id === "syslog" ? (
                 <>
@@ -528,8 +543,7 @@ export function LogLabPage() {
                   </div>
                   <div className="grid-2">
                     <div className="form-row">
-                      <label>Protocol</label>
-                      <select
+                      <label>Protocol<select
                         value={t.destination.protocol ?? "udp"}
                         onChange={(e) =>
                           destination(i, {
@@ -540,11 +554,10 @@ export function LogLabPage() {
                         <option>udp</option>
                         <option>tcp</option>
                         <option>tls</option>
-                      </select>
+                      </select></label>
                     </div>
                     <div className="form-row">
-                      <label>Envelope</label>
-                      <select
+                      <label>Envelope<select
                         value={t.destination.format ?? "rfc5424"}
                         onChange={(e) =>
                           destination(i, {
@@ -556,12 +569,11 @@ export function LogLabPage() {
                         <option>rfc5424</option>
                         <option>rfc3164</option>
                         <option>raw</option>
-                      </select>
+                      </select></label>
                     </div>
                   </div>
                   <div className="form-row">
-                    <label>TCP framing</label>
-                    <select
+                    <label>TCP framing<select
                       value={t.destination.tcp_framing ?? "newline"}
                       onChange={(e) =>
                         destination(i, {
@@ -574,7 +586,7 @@ export function LogLabPage() {
                       <option value="octet_counting">
                         Octet counting (supports embedded newlines)
                       </option>
-                    </select>
+                    </select></label>
                   </div>
                 </>
               ) : ["http_webhook", "cloudflare_logpush"].includes(t.destination.transport_id ?? "http_webhook") ? (
@@ -599,8 +611,7 @@ export function LogLabPage() {
                     onChange={(v) => destination(i, { query_params: v })}
                   />
                   <div className="form-row">
-                    <label>Authentication</label>
-                    <select
+                    <label>Authentication<select
                       value={t.auth_config.auth_method_id}
                       onChange={(e) =>
                         changeTarget(i, {
@@ -616,7 +627,7 @@ export function LogLabPage() {
                           <option key={a}>{a}</option>
                         ),
                       )}
-                    </select>
+                    </select></label>
                   </div>
                   {t.auth_config.auth_method_id === "basic" ? (
                     <div className="grid-2">
@@ -691,6 +702,7 @@ export function LogLabPage() {
                   }
                 />
               )}
+              <details className="advanced-options"><summary>Queue, TLS & routing filters</summary><div className="form-grid">
               <div className="grid-2">
                 <div className="form-row">
                   <label>Timeout (seconds)</label>
@@ -741,8 +753,7 @@ export function LogLabPage() {
               </div>
               <div className="grid-2">
                 <div className="form-row">
-                  <label>Device filter (empty selects all)</label>
-                  <select
+                  <label>Device filter (empty selects all)<select
                     multiple
                     value={t.device_ids}
                     onChange={(e) =>
@@ -759,11 +770,10 @@ export function LogLabPage() {
                         {d.hostname}
                       </option>
                     ))}
-                  </select>
+                  </select></label>
                 </div>
                 <div className="form-row">
-                  <label>Scenario filter (empty selects all)</label>
-                  <select
+                  <label>Scenario filter (empty selects all)<select
                     multiple
                     value={t.scenario_ids}
                     onChange={(e) =>
@@ -778,9 +788,11 @@ export function LogLabPage() {
                     {scenarios.map((s) => (
                       <option key={s}>{s}</option>
                     ))}
-                  </select>
+                  </select></label>
                 </div>
               </div>
+              </div></details>
+              <div className="page-actions collector-footer">
               {id && (
                 <button
                   type="button"
@@ -804,6 +816,7 @@ export function LogLabPage() {
               >
                 Remove collector
               </button>
+              </div>
             </div>
           ))}
           <button
@@ -812,13 +825,13 @@ export function LogLabPage() {
             disabled={targets.length >= 16}
             onClick={() => setTargets((ts) => [...ts, newTarget()])}
           >
-            Add collector
+            <Icon name="plus" />Add collector
           </button>
-          <div className="card">
-            <div className="section-title">Traffic</div>
+          </section>
+          <section className="card workflow-section" id="lab-traffic">
+            <div className="section-heading"><span className="section-number">4</span><div><h2>Traffic & behavior</h2><p>Choose manual delivery or a schedule. Advanced controls shape generated events.</p></div></div>
             <div className="form-row">
-              <label>Schedule</label>
-              <select
+              <label>Schedule<select
                 value={schedule.type}
                 onChange={(e) =>
                   setSchedule((s) => ({
@@ -830,7 +843,7 @@ export function LogLabPage() {
                 <option value="manual">Manual send</option>
                 <option value="continuous">Continuous</option>
                 <option value="finite">Finite</option>
-              </select>
+              </select></label>
             </div>
             {schedule.type !== "manual" && (
               <>
@@ -876,6 +889,7 @@ export function LogLabPage() {
                 )}
               </>
             )}
+            <details className="advanced-options"><summary>Event identities, incidents & weights</summary><div className="form-grid">
             <div className="form-row">
               <label>Random seed</label>
               <input
@@ -939,12 +953,12 @@ export function LogLabPage() {
                 />
               </div>
             ))}
-          </div>
-          <div className="card">
-            <div className="section-title">Uploaded log replay</div>
+            </div></details>
+          </section>
+          <section className="card workflow-section" id="lab-replay">
+            <div className="section-heading"><span className="section-number">5</span><div><h2>Uploaded log replay</h2><p>Replay an existing dataset instead of generating scenario events.</p></div></div>
             <div className="form-row">
-              <label>Dataset</label>
-              <select
+              <label>Dataset<select
                 value={replay.dataset_id}
                 onChange={(e) =>
                   setReplay((r) => ({ ...r, dataset_id: e.target.value }))
@@ -956,7 +970,7 @@ export function LogLabPage() {
                     {d.name} ({d.record_count} records)
                   </option>
                 ))}
-              </select>
+              </select></label>
             </div>
             <div className="grid-2">
               <select
@@ -994,8 +1008,7 @@ export function LogLabPage() {
                   Loop dataset
                 </label>
                 <div className="form-row">
-                  <label>Timing</label>
-                  <select
+                  <label>Timing<select
                     value={replay.timing}
                     onChange={(e) =>
                       setReplay((r) => ({
@@ -1006,7 +1019,7 @@ export function LogLabPage() {
                   >
                     <option value="fixed">Configured traffic rate</option>
                     <option value="original">Original timestamp gaps</option>
-                  </select>
+                  </select></label>
                 </div>
                 <label>
                   <input
@@ -1033,14 +1046,7 @@ export function LogLabPage() {
                     type="button"
                     className="btn"
                     onClick={() => {
-                      void del(`/datasets/${replay.dataset_id}`)
-                        .then(() => {
-                          setDatasets((ds) =>
-                            ds.filter((d) => d.id !== replay.dataset_id),
-                          );
-                          setReplay((r) => ({ ...r, dataset_id: "" }));
-                        })
-                        .catch((e) => setError(formatApiError(e)));
+                      setDeleteDataset(replay.dataset_id);
                     }}
                   >
                     Delete dataset
@@ -1048,18 +1054,38 @@ export function LogLabPage() {
                 </div>
               </>
             )}
-          </div>
+          </section>
+          <div className="lab-save-bar"><span className="form-hint">{!scenarios.length ? "Choose at least one event family to save." : "Saves configuration only. Start or Send from the simulation page."}</span>
           <button
             className="btn btn-primary"
             type="submit"
-            disabled={!scenarios.length || busy || locked}
+            disabled={!scenarios.length || busy || locked || loading || product?.id !== productId}
           >
             {busy ? "Saving…" : id ? "Save lab" : "Create lab"}
           </button>
+          </div>
         </fieldset>
       </form>
+      <aside className="lab-summary card" aria-label="Lab summary"><p className="eyebrow">Your lab</p><h2>{name || "Untitled lab"}</h2>
+        <dl className="summary-values"><dt>Source</dt><dd>{product?.display_name ?? "Choose a source"}</dd><dt>Event families</dt><dd>{scenarios.length}</dd>
+          <dt>Devices</dt><dd>{devices.length || "Source sample identity"}</dd><dt>Collectors</dt><dd>{targets.filter((target) => target.enabled).length} enabled / {targets.length} configured</dd>
+          <dt>Delivery</dt><dd>{schedule.type === "manual" ? "Manual send" : `${schedule.type} · ${rateMode ? `${rate} events/s` : `every ${interval}s`}`}</dd>
+          <dt>Replay</dt><dd>{datasets.find((dataset) => dataset.id === replay.dataset_id)?.name ?? "Generated events"}</dd></dl>
+        <p className="form-hint">Delivery acceptance and downstream parser validation are separate checks.</p>
+        {productId && <Link to={`/guides?vendor=${productId}`}>Deployment guide<Icon name="arrow" /></Link>}
+      </aside>
+      </div>
+      {deleteDataset && <ConfirmDialog title="Delete dataset?" message={`Permanently delete ${datasets.find((item) => item.id === deleteDataset)?.name ?? "this dataset"}? Saved runs may still reference it.`}
+        loading={busy} onCancel={() => setDeleteDataset(null)} onConfirm={() => {
+          if (busy) return;
+          setBusy(true); setError(null);
+          void del(`/datasets/${deleteDataset}`).then(() => {
+            setDatasets((items) => items.filter((item) => item.id !== deleteDataset));
+            setReplay((value) => value.dataset_id === deleteDataset ? { ...value, dataset_id: "" } : value); setDeleteDataset(null);
+          }).catch((err) => { setDeleteDataset(null); setError(formatApiError(err)); }).finally(() => setBusy(false));
+        }} />}
       {preview && (
-        <div className="card">
+        <div className="card output-panel" aria-label="Lab preview">
           <h2>Preview</h2>
           <pre
             style={{

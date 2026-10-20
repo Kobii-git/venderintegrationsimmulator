@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { Icon } from "./Icon";
+import { LoadingState } from "./LoadingState";
 
 const groups = [
   { label: "Workspace", links: [
@@ -68,7 +69,7 @@ export function Layout() {
       </aside>
       <div className="workspace">
         <div className="workspace-bar"><span>Integration workspace</span><span className="workspace-context">Configure · Test · Inspect</span></div>
-        <main className="main" id="main-content" tabIndex={-1}><Outlet /></main>
+        <main className="main" id="main-content" tabIndex={-1}><Suspense fallback={<LoadingState label="Loading workspace…" />}><Outlet /></Suspense></main>
       </div>
     </div>
   );

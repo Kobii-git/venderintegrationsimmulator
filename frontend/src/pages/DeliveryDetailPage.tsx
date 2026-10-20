@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
 import {
   getSimulationEvent,
   getSimulationEventCurl,
   replaySimulationEvent,
 } from "../api/simulations";
+import { ConsoleTabs } from "../components/ConsoleTabs";
 import { ErrorAlert } from "../components/ErrorAlert";
 import { InfoAlert } from "../components/ErrorAlert";
 import { LoadingState } from "../components/LoadingState";
@@ -16,7 +17,8 @@ import { copyToClipboard, formatApiError, formatDateTime } from "../utils/format
 
 export function DeliveryDetailPage() {
   const { id, eventId } = useParams<{ id: string; eventId: string }>();
-  const navigate = useNavigate();
+  const [view, setView] = useState("summary");
+  const [replayedEventId, setReplayedEventId] = useState<string | null>(null);
   const [event, setEvent] = useState<EventInstanceDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -26,13 +28,18 @@ export function DeliveryDetailPage() {
 
   useEffect(() => {
     if (!id || !eventId) return;
+    let active = true;
+    setEvent(null); setSelectedAttemptId(null); setView("summary");
+    setLoading(true); setError(null); setActionMessage(null); setReplayedEventId(null);
     void getSimulationEvent(id, eventId)
       .then((loaded) => {
+        if (!active) return;
         setEvent(loaded);
         setSelectedAttemptId(loaded.delivery_attempts.at(-1)?.id ?? null);
       })
-      .catch((err) => setError(formatApiError(err)))
-      .finally(() => setLoading(false));
+      .catch((err) => { if (active) setError(formatApiError(err)); })
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
   }, [id, eventId]);
 
   const handleCopyCurl = async () => {
@@ -64,7 +71,7 @@ export function DeliveryDetailPage() {
       setActionMessage(
         `${label} — new event ${result.correlation_id} (HTTP ${result.response_status_code ?? "—"})`,
       );
-      setTimeout(() => navigate(`/simulations/${id}/events/${result.new_event_id}`), 1200);
+      setReplayedEventId(result.new_event_id);
     } catch (err) {
       setError(formatApiError(err));
     } finally {
@@ -84,7 +91,7 @@ export function DeliveryDetailPage() {
     <div>
       <div className="page-header">
         <div>
-          <h1>Delivery Detail</h1>
+          <p className="eyebrow">Delivery inspection</p><h1>Delivery Detail</h1>
           <p style={{ margin: 0, color: "var(--text-muted)" }}>
             {formatDateTime(event.generated_at)} · <DeliveryBadge success={attempt?.success ?? null} />
           </p>
@@ -93,6 +100,8 @@ export function DeliveryDetailPage() {
           <button type="button" className="btn" disabled={busy || !attempt} onClick={() => void handleCopyCurl()}>
             Copy as cURL
           </button>
+          <details className="action-menu monitor-tools"><summary>Replay options</summary><div className="action-menu-panel">
+          <span className="menu-hint">Both actions send events using the current destination and credentials.</span>
           <button
             type="button"
             className="btn"
@@ -111,7 +120,8 @@ export function DeliveryDetailPage() {
           >
             Regenerate scenario
           </button>
-          <Link to={`/simulations/${id}`} className="btn">
+          </div></details>
+          <Link to={`/simulations/${id}?view=activity`} className="btn">
             Back to simulation
           </Link>
         </div>
@@ -119,6 +129,11 @@ export function DeliveryDetailPage() {
 
       {error ? <ErrorAlert message={error} /> : null}
       {actionMessage ? <InfoAlert message={actionMessage} /> : null}
+      {replayedEventId && <p><Link className="btn btn-primary" to={`/simulations/${id}/events/${replayedEventId}`}>Open replayed delivery</Link></p>}
+      {attempt && <div className={`delivery-outcome ${attempt.success ? "is-success" : "is-failed"}`} role={attempt.success ? "status" : "alert"}>
+        <h2>{attempt.success ? "Delivery accepted" : "Delivery attempt failed"}</h2>
+        <p>{attempt.error_explanation ?? attempt.error_message ?? attempt.delivery_note ?? (attempt.success ? "The transport accepted this attempt. Confirm receipt and parsing in the destination." : "Inspect the request and response evidence below to identify the failure.")}</p>
+      </div>}
 
       {attempt?.delivery_confirmation ? (
         <InfoAlert message={`${attempt.delivery_confirmation}: ${attempt.delivery_note ?? "Inspect the collector to confirm receipt."}`} />
@@ -127,7 +142,7 @@ export function DeliveryDetailPage() {
         <h2 style={{ fontSize: "1rem" }}>Delivery attempts</h2>
         {event.delivery_attempts.length ? (
           <div className="table-wrap">
-            <table>
+            <table className="data-table">
               <thead>
                 <tr>
                   <th>Collector</th>
@@ -144,12 +159,13 @@ export function DeliveryDetailPage() {
                     <td>{item.target_id ?? "Primary"}</td>
                     <td>#{item.attempt_number}</td>
                     <td>{formatDateTime(item.started_at)}</td>
-                    <td><HttpStatusCode code={item.response_status_code} /></td>
+                    <td><DeliveryBadge success={item.success} /> {item.response_status_code != null && <HttpStatusCode code={item.response_status_code} />}</td>
                     <td>{item.latency_ms == null ? "—" : `${item.latency_ms} ms`}</td>
                     <td>
                       <button
                         type="button"
                         className={item.id === attempt?.id ? "btn btn-primary btn-sm" : "btn btn-sm"}
+                        aria-pressed={item.id === attempt?.id}
                         onClick={() => setSelectedAttemptId(item.id)}
                       >
                         {item.id === attempt?.id ? "Selected" : "Select"}
@@ -165,6 +181,10 @@ export function DeliveryDetailPage() {
         )}
       </div>
 
+      <ConsoleTabs id="delivery" label="Delivery evidence" value={view} onChange={setView} tabs={[
+        { id: "summary", label: "Summary" }, { id: "exchange", label: "Request & response" }, { id: "payload", label: "Event payload" },
+      ]} />
+      <section role="tabpanel" id="delivery-panel-summary" aria-labelledby="delivery-tab-summary" hidden={view !== "summary"}>
       <div className="card">
         <dl className="detail-grid">
           <dt>Simulator event ID</dt>
@@ -173,7 +193,7 @@ export function DeliveryDetailPage() {
             <button
               type="button"
               className="btn btn-sm"
-              onClick={() => void copyToClipboard(event.correlation_id)}
+              onClick={() => { void copyToClipboard(event.correlation_id).then(() => setActionMessage("Correlation ID copied.")).catch(() => setError("Clipboard unavailable. Select the correlation ID to copy it manually.")); }}
             >
               Copy
             </button>
@@ -237,8 +257,10 @@ export function DeliveryDetailPage() {
         </dl>
       </div>
 
+      </section>
+      <section role="tabpanel" id="delivery-panel-exchange" aria-labelledby="delivery-tab-exchange" hidden={view !== "exchange"}>
       {attempt ? (
-        <>
+        <div className="evidence-grid">
           <div className="card">
             <h2 style={{ fontSize: "1rem" }}>Request headers (redacted)</h2>
             <JsonViewer data={attempt.request_headers_redacted} />
@@ -271,13 +293,16 @@ export function DeliveryDetailPage() {
               <p style={{ color: "var(--text-muted)" }}>No response body</p>
             )}
           </div>
-        </>
+        </div>
       ) : null}
 
+      </section>
+      <section role="tabpanel" id="delivery-panel-payload" aria-labelledby="delivery-tab-payload" hidden={view !== "payload"}>
       <div className="card">
         <h2 style={{ fontSize: "1rem" }}>Event payload</h2>
         <JsonViewer data={event.payload} />
       </div>
+      </section>
     </div>
   );
 }

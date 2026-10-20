@@ -200,6 +200,7 @@ test("UpGuard preview/send, fault, attempt, cURL, replay, export, and import", a
   await expect(page.getByRole("button", { name: "Selected" })).toBeVisible();
   await page.getByRole("button", { name: "Copy as cURL" }).click();
   await expect(page.getByText(/cURL for attempt .* copied/)).toBeVisible();
+  await page.getByText("Replay options", { exact: true }).click();
   await page.getByRole("button", { name: "Replay exact payload" }).click();
   await expect(page.getByText(/Exact payload replayed/)).toBeVisible();
 
@@ -217,6 +218,7 @@ test("UpGuard preview/send, fault, attempt, cURL, replay, export, and import", a
   await expect(page.getByText(/Fault injection is ENABLED/)).toBeVisible();
 
   const downloadPromise = page.waitForEvent("download");
+  await page.getByText("Tools & configuration", { exact: true }).click();
   await page.getByRole("button", { name: "Export config" }).click();
   const download = await downloadPromise;
   expect(download.suggestedFilename()).toContain("e2e-upguard");
@@ -299,7 +301,7 @@ test("OAuth token metadata is visible without token prefixes", async ({ page, re
   });
   expect(polled.ok(), await polled.text()).toBeTruthy();
 
-  await page.goto(`/simulations/${oauthId}`);
+  await page.goto(`/simulations/${oauthId}?view=activity`);
   await expect(page.getByText("Issued tokens (metadata only)")).toBeVisible();
   await expect(page.getByText(`browser-client-${runId}`)).toBeVisible();
   await expect(page.getByText(/token prefix/i)).toHaveCount(0);
@@ -313,6 +315,7 @@ test("Sophos token, discovery, and cursor workflow uses complete live URLs", asy
   await page.getByRole("button", { name: "Start" }).click();
   await expect(page.getByText("Dataset items").locator(".."))
     .toContainText("205");
+  await page.getByRole("tab", { name: "Connection", exact: true }).click();
   await expect(page.getByText(`POST ${process.env.E2E_BASE_URL ?? "http://127.0.0.1:8080"}/api/v1/mock/sophos-central`, { exact: false }).first())
     .toBeVisible();
 
@@ -366,6 +369,7 @@ test("Okta System Log and event-hook action work against the real receiver", asy
   expect(logs.headers().link).toContain('rel="next"');
 
   await page.goto(`/simulations/${oktaHookId}`);
+  await page.getByText("Tools & configuration", { exact: true }).click();
   await page.getByRole("button", { name: "Verify event-hook endpoint" }).click();
   await expect(page.getByText("verify-event-hook: verified (HTTP 200)")).toBeVisible();
   await page.getByRole("button", { name: "Send one now" }).click();

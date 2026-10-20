@@ -54,6 +54,10 @@ test("generate four UpGuard raw JSON examples, download, and inspect native logs
     .click();
   await expect(output).toHaveValue(/srcip=/);
   expect(await output.inputValue()).not.toContain("_syslog_message");
+  for (const width of [320, 390, 768, 1280]) {
+    await page.setViewportSize({ width, height: 900 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  }
   expect(writes).toHaveLength(6);
   expect(
     writes.every((path) =>

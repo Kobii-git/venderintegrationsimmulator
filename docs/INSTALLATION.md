@@ -79,7 +79,7 @@ volume to keep existing data.
 ## Image versions
 
 `latest` is the default and follows successful, tested `main` builds. Each release
-also publishes a version tag such as `0.5.0` and a `sha-<full commit>` tag. Source
+also publishes a version tag such as `0.6.0` and a `sha-<full commit>` tag. Source
 release tags use `vX.Y.Z`; image version tags use `X.Y.Z`.
 
 Version pinning is optional: replace `:latest` in the Docker commands with a

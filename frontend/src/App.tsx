@@ -1,17 +1,18 @@
+import { lazy } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-
-import { UploadLogsPage } from "./pages/UploadLogsPage";
-import { LogLabPage } from "./pages/LogLabPage";
-import { GuidesPage } from "./pages/GuidesPage";
-import { RawLogPage } from "./pages/RawLogPage";
 import { Layout } from "./components/Layout";
-import { DashboardPage } from "./pages/DashboardPage";
-import { DeliveryDetailPage } from "./pages/DeliveryDetailPage";
-import { EventPreviewPage } from "./pages/EventPreviewPage";
-import { InboundRequestDetailPage } from "./pages/InboundRequestDetailPage";
-import { InboundRequestsPage } from "./pages/InboundRequestsPage";
-import { SimulationFormPage } from "./pages/SimulationFormPage";
-import { SimulationLivePage } from "./pages/SimulationLivePage";
+
+const UploadLogsPage = lazy(() => import("./pages/UploadLogsPage").then((module) => ({ default: module.UploadLogsPage })));
+const LogLabPage = lazy(() => import("./pages/LogLabPage").then((module) => ({ default: module.LogLabPage })));
+const GuidesPage = lazy(() => import("./pages/GuidesPage").then((module) => ({ default: module.GuidesPage })));
+const RawLogPage = lazy(() => import("./pages/RawLogPage").then((module) => ({ default: module.RawLogPage })));
+const DashboardPage = lazy(() => import("./pages/DashboardPage").then((module) => ({ default: module.DashboardPage })));
+const DeliveryDetailPage = lazy(() => import("./pages/DeliveryDetailPage").then((module) => ({ default: module.DeliveryDetailPage })));
+const EventPreviewPage = lazy(() => import("./pages/EventPreviewPage").then((module) => ({ default: module.EventPreviewPage })));
+const InboundRequestDetailPage = lazy(() => import("./pages/InboundRequestDetailPage").then((module) => ({ default: module.InboundRequestDetailPage })));
+const InboundRequestsPage = lazy(() => import("./pages/InboundRequestsPage").then((module) => ({ default: module.InboundRequestsPage })));
+const SimulationFormPage = lazy(() => import("./pages/SimulationFormPage").then((module) => ({ default: module.SimulationFormPage })));
+const SimulationLivePage = lazy(() => import("./pages/SimulationLivePage").then((module) => ({ default: module.SimulationLivePage })));
 
 export default function App() {
   return (
