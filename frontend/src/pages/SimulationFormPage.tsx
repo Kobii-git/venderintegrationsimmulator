@@ -433,7 +433,10 @@ export function SimulationFormPage() {
   const stepHeading = useRef<HTMLHeadingElement>(null);
   const stepTitles = ["Vendor & scenarios", "Connection", form.simulation_mode === "pull_api" ? "Dataset & behavior" : "Schedule & behavior", "Review & save"];
 
-  useEffect(() => { stepHeading.current?.focus(); }, [step]);
+  useEffect(() => {
+    stepHeading.current?.focus({ preventScroll: true });
+    document.documentElement.scrollTo?.({ top: 0, behavior: "instant" });
+  }, [step]);
   const [hasPassword, setHasPassword] = useState(false);
   const [hasToken, setHasToken] = useState(false);
   const [hasOAuthSecret, setHasOAuthSecret] = useState(false);

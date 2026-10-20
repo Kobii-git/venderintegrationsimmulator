@@ -21,6 +21,7 @@ test("guided creation validates, retains edits, reviews, and saves without sendi
   await page.getByRole("checkbox", { name: "Data Leak Detected (data-leak)" }).check();
   await next(page);
   await expect(page.getByRole("heading", { name: "Connection", exact: true })).toBeFocused();
+  await expect(page.getByRole("heading", { name: "New simulation", exact: true })).toBeInViewport();
   await next(page);
   await expect(page.getByRole("alert")).toContainText("highlighted field");
   await page.getByLabel("Webhook URL", { exact: true }).fill("https://collector.example/hook?sig=wizard-secret");

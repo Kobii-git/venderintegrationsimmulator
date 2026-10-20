@@ -57,7 +57,10 @@ export function DestinationSection({
             }
           >
             {supportedTransports.map((transport) => (
-              <option key={transport} value={transport}>{transport}</option>
+              <option key={transport} value={transport}>{({
+                http_webhook: "HTTP webhook", syslog: "Syslog", azure_logs_ingestion: "Azure Logs Ingestion API",
+                azure_function_app: "Azure Function App relay", cloudflare_logpush: "Cloudflare Logpush",
+              } as Record<string, string>)[transport] ?? transport}</option>
             ))}
           </select>
         </div>
