@@ -118,6 +118,8 @@ export function DestinationSection({
               </select>
             </div>
           </div>
+          <details className="advanced-options"><summary>Advanced Syslog settings</summary>
+            <div className="form-grid">
           <div className="grid-2">
             <div className="form-row">
               <label htmlFor="facility">Facility (0–23)</label>
@@ -209,6 +211,8 @@ export function DestinationSection({
             </div>
             <TimeoutInput destination={destination} onChange={updateDestination} />
           </div>
+            </div>
+          </details>
           <p className="form-hint">
             UDP delivery is best-effort: a successful send does not prove the remote collector
             received the message.
@@ -231,6 +235,8 @@ export function DestinationSection({
               pasted in the URL become encrypted query entries when saved.
             </span>
           </div>
+          <details className="advanced-options"><summary>Headers, query parameters & HTTP settings</summary>
+            <div className="form-grid">
           <div className="grid-2">
             <div className="form-row">
               <label htmlFor="method">HTTP method</label>
@@ -276,12 +282,10 @@ export function DestinationSection({
             onChange={(query_params) => updateDestination({ query_params })}
             namePlaceholder="Parameter"
           />
+            </div>
+          </details>
         </>
       )}
-
-      <button type="button" className="btn" onClick={onTest} disabled={testing}>
-        {testing ? "Testing…" : "Test connection"}
-      </button>
 
       {!isSyslog ? (
         <OutboundAuthentication
@@ -290,6 +294,12 @@ export function DestinationSection({
           onChange={onAuthChange}
         />
       ) : null}
+      <div className="page-actions">
+      <button type="button" className="btn" onClick={onTest} disabled={testing}>
+        {testing ? "Testing…" : "Test connection"}
+      </button>
+
+      </div>
     </section>
   );
 }

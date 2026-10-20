@@ -35,7 +35,8 @@ assert request("/guides") == request("/")
 assert len(json.loads(request("/api/v1/guides"))) >= 90
 assert b"Production deployment" in request("/api/v1/guides/mimecast/native")
 assert json.loads(request("/api/v1/products"))
-assert json.loads(request("/api/v1/version"))["environment"] == "production"
+version = json.loads(request("/api/v1/version"))
+assert version["environment"] == "production" and version["version"] == "0.5.0", version
 raw = json.loads(request("/api/v1/products/upguard/scenarios/score-threshold/raw", {}))
 assert raw["content_type"] == "application/json"
 assert json.loads(raw["raw_log"])["notification"]["type"] == "CustomerCSTARUnderThreshold"

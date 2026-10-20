@@ -47,7 +47,7 @@ test("Cloudflare saved Log Lab native wire and Mimecast saved OAuth batch downlo
  await page.getByLabel('Source',{exact:true}).selectOption('cloudflare');
  await page.getByLabel('HTTP Request',{exact:true}).check();
  await page.getByLabel('Collector 1 transport').selectOption('cloudflare_logpush');
- await page.locator('input[type="url"]').fill('http://receiver:9000/cloudflare');
+ await page.locator('input[type="url"]').fill(`http://${process.env.E2E_RECEIVER_HOST ?? "receiver"}:9000/cloudflare`);
  await page.getByRole('button',{name:'Create lab',exact:true}).click();
  await expect(page).toHaveURL(/\/simulations\/[a-f0-9-]+$/);
  const cloudId=page.url().split('/').at(-1)!;
@@ -72,5 +72,7 @@ test("Cloudflare saved Log Lab native wire and Mimecast saved OAuth batch downlo
  expect(gunzipSync(await file.body()).toString().trim().split('\n')).toHaveLength(2);
  await page.goto(`/simulations/${sim.id}/edit`);
  await expect(page.getByText(/API 2.0/)).toBeVisible();
+ await page.getByRole("button", {name:"Continue", exact:true}).click();
+ await expect(page.getByLabel("Inbound auth", {exact:true})).toHaveValue("oauth2_client_credentials");
  await request.delete(`/api/v1/simulations/${sim.id}`);
 });

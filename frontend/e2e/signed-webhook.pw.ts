@@ -20,14 +20,18 @@ test("paste a signed webhook URL, test, save, edit and send without exposing its
   await page
     .getByRole("checkbox", { name: "Data Leak Detected (data-leak)" })
     .check();
+  await page.getByRole("button", { name: "Continue", exact: true }).click();
   await page
     .getByLabel("Webhook URL", { exact: true })
     .fill(base + "?" + query);
-  await page.getByLabel("Mode", { exact: true }).selectOption("manual");
   await page
     .getByRole("button", { name: "Test connection", exact: true })
     .click();
   await expect(page.getByText(/Connection OK/)).toBeVisible();
+  await page.getByRole("button", { name: "Continue", exact: true }).click();
+  await page.getByLabel("Mode", { exact: true }).selectOption("manual");
+  await page.getByRole("button", { name: "Continue", exact: true }).click();
+  expect(await page.locator("body").innerText()).not.toContain(signature);
   await page
     .getByRole("button", { name: "Create simulation", exact: true })
     .click();
@@ -46,6 +50,8 @@ test("paste a signed webhook URL, test, save, edit and send without exposing its
     );
     expect(await saved.text()).not.toContain(signature);
     await page.goto(`/simulations/${id}/edit`);
+    await page.getByRole("button", { name: "Continue", exact: true }).click();
+    await page.getByText("Headers, query parameters & HTTP settings", { exact: true }).click();
     await expect(page.getByLabel("Webhook URL", { exact: true })).toHaveValue(
       base,
     );
@@ -55,6 +61,8 @@ test("paste a signed webhook URL, test, save, edit and send without exposing its
     await expect(
       page.getByLabel("URL query parameters value 4"),
     ).toHaveAttribute("type", "password");
+    await page.getByRole("button", { name: "Continue", exact: true }).click();
+    await page.getByRole("button", { name: "Continue", exact: true }).click();
     await page
       .getByRole("button", { name: "Save changes", exact: true })
       .click();

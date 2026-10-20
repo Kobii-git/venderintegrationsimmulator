@@ -1,4 +1,25 @@
-# Current release: 0.4.8
+# Current release: 0.5.0
+
+Release 0.5.0 introduces the Modern console: grouped responsive navigation,
+a searchable simulation dashboard and four-step simulation creation/editing.
+Existing advanced configuration and write-only secret handling remain available;
+review happens before saving, and saving does not send or start a simulation.
+No database schema or API contract change is required.
+See [release and upgrade notes](UPGRADE_0.5.0.md).
+
+Local verification passed: **414 backend tests**, **24 frontend component tests**,
+**19 real-backend Chromium workflows without retries**, Ruff/mypy, frontend
+lint/types/build, the 90-article documentation gate and locked dependency audits.
+Browser checks cover 320px, 390px, 768px and 1280px widths. Local Docker rebuilds
+are limited by the Docker VM's full disk; isolated native receiver/browser tests
+pass, and all container gates must pass on clean CI runners before publication.
+
+The release workflow gates publication on source, migration, real-backend browser,
+production-image and native AMD64/ARM64 checks. Docker publication and pulled-image
+verification must be confirmed before claiming availability. External Sentinel
+and vendor parser acceptance remain separate operator checks.
+
+## Release 0.4.8 verification
 
 Release 0.4.8 simplifies first installation and updates: the public `latest` image
 is the default, no environment file or registry login is required, and the
@@ -99,7 +120,7 @@ on the local ARM64 Docker host. Published multi-platform digest:
 ## Recovery baseline
 
 The authoritative application repository is now https://github.com/Kobii-git/venderintegrationsimmulator.
-Version 0.4.8 source, deployment configuration and verification scripts are maintained on `main`.
+Version 0.5.0 source, deployment configuration and verification scripts are maintained on `main`.
 Future updates increment the application version and publish versioned and commit-tagged images.
 
 ## Signed webhook URLs, 7 October 2026 (0.4.5)

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 import {
@@ -9,6 +9,8 @@ import {
 import { testHttpConnection, testSyslogConnection } from "../api/transport";
 import { ErrorAlert } from "../components/ErrorAlert";
 import { InfoAlert } from "../components/ErrorAlert";
+import { Icon } from "../components/Icon";
+import { endpointLabel } from "../utils/endpoint";
 import { LoadingState } from "../components/LoadingState";
 import { ScenarioOverridesSection } from "../components/ScenarioOverridesSection";
 import { DestinationSection } from "../components/simulation-form/DestinationSection";
@@ -424,7 +426,14 @@ export function SimulationFormPage() {
   const navigate = useNavigate();
 
   const [form, setForm] = useState<FormState>(DEFAULT_FORM);
-  const { products, productDetail, catalogError } = useProductCatalog(form.product_id);
+  const { products, productDetail: loadedProductDetail, catalogError } = useProductCatalog(form.product_id);
+  const productDetail = loadedProductDetail?.id === form.product_id ? loadedProductDetail : null;
+  const [step, setStep] = useState(0);
+  const formRef = useRef<HTMLFormElement>(null);
+  const stepHeading = useRef<HTMLHeadingElement>(null);
+  const stepTitles = ["Vendor & scenarios", "Connection", form.simulation_mode === "pull_api" ? "Dataset & behavior" : "Schedule & behavior", "Review & save"];
+
+  useEffect(() => { stepHeading.current?.focus(); }, [step]);
   const [hasPassword, setHasPassword] = useState(false);
   const [hasToken, setHasToken] = useState(false);
   const [hasOAuthSecret, setHasOAuthSecret] = useState(false);
@@ -695,8 +704,46 @@ export function SimulationFormPage() {
     }
   };
 
+  const validateStep = () => {
+    setError(null);
+    if (step === 0) {
+      if (!form.name.trim()) { setError("Enter a simulation name to continue."); return false; }
+      if (!productDetail) { setError("Choose a product and wait for its scenarios to load."); return false; }
+      const available = productDetail.scenarios.filter((scenario) => !scenario.supported_modes?.length || scenario.supported_modes.includes(form.simulation_mode));
+      if (!form.scenario_ids.length || form.scenario_ids.some((id) => !available.some((scenario) => scenario.id === id))) {
+        setError("Select at least one scenario supported by this simulation mode."); return false;
+      }
+    }
+    const controls = formRef.current?.querySelectorAll<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>(`[data-step="${step}"] input, [data-step="${step}"] select, [data-step="${step}"] textarea`);
+    const invalid = Array.from(controls ?? []).find((control) => !control.checkValidity());
+    if (invalid) {
+      let ancestor = invalid.parentElement;
+      while (ancestor && ancestor !== formRef.current) {
+        if (ancestor instanceof HTMLDetailsElement) ancestor.open = true;
+        ancestor = ancestor.parentElement;
+      }
+      setError("Check the highlighted field before continuing.");
+      invalid.reportValidity();
+      invalid.focus();
+      return false;
+    }
+    return true;
+  };
+
+  const goBack = (index: number) => { setError(null); setTestResult(null); setStep(index); };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (saving) return;
+    if (step < 3) {
+      if (validateStep()) { setTestResult(null); setStep(step + 1); }
+      return;
+    }
+    if (!productDetail || !form.name.trim() || !form.scenario_ids.length) {
+      goBack(0);
+      setError("Review the product, name, and scenarios before saving.");
+      return;
+    }
     setSaving(true);
     setError(null);
     try {
@@ -717,7 +764,8 @@ export function SimulationFormPage() {
   return (
     <div>
       <div className="page-header">
-        <h1>{isEdit ? "Edit Simulation" : "New Simulation"}</h1>
+        <div><p className="eyebrow">Simulation setup</p><h1>{isEdit ? "Edit simulation" : "New simulation"}</h1>
+          <p className="page-description">{isEdit ? "Review and update your saved configuration." : "Build a test integration, one step at a time."}</p></div>
         <Link to="/" className="btn">
           Cancel
         </Link>
@@ -731,7 +779,25 @@ export function SimulationFormPage() {
         />
       ) : null}
 
-      <form onSubmit={(e) => void handleSubmit(e)} className="card">
+      <nav className="setup-steps" aria-label="Simulation setup steps">
+        <ol>{stepTitles.map((title, index) => <li key={title} className={index === step ? "current" : index < step ? "complete" : ""}>
+          <button type="button" disabled={index > step || saving} aria-current={index === step ? "step" : undefined}
+            onClick={() => goBack(index)}><span className="step-number">{index < step ? <Icon name="check" /> : index + 1}</span><span>{title}</span></button>
+        </li>)}</ol>
+      </nav>
+      <form ref={formRef} noValidate onSubmit={(e) => void handleSubmit(e)} className="setup-form">
+        <div className="card setup-panel">
+          <div className="setup-panel-header"><p className="eyebrow">Step {step + 1} of 4</p>
+            <h2 ref={stepHeading} tabIndex={-1}>{stepTitles[step]}</h2>
+            <p className="page-description">{[
+              "Choose the product and the events you want to simulate.",
+              isPull ? "Configure the mock API your collector will poll." : "Choose where events go and how to authenticate.",
+              isPull ? "Set the dataset size and optional failure behavior." : "Choose manual delivery or a schedule. Fault injection is optional.",
+              "Check your configuration. Saving does not start the simulation or send events.",
+            ][step]}</p>
+          </div>
+        <fieldset className="setup-fields" data-step="0" hidden={step !== 0} disabled={step !== 0 || saving}>
+        <legend className="sr-only">Vendor and scenarios</legend>
         <div className="form-grid">
           <div className="form-row">
             <label htmlFor="name">Simulation name</label>
@@ -743,12 +809,13 @@ export function SimulationFormPage() {
             />
           </div>
 
-          <div className="grid-2">
+          <div>
             <div className="form-row">
               <label htmlFor="product">Product</label>
               <select
                 id="product"
                 required
+                disabled={isEdit}
                 value={form.product_id}
                 onChange={(e) =>
                   setForm((prev) => ({
@@ -756,13 +823,11 @@ export function SimulationFormPage() {
                     product_id: e.target.value,
                     scenario_ids: [],
                     vendor_options: {},
-                    simulation_mode: products.find((p) => p.id === e.target.value)
-                      ?.supported_modes.includes("pull_api") &&
-                    !products.find((p) => p.id === e.target.value)?.supported_modes.includes(
-                      "push_webhook",
-                    )
-                      ? "pull_api"
-                      : prev.simulation_mode,
+                    scenario_overrides: {},
+                    simulation_mode: products.find((p) => p.id === e.target.value)?.supported_modes[0] ?? "push_webhook",
+                    destination: { ...prev.destination, transport_id: (products.find((p) => p.id === e.target.value)?.supported_transports[0] ?? "http_webhook") as TransportId },
+                    auth_method_id: products.find((p) => p.id === e.target.value)?.supported_auth_methods[0] ?? "none",
+                    inbound_auth_method_id: products.find((p) => p.id === e.target.value)?.supported_inbound_auth_methods[0] ?? "none",
                   }))
                 }
               >
@@ -773,17 +838,7 @@ export function SimulationFormPage() {
                   </option>
                 ))}
               </select>
-            </div>
-            <div className="form-row">
-              <label htmlFor="fidelity">Fidelity mode</label>
-              <select
-                id="fidelity"
-                value={form.fidelity_mode}
-                onChange={(e) => update("fidelity_mode", e.target.value as FidelityMode)}
-              >
-                <option value="troubleshooting">Troubleshooting (with diagnostics)</option>
-                <option value="vendor_accurate">Vendor accurate</option>
-              </select>
+              {isEdit && <span className="form-hint">The product is fixed for a saved simulation. Create a new simulation to use a different product.</span>}
             </div>
           </div>
 
@@ -793,7 +848,7 @@ export function SimulationFormPage() {
               <select
                 id="simulation-mode"
                 value={form.simulation_mode}
-                onChange={(e) => update("simulation_mode", e.target.value as SimulationMode)}
+                onChange={(e) => setForm((prev) => ({ ...prev, simulation_mode: e.target.value as SimulationMode, scenario_ids: [] }))}
               >
                 {supportedModes.includes("push_webhook") ? (
                   <option value="push_webhook">Push webhook (simulator sends events)</option>
@@ -807,12 +862,27 @@ export function SimulationFormPage() {
 
           {productDetail ? (
             <ScenarioSelectionSection
-              scenarios={productDetail.scenarios}
+              scenarios={productDetail.scenarios.filter((scenario) => !scenario.supported_modes?.length || scenario.supported_modes.includes(form.simulation_mode))}
               selectedIds={form.scenario_ids}
               onToggle={toggleScenario}
             />
           ) : null}
 
+          {form.product_id && !productDetail && !catalogError ? <LoadingState label="Loading product scenarios…" /> : null}
+          <details className="advanced-options">
+            <summary>Sample values & advanced options</summary>
+            <div className="form-grid">
+            <div className="form-row">
+              <label htmlFor="fidelity">Fidelity mode</label>
+              <select
+                id="fidelity"
+                value={form.fidelity_mode}
+                onChange={(e) => update("fidelity_mode", e.target.value as FidelityMode)}
+              >
+                <option value="troubleshooting">Troubleshooting (with diagnostics)</option>
+                <option value="vendor_accurate">Vendor accurate</option>
+              </select>
+            </div>
           {productDetail ? (
             <ScenarioOverridesSection
               scenarios={productDetail.scenarios}
@@ -838,7 +908,14 @@ export function SimulationFormPage() {
             </span>
           </div>
 
+            </div>
+          </details>
           {productDetail && <p><Link to={`/guides?vendor=${productDetail.id}`}>Deployment guides for {productDetail.display_name}</Link>{productDetail.connection_profiles?.map(profile => <span key={profile.id} className="form-hint"> · {profile.display_name}</span>)}</p>}
+        </div>
+        </fieldset>
+        <fieldset className="setup-fields" data-step="1" hidden={step !== 1} disabled={step !== 1 || saving}>
+          <legend className="sr-only">Connection</legend>
+          <div className="form-grid">
           {!isPull ? (
             <DestinationSection
               destination={form.destination}
@@ -941,6 +1018,7 @@ export function SimulationFormPage() {
                   }))
                 }
               />
+              <details className="advanced-options"><summary>Pagination settings</summary>
               <div className="grid-2">
                 <div className="form-row">
                   <label htmlFor="default-page-size">Default page size</label>
@@ -965,6 +1043,16 @@ export function SimulationFormPage() {
                   />
                 </div>
               </div>
+              </details>
+            </>
+          ) : null}
+
+          </div>
+        </fieldset>
+        <fieldset className="setup-fields" data-step="2" hidden={step !== 2} disabled={step !== 2 || saving}>
+          <legend className="sr-only">Dataset, schedule and behavior</legend>
+          <div className="form-grid">
+            {isPull ? <>
               <div className="section-title">Materialized pull dataset</div>
               <div className="grid-2">
                 <div className="form-row">
@@ -1040,9 +1128,7 @@ export function SimulationFormPage() {
                   }))
                 }
               />
-            </>
-          ) : null}
-
+            </> : null}
           {!isPull ? (
             <SchedulingSection
               type={form.schedule_type}
@@ -1092,13 +1178,41 @@ export function SimulationFormPage() {
             />
           ) : null}
 
-          <div className="page-actions" style={{ marginTop: "1rem" }}>
-            <button
-              type="submit"
-              className="btn btn-primary"
-              disabled={saving || form.scenario_ids.length === 0}
-            >
-              {saving ? "Saving…" : isEdit ? "Save changes" : "Create simulation"}
+          </div>
+        </fieldset>
+        {step === 3 ? (
+          <div className="review-grid">
+            <section className="review-section">
+              <div className="review-heading"><h3>Vendor & scenarios</h3><button className="btn btn-sm" type="button" onClick={() => goBack(0)} disabled={saving}>Edit vendor & scenarios</button></div>
+              <dl className="review-values"><dt>Name</dt><dd>{form.name}</dd><dt>Product</dt><dd>{productDetail?.display_name}</dd>
+                <dt>Mode</dt><dd>{isPull ? "Pull API — collector polls simulator" : "Push — simulator sends events"}</dd>
+                <dt>Scenarios</dt><dd>{form.scenario_ids.map((id) => productDetail?.scenarios.find((scenario) => scenario.id === id)?.display_name ?? id).join(", ")}</dd>
+                <dt>Payload</dt><dd>{form.fidelity_mode === "vendor_accurate" ? "Vendor accurate" : "Troubleshooting with diagnostics"}</dd></dl>
+            </section>
+            <section className="review-section">
+              <div className="review-heading"><h3>Connection</h3><button className="btn btn-sm" type="button" onClick={() => goBack(1)} disabled={saving}>Edit connection</button></div>
+              <dl className="review-values"><dt>{isPull ? "Endpoint" : "Destination"}</dt><dd>{isPull ? "Mock API endpoints are available after saving." : isSyslog ? `${form.destination.protocol?.toUpperCase()} · ${form.destination.host}:${form.destination.port}` : endpointLabel(form.destination.url)}</dd>
+                <dt>Authentication</dt><dd>{isPull ? form.inbound_auth_method_id : isSyslog ? "Transport settings" : form.auth_method_id}</dd>
+                {!isPull && !isSyslog && <><dt>Custom values</dt><dd>{form.destination.headers?.length ?? 0} headers · {form.destination.query_params?.length ?? 0} query entries. URL query values and credentials are hidden here.</dd></>}
+              </dl>
+            </section>
+            <section className="review-section">
+              <div className="review-heading"><h3>{isPull ? "Dataset & behavior" : "Schedule & behavior"}</h3><button className="btn btn-sm" type="button" onClick={() => goBack(2)} disabled={saving}>Edit behavior</button></div>
+              <dl className="review-values">
+                {isPull ? <><dt>Dataset</dt><dd>{form.inbound_dataset_size} items per route · {form.inbound_item_interval_seconds}s item interval</dd></> : <><dt>Delivery</dt><dd>{form.schedule_type === "manual" ? "Manual — use Send after saving" : `${form.schedule_type === "finite" ? `${form.event_count} events` : "Continuous"} · every ${form.interval_seconds}s`}</dd></>}
+                <dt>Fault injection</dt><dd>{(isPull ? form.inbound_fault_enabled || form.oauth_fault_enabled : form.fault_enabled) ? "Enabled — deliberately generates problematic telemetry" : "Off"}</dd>
+              </dl>
+            </section>
+            <div className="alert alert-info">Delivery acceptance does not confirm downstream ingestion or vendor parser compatibility.</div>
+          </div>
+        ) : null}
+        </div>
+        <div className="setup-footer">
+          <div>{step > 0 && <button type="button" className="btn" disabled={saving} onClick={() => goBack(step - 1)}>Back</button>}</div>
+          <div className="setup-footer-next"><span className="form-hint">{step === 3 ? "Saves configuration only. Nothing is sent." : "Your entries stay in this form as you move between steps."}</span>
+            <button type="submit" className="btn btn-primary" disabled={saving || (step === 0 && Boolean(form.product_id) && !productDetail && !catalogError)}>
+              {saving ? "Saving…" : step < 3 ? "Continue" : isEdit ? "Save changes" : "Create simulation"}
+              {step < 3 && <Icon name="arrow" />}
             </button>
           </div>
         </div>

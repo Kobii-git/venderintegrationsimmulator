@@ -1,3 +1,18 @@
+# 0.5.0 release gates
+
+- [x] Modern console navigation, dashboard and guided create/edit workflows.
+- [x] Frontend lint/types/build, 24 component tests and locked dependency audit.
+- [x] Backend Ruff/mypy, 414 tests, documentation gate and both lock audits.
+- [x] 19 real-backend Chromium workflows without retries, including responsive
+      navigation, push/Syslog/pull setup, signed URLs and keyboard cancellation.
+- [ ] Migration/rollback, production Docker and native AMD64/ARM64 CI gates.
+- [ ] Confirm version/commit/latest publication and matching pulled-image checks.
+- [ ] Tag and publish v0.5.0 after the required release gates pass.
+
+See [0.5.0 release notes](UPGRADE_0.5.0.md). External Sentinel/table/parser
+acceptance remains a separate environment check. Local Docker rebuilds are
+limited by a full Docker VM disk; clean CI provides the required container gates.
+
 # 0.4.0 release gates
 
 See [implementation evidence](IMPLEMENTATION_STATUS.md). Source checks, 271 backend tests, 12 frontend tests and seven local Chromium workflows passed. Production/development lock audits report no known vulnerabilities.

@@ -104,10 +104,49 @@ describe("DashboardPage", () => {
     expect(screen.getByText("upguard")).toBeInTheDocument();
     expect(screen.getByText("stopped")).toBeInTheDocument();
   });
+
+  it("combines search and status filters and clears an empty result", async () => {
+    vi.mocked(simulationsApi.listSimulations).mockResolvedValue([
+      mockSimulation, { ...mockSimulation, id: "sim-2", name: "Firewall", product_id: "fortinet", status: "running" },
+    ]);
+    render(<MemoryRouter><DashboardPage /></MemoryRouter>);
+    await screen.findByText("Firewall");
+    await userEvent.selectOptions(screen.getByLabelText("Filter by status"), "running");
+    expect(screen.queryByText("UpGuard Test")).not.toBeInTheDocument();
+    await userEvent.type(screen.getByLabelText("Search simulations"), "unknown");
+    expect(screen.getByText("No matching simulations")).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Clear filters" }));
+    expect(screen.getByText("UpGuard Test")).toBeInTheDocument();
+    expect(screen.getByText("Firewall")).toBeInTheDocument();
+  });
+
+  it("uses Send for a manual push, Start for a pull API, and Stop for running simulations", async () => {
+    vi.mocked(simulationsApi.listSimulations).mockResolvedValue([
+      mockSimulation,
+      { ...mockSimulation, id: "pull", name: "Pull", simulation_mode: "pull_api" },
+      { ...mockSimulation, id: "running", name: "Running", status: "running" },
+    ]);
+    render(<MemoryRouter><DashboardPage /></MemoryRouter>);
+    await userEvent.click(await screen.findByRole("button", { name: "Send" }));
+    expect(simulationsApi.sendSimulationEvent).toHaveBeenCalledWith("sim-1");
+    await userEvent.click(screen.getByRole("button", { name: "Start" }));
+    expect(simulationsApi.startSimulation).toHaveBeenCalledWith("pull");
+    await userEvent.click(screen.getByRole("button", { name: "Stop" }));
+    expect(simulationsApi.stopSimulation).toHaveBeenCalledWith("running");
+  });
+
+  it("explains missing credentials and keeps sending disabled", async () => {
+    vi.mocked(simulationsApi.listSimulations).mockResolvedValue([{ ...mockSimulation, missing_secrets: ["token"] }]);
+    render(<MemoryRouter><DashboardPage /></MemoryRouter>);
+    expect(await screen.findByRole("button", { name: "Send" })).toBeDisabled();
+    expect(screen.getByText("Add missing credentials in Edit before sending.")).toBeInTheDocument();
+  });
 });
 
 describe("SimulationFormPage", () => {
   beforeEach(() => {
+    vi.mocked(simulationsApi.createSimulation).mockClear();
+    vi.mocked(simulationsApi.updateSimulation).mockClear();
     vi.mocked(productsApi.listProducts).mockResolvedValue([
       {
         id: "upguard",
@@ -158,6 +197,34 @@ describe("SimulationFormPage", () => {
     expect(screen.getByLabelText(/product/i)).toBeInTheDocument();
   });
 
+  it("validates each step, preserves entries on Back, and saves only after review", async () => {
+    vi.mocked(simulationsApi.createSimulation).mockResolvedValue(mockSimulation);
+    render(<MemoryRouter><SimulationFormPage /></MemoryRouter>);
+    await userEvent.click(screen.getByRole("button", { name: "Continue" }));
+    expect(screen.getByRole("alert")).toHaveTextContent("Enter a simulation name");
+    expect(screen.getByRole("button", { name: /4 Review/ })).toBeDisabled();
+    await userEvent.type(screen.getByLabelText("Simulation name"), "Wizard test");
+    await userEvent.selectOptions(screen.getByLabelText("Product"), "upguard");
+    await userEvent.click(await screen.findByLabelText(/Data Leak/));
+    await userEvent.click(screen.getByRole("button", { name: "Continue" }));
+    await userEvent.click(screen.getByRole("button", { name: "Continue" }));
+    expect(screen.getByRole("heading", { name: "Connection" })).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent("highlighted field");
+    await userEvent.type(screen.getByLabelText("Webhook URL"), "https://collector.example/hook?sig=review-secret");
+    await userEvent.click(screen.getByRole("button", { name: "Back" }));
+    expect(screen.getByLabelText("Simulation name")).toHaveValue("Wizard test");
+    await userEvent.click(screen.getByRole("button", { name: "Continue" }));
+    expect(screen.getByLabelText("Webhook URL")).toHaveValue("https://collector.example/hook?sig=review-secret");
+    await userEvent.click(screen.getByRole("button", { name: "Continue" }));
+    await userEvent.click(screen.getByRole("button", { name: "Continue" }));
+    expect(screen.getByRole("heading", { name: "Review & save" })).toBeInTheDocument();
+    expect(screen.getByText("https://collector.example/hook")).toBeInTheDocument();
+    expect(screen.queryByText(/review-secret/)).not.toBeInTheDocument();
+    expect(simulationsApi.createSimulation).not.toHaveBeenCalled();
+    await userEvent.click(screen.getByRole("button", { name: "Create simulation" }));
+    await waitFor(() => expect(simulationsApi.createSimulation).toHaveBeenCalledWith(expect.objectContaining({ name: "Wizard test" })));
+  });
+
   it("does not echo stored password on edit", async () => {
     vi.mocked(simulationsApi.getSimulation).mockResolvedValue(mockSimulation);
     vi.mocked(simulationsApi.updateSimulation).mockResolvedValue(mockSimulation);
@@ -170,10 +237,14 @@ describe("SimulationFormPage", () => {
       </MemoryRouter>,
     );
 
+    await screen.findByLabelText(/Data Leak/);
+    await userEvent.click(screen.getByRole("button", { name: "Continue" }));
     const password = await screen.findByLabelText(/^password$/i);
     expect(password).toHaveValue("");
     expect(password).toHaveAttribute("placeholder", "Leave blank to keep existing");
 
+    await userEvent.click(screen.getByRole("button", { name: "Continue" }));
+    await userEvent.click(screen.getByRole("button", { name: "Continue" }));
     await userEvent.click(screen.getByRole("button", { name: "Save changes" }));
     await waitFor(() => {
       expect(simulationsApi.updateSimulation).toHaveBeenCalledWith(
@@ -206,6 +277,11 @@ describe("SimulationFormPage", () => {
       </MemoryRouter>,
     );
 
+    await userEvent.type(await screen.findByLabelText(/simulation name/i), "Header check");
+    await userEvent.selectOptions(screen.getByLabelText(/product/i), "upguard");
+    await userEvent.click(await screen.findByLabelText(/Data Leak/));
+    await userEvent.click(screen.getByRole("button", { name: "Continue" }));
+    await userEvent.click(screen.getByText("Headers, query parameters & HTTP settings"));
     await userEvent.type(
       await screen.findByLabelText(/webhook url/i),
       "https://collector.example/hook",
@@ -300,10 +376,11 @@ describe("SimulationFormPage", () => {
     );
     await userEvent.type(await screen.findByLabelText(/simulation name/i), "Okta polling");
     await userEvent.selectOptions(screen.getByLabelText(/product/i), "okta");
-    expect(await screen.findByLabelText("Okta org URL")).toHaveValue(
-      "https://example.okta.com",
-    );
-    await userEvent.click(screen.getByLabelText(/User Session Started/i));
+    await userEvent.click(await screen.findByLabelText(/User Session Started/i));
+    await userEvent.click(screen.getByRole("button", { name: "Continue" }));
+    expect(await screen.findByLabelText("Okta org URL")).toHaveValue("https://example.okta.com");
+    await userEvent.click(screen.getByRole("button", { name: "Continue" }));
+    await userEvent.click(screen.getByRole("button", { name: "Continue" }));
     await userEvent.click(screen.getByRole("button", { name: /create simulation/i }));
 
     await waitFor(() => {
