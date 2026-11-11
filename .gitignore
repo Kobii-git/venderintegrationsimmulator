@@ -59,3 +59,6 @@ azure/function-relay/local.settings.json
 azure/function-relay/.python_packages/
 azure/function-relay/infra/main.json
 azure/function-relay/infra/dcr-access.json
+
+# Machine-local Claude Code permission rules may contain credentials.
+**/.claude/settings.local.json
